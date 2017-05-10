@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ToDo API Client Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-inner">
+            <a class="brand" href="#">PhenoWL Demo</a>
+        </div>
+    </div>
+    <div id="main" class="container">
+        <table class="table table-striped">
+            <tr><td><b>Function</b></td><td><b>Module</b></td><td><b>Internal Name</b></td></tr>
+            <!-- ko foreach: tasks -->
+            <tr>
+                <td><span data-bind="text: name"></span></td>
+                <td><span data-bind="text: module"></span></td>
+                <td>
+                    <span data-bind="text: internal" class="label label-success">Done</span>
+                </td>
+            </tr>
+            <!-- /ko -->
+        </table>
+        <textarea rows="10" style="min-width: 60%" id="script"></textarea><br>
+        <button data-bind="click: runPhenoWL" class="btn">Run</button><br>
+        <label>Output:</label>
+        <textarea rows="10" style="min-width: 60%" id="output"></textarea><br>
+        <label>Error:</label>
+        <textarea rows="10" style="min-width: 60%" id="error"></textarea>
+    </div>
+    <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="addDialogLabel">Add Task</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="inputTask">Task</label>
+                    <div class="controls">
+                        <input data-bind="value: module" type="text" id="inputTask" placeholder="Module" style="width: 150px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inpunamen">name</label>
+                    <div class="controls">
+                        <input data-bind="value: name" type="text" id="inputDescription" placeholder="Name" style="width: 300px;">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-bind="click: addTask" class="btn btn-primary">Add Task</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        </div>
+    </div>
+    <div id="edit" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="editDialogLabel">Edit Task</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="inputTask">Task</label>
+                    <div class="controls">
+                        <input data-bind="value: module" type="text" id="inputTask" placeholder="Module" style="width: 150px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inputDescription">Name</label>
+                    <div class="controls">
+                        <input data-bind="value: name" type="text" id="inputDescription" placeholder="Name" style="width: 300px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox"> Done
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-bind="click:editTask" class="btn btn-primary">Update Task</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        </div>
+    </div>
+    <div id="login" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="loginLabel" aria-hidden="true">
+        <div class="modal-header">
+            <h3 id="loginLabel">Sign In</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="inputUsername">Username</label>
+                    <div class="controls">
+                        <input data-bind="value: username" type="text" id="inputUsername" placeholder="Username">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inputPassword">Password</label>
+                    <div class="controls">
+                        <input data-bind="value: password" type="password" id="inputPassword" placeholder="Password">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-bind="click: login" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Sign In</button>
+        </div>
+    </div>
+    <script type="text/javascript">
+        function TasksViewModel() {
+            var self = this;
+            self.tasksURI = 'http://localhost:5000/todo/api/v1.0/tasks';
+            self.username = "";
+            self.password = "";
+            self.tasks = ko.observableArray();
+
+            self.ajax = function(uri, method, data) {
+                var request = {
+                    url: uri,
+                    type: method,
+                    contentType: "application/json",
+                    accepts: "application/json",
+                    cache: false,
+                    dataType: 'json',
+                    data: JSON.stringify(data),
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", 
+                            "Basic " + btoa(self.username + ":" + self.password));
+                    },
+                    error: function(jqXHR) {
+                        console.log("ajax error " + jqXHR.status);
+                    }
+                };
+                return $.ajax(request);
+            }
+            self.updateTask = function(task, newTask) {
+                var i = self.tasks.indexOf(task);
+                self.tasks()[i].module(newTask.module);
+                self.tasks()[i].name(newTask.name);
+                self.tasks()[i].internal(newTask.internal);
+            }
+
+            self.beginAdd = function() {
+                $('#add').modal('show');
+            }
+            self.runPhenoWL = function(task) {
+                self.ajax(self.tasksURI, 'POST', {'script': $("#script").val()}).done(function(data) {
+                    $("#output").val(data.out);
+                    $("#error").val(data.err);
+                });
+            }
+            self.beginEdit = function(task) {
+                editTaskViewModel.setTask(task);
+                $('#edit').modal('show');
+            }
+            self.edit = function(task, data) {
+                self.ajax(task.uri(), 'PUT', data).done(function(res) {
+                    self.updateTask(task, res.task);
+                });
+            }
+            self.remove = function(task) {
+                self.ajax(task.uri(), 'DELETE').done(function() {
+                    self.tasks.remove(task);
+                });
+            }
+            self.markInProgress = function(task) {
+                self.ajax(task.uri(), 'PUT', { internal: "" }).done(function(res) {
+                    self.updateTask(task, res.task);
+                });
+            }
+            self.markDone = function(task) {
+                self.ajax(task.uri(), 'PUT', { internal: "" }).done(function(res) {
+                    self.updateTask(task, res.task);
+                });
+            }
+            self.beginLogin = function() {
+                $('#login').modal('show');
+            }
+            self.login = function(username, password) {
+                self.username = username;
+                self.password = password;
+                self.ajax(self.tasksURI, 'GET').done(function(data) {
+                    for (var i = 0; i < data.tasks.length; i++) {
+                        self.tasks.push({
+                            module: ko.observable(data.tasks[i].module),
+                            name: ko.observable(data.tasks[i].name),
+                            internal: ko.observable(data.tasks[i].internal)
+                        });
+                    }
+                }).fail(function(jqXHR) {
+                    if (jqXHR.status == 403)
+                        setTimeout(self.beginLogin, 500);
+                });
+            }
+            
+            self.beginLogin();
+        }
+        function AddTaskViewModel() {
+            var self = this;
+            self.module = ko.observable();
+            self.name = ko.observable();
+ 
+            self.addTask = function() {
+                $('#add').modal('hide');
+                tasksViewModel.add({
+                    module: self.module(),
+                    name: self.name()
+                });
+                self.module("");
+                self.name("");
+            }
+        }
+        function EditTaskViewModel() {
+            var self = this;
+            self.module = ko.observable();
+            self.name = ko.observable();
+            self.internal = ko.observable();
+ 
+            self.setTask = function(task) {
+                self.task = task;
+                self.module(task.module());
+                self.name(task.name());
+                self.internal(task.internal());
+                $('edit').modal('show');
+            }
+ 
+            self.editTask = function() {
+                $('#edit').modal('hide');
+                tasksViewModel.edit(self.task, {
+                	module: self.module(),
+                	name: self.name() ,
+                    internal: self.internal()
+                });
+            }
+        }
+        function LoginViewModel() {
+            var self = this;
+            self.username = ko.observable();
+            self.password = ko.observable();
+ 
+            self.login = function() {
+                $('#login').modal('hide');
+                tasksViewModel.login(self.username(), self.password());
+            }
+        }
+        
+        var tasksViewModel = new TasksViewModel();
+        var addTaskViewModel = new AddTaskViewModel();
+        var editTaskViewModel = new EditTaskViewModel();
+        var loginViewModel = new LoginViewModel();
+        ko.applyBindings(tasksViewModel, $('#main')[0]);
+        ko.applyBindings(addTaskViewModel, $('#add')[0]);
+        ko.applyBindings(editTaskViewModel, $('#edit')[0]);
+        ko.applyBindings(loginViewModel, $('#login')[0]);
+    </script>
+</body>
+</html>

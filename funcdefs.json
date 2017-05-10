@@ -1,0 +1,82 @@
+{
+    "libraries": [
+    {
+    	"org": "p2irc",
+    	"desc": "Libraries created and maintained by p2irc group",
+    	"packages":	[
+    	{
+    		"title": "P2IRC",
+    		"package": "p2irc",
+    		"module": "registration",
+    		"functions":[
+    			{
+    				"name": "Register",
+    				"internal": "register_channels",
+    				"params": [
+    					{
+    						"name": "source",
+    						"type": "string"
+    					}
+    				],
+    				"returns": "byte[]"
+    			}
+    		]
+    		}
+    	]
+    },
+    {
+        "org": "SRLAB",
+        "desc": "Libraries created and maintained by SRLAB of USASK",
+        "packages": [
+        {
+            "title": "Phenoproc",
+            "package": "Phenoproc",
+            "module": "phenoproc.hadoop",
+            "functions":[
+                {
+                    "name": "wordcount",
+                    "internal": "wordcount",
+                    "params": [
+                        {
+                            "name": "source",
+                            "type": "string"
+                        }
+                    ],
+                    "returns": "string"
+                }
+            ]
+         },
+         {
+            "title": "local",
+            "package": "local",
+            "module": "phenowl",
+            "functions":[
+                {
+                    "name": "Write",
+                    "internal": "write",
+                    "returns": "string"
+                }
+            ]
+         }
+        ]
+    },
+   {
+        "org": "python",
+        "desc": "standard python libraries",
+        "packages": [
+        {
+            "title": "os",
+            "package": "os",
+            "module": "os",
+            "functions":[
+                {
+                    "name": "CWD",
+                    "internal": "getcwd",
+                    "returns": "string"
+                }
+            ]
+            }
+        ]
+    }    
+    ]
+}
