@@ -9,7 +9,7 @@ from flask.ext.httpauth import HTTPBasicAuth
 from phenoparser import Interpreter
 import os
 import sys
-from selenium.webdriver.remote.utils import dump_json
+
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
