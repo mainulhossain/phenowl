@@ -6,3 +6,4 @@ MarkupSafe
 Werkzeug
 itsdangerous
 six
+pyparsing
