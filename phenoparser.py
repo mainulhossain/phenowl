@@ -35,6 +35,7 @@ class InterpreterContext(object):
     def __init__(self):
         self.libraries = None
         self.clear()
+        self.shared = Info()
 
     def setpos(self, location, text):
         self.location = location
@@ -110,13 +111,10 @@ class Symbol(object):
 
 class SymbolTree(object):
 
-    def __init__(self, context, shared):
+    def __init__(self, context):
         self.context = context
         self.table = []
         self.table_len = 0
-
-        # shared data
-        self.shared = shared
 
     def error(self, text=""):
         if text == "":
@@ -188,9 +186,9 @@ class SymbolTree(object):
     def insert_parameter(self, pname, ptype = Info.TYPES.NO_TYPE):
         index = self.insert_id(pname, Info.KINDS.PARAMETER, Info.KINDS.PARAMETER, ptype)
         # set parameter's attribute to it's ordinal number
-        self.table[index].set_attribute("Index", self.shared.function_params)
+        self.table[index].set_attribute("Index", self.context.shared.function_params)
         # set parameter's type in param_types list of a function
-        self.table[self.shared.function_index].param_types.append(ptype)
+        self.table[self.context.shared.function_index].param_types.append(ptype)
         return index
 
     def insert_function(self, fname, ftype = Info.TYPES.NO_TYPE):
@@ -320,14 +318,21 @@ class FunctionCallHelper(object):
 	def add_argument(self, arg):
 		self.arguments.append(arg)
 
+class ConditionalHelper:
+    def __init__(self):
+        #label number for "false" internal labels
+        self.false_label_number = -1
+        #label number for all other internal labels
+        self.label_number = None
+        #label stack for nested statements
+        self.label_stack = []
+        
 class ExecutionEngine(object):
 
     # dictionary of relational operators
     RELATIONAL_DICT = dict([op, i] for i, op in enumerate(Info.RELATIONAL_OPERATORS))
 
-    def __init__(self, shared, symtree, context):
-        # shared data
-        self.shared = shared
+    def __init__(self, symtree, context):
         # symbol table
         self.symtree = symtree
         # set the context
@@ -374,8 +379,8 @@ class ExecutionEngine(object):
         pass
 
     def function_body(self):
-        if self.shared.function_vars > 0:
-            const = self.symtree.insert_constant("{0}".format(self.shared.function_vars * 4), Info.TYPES.NO_TYPE)
+        if self.context.shared.function_vars > 0:
+            const = self.symtree.insert_constant("{0}".format(self.context.shared.function_vars * 4), Info.TYPES.NO_TYPE)
 
     def function_end(self):
     	pass
@@ -432,13 +437,11 @@ class PhenoWLParser(object):
 
         self.build_grammer()
         self.context = context
-        
-        # shared data
-        self.shared = Info()
+
         # symbol table
-        self.symtree = SymbolTree(context, self.shared)
+        self.symtree = SymbolTree(context)
         
-        self.execengine = ExecutionEngine(self.shared, self.symtree, self.context)
+        self.execengine = ExecutionEngine(self.symtree, self.context)
         self.function_call_helper = FunctionCallHelper()
         self.add_libraries_to_symtree()
         
@@ -446,12 +449,7 @@ class PhenoWLParser(object):
         self.relexp_code = None
         # last and expression
         self.andexp_code = None
-        # label number for "false" internal labels
-        self.false_label_number = -1
-        # label number for all other internal labels
-        self.label_number = None
-        # label stack for nested statements
-        self.label_stack = []
+        self.conditional = ConditionalHelper()
         self.tokens = []
         
     def string_action(self, s, l, t):
@@ -574,14 +572,14 @@ class PhenoWLParser(object):
 
     def local_variable_action(self, text, loc, var):
         self.context.setpos(loc, text)
-        index = self.symtree.insert_local_var(var.name, var.type, self.shared.function_vars)
-        self.shared.function_vars += 1
+        index = self.symtree.insert_local_var(var.name, var.type, self.context.shared.function_vars)
+        self.context.shared.function_vars += 1
         return index
 
     def parameter_action(self, text, loc, par):
         self.context.setpos(loc, text)
         index = self.symtree.insert_parameter(par.name)
-        self.shared.function_params += 1
+        self.context.shared.function_params += 1
         return index
        
     def eval_value(self, str_value):
@@ -605,10 +603,10 @@ class PhenoWLParser(object):
 
     def function_begin_action(self, text, loc, fun):
         self.context.setpos(loc, text)
-        self.shared.function_index = self.symtree.insert_function(fun.name)
-        self.shared.function_name = fun.name
-        self.shared.function_params = 0
-        self.shared.function_vars = 0
+        self.context.shared.function_index = self.symtree.insert_function(fun.name)
+        self.context.shared.function_name = fun.name
+        self.context.shared.function_params = 0
+        self.context.shared.function_vars = 0
         self.execengine.function_begin();
 
     def function_chain_action(self, text, loc, fun):
@@ -625,9 +623,9 @@ class PhenoWLParser(object):
 
     def function_end_action(self, text, loc, fun):
         # set function's attribute to number of function parameters
-        self.symtree.set_attribute(self.shared.function_index, self.shared.function_params)
+        self.symtree.set_attribute(self.context.shared.function_index, self.context.shared.function_params)
         # clear local function symbols (but leave function name)
-        self.symtree.clear(self.shared.function_index + 1)
+        self.symtree.clear(self.context.shared.function_index + 1)
         self.execengine.function_end()
 
     def return_action(self, text, loc, ret):
@@ -709,41 +707,41 @@ class PhenoWLParser(object):
 
     def logexp_action(self, text, loc, arg):
         self.context.setpos(loc, text)
-        self.false_label_number += 1
+        self.conditional.false_label_number += 1
 
     def if_begin_action(self, text, loc, arg):
         self.context.setpos(loc, text)
-        self.false_label_number += 1
-        self.label_number = self.false_label_number
+        self.conditional.false_label_number += 1
+        self.conditional.label_number = self.conditional.false_label_number
 
     def if_body_action(self, text, loc, arg):
         self.context.setpos(loc, text)
-        self.label_stack.append(self.false_label_number)
-        self.label_stack.append(self.label_number)
+        self.conditional.label_stack.append(self.conditional.false_label_number)
+        self.conditional.label_stack.append(self.conditional.label_number)
 
     def if_else_action(self, text, loc, arg):
         self.context.setpos(loc, text)
         # jump to exit after all statements for true condition are executed
-        self.label_number = self.label_stack.pop()
-        self.label_stack.append(self.label_number)
+        self.conditional.label_number = self.conditional.label_stack.pop()
+        self.conditional.label_stack.append(self.conditional.label_number)
 
     def if_end_action(self, text, loc, arg):
         self.context.setpos(loc, text)
 
     def while_begin_action(self, text, loc, arg):
         self.context.setpos(loc, text)
-        self.false_label_number += 1
-        self.label_number = self.false_label_number
+        self.conditional.false_label_number += 1
+        self.conditional.label_number = self.conditional.false_label_number
 
     def while_body_action(self, text, loc, arg):
         self.context.setpos(loc, text)
-        self.label_stack.append(self.false_label_number)
-        self.label_stack.append(self.label_number)
+        self.conditional.label_stack.append(self.conditional.false_label_number)
+        self.conditional.label_stack.append(self.conditional.label_number)
 
     def while_end_action(self, text, loc, arg):
         self.context.setpos(loc, text)
         # jump to condition checking after while statement body
-        self.label_number = self.label_stack.pop()
+        self.conditional.label_number = self.conditional.label_stack.pop()
 
     def parse(self, text):
         try:
