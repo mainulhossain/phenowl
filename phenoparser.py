@@ -494,7 +494,8 @@ if __name__ == "__main__":
     
     test_program_example = """
         
-        print(CWD(), "test")
+        Register('/home/phenodoop/discus-p2irc/data_for_testing/Registration_test_images/', '/home/phenodoop/phenoproc/data')
+        
     """
     
     p = PhenoWLParser(PhenoWLGrammar())
