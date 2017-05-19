@@ -6,7 +6,7 @@ Flask-RESTful extension."""
 from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
-from phenoparser import Interpreter
+from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
 import os
 import sys
 
@@ -15,14 +15,16 @@ app = Flask(__name__, static_url_path="")
 api = Api(app)
 auth = HTTPBasicAuth()
 
-interpreter = Interpreter(os.path.join(os.path.dirname(__file__), "funcdefs.json"))
+interpreter = PhenoWLInterpreter()
+interpreter.context.load_libraries("funcdefs.json")
+    
 tasks = []
 for l in interpreter.context.libraries:
     for p in l["packages"]:
         for f in p["functions"]:
             name = f["name"] if f.get("name") else f["internal"]
             internal = f["internal"] if f.get("internal") else f["name"]
-            tasks.append({"module": p["module"], "name": name, "internal": internal}) 
+            tasks.append({"module": p["module"] if p.get('module') else "", "name": name, "internal": internal}) 
 
 @auth.get_password
 def get_password(username):
@@ -59,7 +61,12 @@ class TaskListAPI(Resource):
         args = self.reqparse.parse_args()
         print(args['script'], sys.stderr)
         script = args['script']
-        interpreter.interpret(script)
+        try:
+            parser = PhenoWLParser(PythonGrammar())   
+            prog = parser.parse(script)
+            interpreter.run(prog)
+        except:
+            interpreter.context.err.append("Error in parse and interpretation")
         return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201
 
 
@@ -104,4 +111,4 @@ api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<string:id>', endpoint='task')
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

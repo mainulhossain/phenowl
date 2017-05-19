@@ -33,27 +33,15 @@
             "package": "Phenoproc",
             "module": "phenoproc.hadoop",
             "functions":[
-                {
-                    "name": "wordcount",
-                    "internal": "wordcount",
-                    "params": [
-                        {
-                            "name": "source",
-                            "type": "string"
-                        }
-                    ],
-                    "returns": "string"
-                }
             ]
          },
          {
             "title": "local",
             "package": "local",
-            "module": "phenowl",
             "functions":[
                 {
-                    "name": "Write",
-                    "internal": "write",
+                    "name": "print",
+                    "internal": "print",
                     "returns": "string"
                 }
             ]
@@ -73,6 +61,16 @@
                     "name": "CWD",
                     "internal": "getcwd",
                     "returns": "string"
+                }
+            ]
+            },
+            {
+            "title": "os",
+            "functions":[
+                {
+                    "name": "range",
+                    "internal": "range",
+                    "returns": "list"
                 }
             ]
             }
