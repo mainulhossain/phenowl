@@ -1,7 +1,7 @@
 from importlib import import_module
 from phenoparser import Context
 
-def load_module(self, modulename):
+def load_module(modulename):
     #if modulename not in sys.modules:
     #name = "package." + modulename
     #return __import__(modulename, fromlist=[''])
@@ -18,6 +18,6 @@ def call_func(context, module_name, func_name, arguments):
         function = possibles.get(func_name)
         return function(*arguments)
     else:
-        module_obj = self.load_module(module_name)
+        module_obj = load_module(module_name)
         function = getattr(module_obj, func_name)
         return function(*arguments)

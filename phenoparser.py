@@ -4,7 +4,7 @@ import os
 import json
 import sys
 import ast
-import function_caller
+import func_resolver
 
 class SymbolTable():
     def __init__(self):
