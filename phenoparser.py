@@ -4,6 +4,7 @@ import os
 import json
 import sys
 import ast
+import function_caller
 
 class SymbolTable():
     def __init__(self):
@@ -19,7 +20,7 @@ class SymbolTable():
         else:
             raise "var does not exist"
     
-    def exists(self, name):
+    def var_exists(self, name):
         return name in self.vars
             
     def add_func(self, module, internal_name, func_name, args):
@@ -40,7 +41,7 @@ class SymbolTable():
             if mod_func[1] == funcname:
                 return mod_func[0]
             
-    def get_modbyfuncname(self, func_name):
+    def get_module_by_funcname(self, func_name):
         for k, v in self.funcs.items():
             if v[0] == func_name:
                 mod_func = k.split(',')
@@ -116,17 +117,17 @@ class Context:
         
     def get_var(self, name):
         for s in reversed(self.symtab_stack):
-            if s.exists(name):
+            if s.var_exists(name):
                 return s.get_var(name)
         return self.symtab.get_var(name)
             
     def update_var(self, name, value):
         for s in reversed(self.symtab_stack):
-            if s.exists(name):
+            if s.var_exists(name):
                 return s.update_var(name, value)
         return self.symtab.update_var(name, value)
     
-    def exists(self, name):
+    def var_exists(self, name):
         for s in reversed(self.symtab_stack):
             if name in s.vars:
                 return True
@@ -188,26 +189,6 @@ class PhenoWLInterpreter:
   
     def error(self, *args):
         self.err.append("{0}".format(', '.join(map(str, args))))
-
-    def load_module(self, modulename):
-        #if modulename not in sys.modules:
-        name = "package." + modulename
-        return __import__(modulename, fromlist=[''])
-            
-    def call_func(self, module_name, func_name, arguments):
-        if not module_name or module_name == "None":
-            if func_name == "print".lower():
-                return self.context.write(*arguments)
-            if func_name == "range".lower():
-                return range(*arguments)
-            possibles = globals().copy()
-            possibles.update(locals())
-            function = possibles.get(func_name)
-            return function(*arguments)
-        else:
-            module_obj = self.load_module(module_name)
-            function = getattr(module_obj, func_name)
-            return function(*arguments)
         
     def dolist(self, expr):
         v = []
@@ -217,11 +198,11 @@ class PhenoWLInterpreter:
     
     def dofunc(self, expr):
         func_name = self.context.func_to_internal_name(expr[0])
-        module_name = self.context.symtab.get_modbyfuncname(func_name)
+        module_name = self.context.symtab.get_module_by_funcname(func_name)
         v = []
         for e in expr[1]:
             v.append(self.eval(e))
-        return self.call_func(module_name, func_name, v)
+        return func_resolver.call_func(self.context, module_name, func_name, v)
 
     def dorelexpr(self, expr):
         left = self.eval(expr[0])
@@ -313,7 +294,7 @@ class PhenoWLInterpreter:
                     return complex(t)
             return str_value
         except ValueError:
-            if self.context.exists(str_value):
+            if self.context.var_exists(str_value):
                 return self.context.get_var(str_value)
             return str_value
     
@@ -354,8 +335,10 @@ class PhenoWLInterpreter:
         elif expr[0] == "FUNCCALL":
             return self.dofunc(expr[1])
         else:
+            val = []
             for subexpr in expr:
-                self.eval(subexpr)
+                val.append(self.eval(subexpr))
+            return val
 
     # Run it
     def run(self, prog):

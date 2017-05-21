@@ -7,11 +7,11 @@
     	{
     		"title": "P2IRC",
     		"package": "p2irc",
-    		"module": "p2irc.image_tools",
+    		"module": "p2irc.image_tools.registration",
     		"functions":[
     			{
     				"name": "Register",
-    				"internal": "registration.register_channels",
+    				"internal": "register_channels",
     				"params": [
     					{
     						"name": "source",
