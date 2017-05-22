@@ -5,6 +5,7 @@ Flask-RESTful extension."""
 
 from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
+from flask_restful.utils import cors
 from flask.ext.httpauth import HTTPBasicAuth
 from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
 import os
@@ -13,7 +14,15 @@ import sys
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
+#api.decorators=[cors.crossdomain(origin='*')]
 auth = HTTPBasicAuth()
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
 
 interpreter = PhenoWLInterpreter()
 interpreter.context.load_libraries("funcdefs.json")
@@ -54,9 +63,11 @@ class TaskListAPI(Resource):
         self.reqparse.add_argument('script', type=str, required=True, help='No script provided', location='json')
         super(TaskListAPI, self).__init__()
 
+    #@cors.crossdomain(origin='*')
     def get(self):
         return {'tasks': [marshal(task, task_fields) for task in tasks]}
 
+    #@cors.crossdomain(origin='*')
     def post(self):
         args = self.reqparse.parse_args()
         print(args['script'], sys.stderr)
@@ -80,12 +91,14 @@ class TaskAPI(Resource):
         self.reqparse.add_argument('internal', type=bool, location='json')
         super(TaskAPI, self).__init__()
 
+    #@cors.crossdomain(origin='*')
     def get(self, id):
         task = [task for task in tasks if task['name'] == id]
         if len(task) == 0:
             abort(404)
         return {'task': marshal(task[0], task_fields)}
 
+    #@cors.crossdomain(origin='*')
     def put(self, id):
         task = [task for task in tasks if task['name'] == id]
         if len(task) == 0:
@@ -111,4 +124,4 @@ api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<string:id>', endpoint='task')
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    app.run(host='0.0.0.0', debug=True)
+    app.run(debug=True)

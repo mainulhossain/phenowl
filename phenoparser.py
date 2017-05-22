@@ -84,7 +84,7 @@ class SymbolTable():
                 param_len = max(param_len, l)
             
             # print table header for vars
-            display += "\n{0:3s} | {1:^{2}s} | {3:^{4}s} | {5:^{6}s} | {7:^{8}s}".format(" No", mod_name, mod_len, internal_name, internal_len, func_name, func_len, param_names, param_len)
+            display += "\n\n{0:3s} | {1:^{2}s} | {3:^{4}s} | {5:^{6}s} | {7:^{8}s}".format(" No", mod_name, mod_len, internal_name, internal_len, func_name, func_len, param_names, param_len)
             display += ("\n-------------------" + "-" * (mod_len + internal_len + func_len + param_len))
             # print symbol table
             i = 1
@@ -155,8 +155,8 @@ class Context:
                     params = []
                     if (f.get("params")):
                         for param in f["params"]:
-                            params.append(f["name"]) 
-                    self.symtab.add_func(p["module"] if p.get("module") else None, name, internal_name, params)
+                            params.append(param) 
+                    self.symtab.add_func(p["module"] if p.get("module") else None, internal_name, name, params)
                 
     def iequal(self, str1, str2):
         if str1 == None:
@@ -180,16 +180,9 @@ class Context:
             self.symtab_stack.pop() 
                 
 class PhenoWLInterpreter:
-
-    # Initialize the interpreter. prog is a dictionary
-    # containing (line,statement) mappings
     def __init__(self):
         self.context = Context()
-        self.error = []
-  
-    def error(self, *args):
-        self.err.append("{0}".format(', '.join(map(str, args))))
-        
+
     def dolist(self, expr):
         v = []
         for e in expr:
@@ -198,6 +191,8 @@ class PhenoWLInterpreter:
     
     def dofunc(self, expr):
         func_name = self.context.func_to_internal_name(expr[0])
+        if not func_name:
+            raise Exception(r"'{0}' doesn't exist.".format(expr[0]))
         module_name = self.context.symtab.get_module_by_funcname(func_name)
         v = []
         for e in expr[1]:
@@ -477,7 +472,8 @@ if __name__ == "__main__":
     
     test_program_example = """
         
-        Register('/home/phenodoop/discus-p2irc/data_for_testing/Registration_test_images/', '/home/phenodoop/phenoproc/data')
+        x = 20
+        print("/home/phenodoop/discus-p2irc/data_for_testing/Registration_test_images/", "/home/phenodoop/phenoproc/data")
         
     """
     
@@ -490,5 +486,5 @@ if __name__ == "__main__":
     integrator.context.load_libraries("funcdefs.json")
     integrator.run(tokens)
     print(integrator.context.symtab)
-    print(integrator.context.symtab_stack)
     print(integrator.context.out)
+    print(integrator.context.err)

@@ -1,80 +1,103 @@
-{
-    "libraries": [
-    {
-    	"org": "p2irc",
-    	"desc": "Libraries created and maintained by p2irc group",
-    	"packages":	[
-    	{
-    		"title": "P2IRC",
-    		"package": "p2irc",
-    		"module": "p2irc.image_tools.registration",
-    		"functions":[
-    			{
-    				"name": "Register",
-    				"internal": "register_channels",
-    				"params": [
-    					{
-    						"name": "source",
-    						"type": "string"
-    					}
-    				],
-    				"returns": "byte[]"
-    			}
-    		]
-    		}
-    	]
-    },
-    {
-        "org": "SRLAB",
-        "desc": "Libraries created and maintained by SRLAB of USASK",
-        "packages": [
-        {
-            "title": "Phenoproc",
-            "package": "Phenoproc",
-            "module": "phenoproc.hadoop",
-            "functions":[
-            ]
-         },
-         {
-            "title": "local",
-            "package": "local",
-            "functions":[
-                {
-                    "name": "print",
-                    "internal": "print",
-                    "returns": "string"
-                }
-            ]
-         }
-        ]
-    },
-   {
-        "org": "python",
-        "desc": "standard python libraries",
-        "packages": [
-        {
-            "title": "os",
-            "package": "os",
-            "module": "os",
-            "functions":[
-                {
-                    "name": "CWD",
-                    "internal": "getcwd",
-                    "returns": "string"
-                }
-            ]
+{  
+   "libraries":[  
+      {  
+         "org":"p2irc",
+         "desc":"Libraries created and maintained by p2irc group",
+         "packages":[  
+            {  
+               "title":"P2IRC",
+               "package":"p2irc",
+               "module":"p2irc.image_tools.registration",
+               "functions":[  
+                  {  
+                     "name":"Register",
+                     "internal":"register_channels",
+                     "params":[  
+                        {  
+                           "name":"source",
+                           "type":"string"
+                        }
+                     ],
+                     "returns":"byte[]"
+                  }
+               ]
             },
-            {
-            "title": "os",
-            "functions":[
-                {
-                    "name": "range",
-                    "internal": "range",
-                    "returns": "list"
-                }
-            ]
+            {  
+               "title":"P2IRC",
+               "package":"p2irc",
+               "module":"p2irc.image_tools.plot_segmentation.plot_segmentation",
+               "functions":[  
+                  {  
+                     "name":"SegmentPlots",
+                     "internal":"main",
+                     "params":[  
+                        {  
+                           "name":"PathOfImageDatabase",
+                           "type":"string"
+                        },
+                        {  
+                           "name":"Rows",
+                           "type":"Integer"
+                        }
+                     ],
+                     "returns":"byte[]"
+                  }
+               ]
             }
-        ]
-    }    
-    ]
+         ]
+      },
+      {  
+         "org":"SRLAB",
+         "desc":"Libraries created and maintained by SRLAB of USASK",
+         "packages":[  
+            {  
+               "title":"Phenoproc",
+               "package":"Phenoproc",
+               "module":"phenoproc.hadoop",
+               "functions":[  
+
+               ]
+            },
+            {  
+               "title":"local",
+               "package":"local",
+               "functions":[  
+                  {  
+                     "name":"print",
+                     "internal":"print",
+                     "returns":"string"
+                  }
+               ]
+            }
+         ]
+      },
+      {  
+         "org":"python",
+         "desc":"standard python libraries",
+         "packages":[  
+            {  
+               "title":"os",
+               "package":"os",
+               "module":"os",
+               "functions":[  
+                  {  
+                     "name":"getcwd",
+                     "internal":"getcwd",
+                     "returns":"string"
+                  }
+               ]
+            },
+            {  
+               "title":"os",
+               "functions":[  
+                  {  
+                     "name":"range",
+                     "internal":"range",
+                     "returns":"list"
+                  }
+               ]
+            }
+         ]
+      }
+   ]
 }
