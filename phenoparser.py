@@ -193,7 +193,7 @@ class PhenoWLInterpreter:
         func_name = self.context.func_to_internal_name(expr[0])
         if not func_name:
             raise Exception(r"'{0}' doesn't exist.".format(expr[0]))
-        module_name = self.context.symtab.get_module_by_funcname(func_name)
+        module_name = self.context.symtab.get_module_by_funcname(expr[0].lower())
         v = []
         for e in expr[1]:
             v.append(self.eval(e))
@@ -287,6 +287,10 @@ class PhenoWLInterpreter:
                     return float(t)
                 if type(t) is complex:
                     return complex(t)
+            else:
+                if len(str_value) > 1:
+                    if (str_value.startswith("'") and str_value.endswith("'")) or (str_value.startswith('"') and str_value.endswith('"')):
+                        return str_value[1:-1]
             return str_value
         except ValueError:
             if self.context.var_exists(str_value):
