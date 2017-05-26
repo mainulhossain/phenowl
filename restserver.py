@@ -14,7 +14,7 @@ import sys
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
-#api.decorators=[cors.crossdomain(origin='*')]
+api.decorators=[cors.crossdomain(origin='*')]
 auth = HTTPBasicAuth()
 
 @app.after_request

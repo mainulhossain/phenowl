@@ -7,47 +7,113 @@ import ast
 import func_resolver
 
 class SymbolTable():
+    '''
+    Table to hold program symbols (vars and functions).
+    For local symbols, a stack of symbol tables is
+    maintained.
+    '''
     def __init__(self):
+        '''
+        Initializes the table.
+        '''
         self.vars = {}
         self.funcs = {}
         
     def add_var(self, name, value):
+        '''
+        Adds/Overwrites a variable to the symbol table.
+        :param name:
+        :param value:
+        '''
         self.vars[name] = value
     
     def update_var(self, name, value):
-        if name in self.vars:
-            self.vars[name] = value
-        else:
-            raise "var does not exist"
+        '''
+        Updates a variable in the symbol table
+        :param name:
+        :param value:
+        '''
+        self.check_var(name)
+        self.vars[name] = value
     
     def var_exists(self, name):
+        '''
+        Checks if a variable exists in the symbol table
+        :param name:
+        '''
         return name in self.vars
+    
+    def check_var(self, name):
+        if not self.var_exists(name):
+            raise "var {0} does not exist".format(name)
+        return True
             
     def add_func(self, module, internal_name, func_name, args):
+        '''
+        Add a new function in the symbol table. The function table is a dictionary with key-value pair as:
+        [ <module_name, internal_name>, <func_name, parameters> ]
+        :param module:
+        :param internal_name:
+        :param func_name:
+        :param args:
+        '''
         self.funcs[','.join([str(module), internal_name])] = [func_name, args]
 
     def get_var(self, name):
+        '''
+        Gets value of a variable
+        :param name:
+        '''
+        self.check_var(name)
         return self.vars[name]
     
-    def get_func(self, module, name):
-        return self.funcs[','.join([module, name])]
+    def check_func(self, module, internal_name):
+        key = ','.join([module, internal_name])
+        if not key in self.funcs:
+            raise "Function {0} does not exist".format(key)
+        return True
+    
+    def get_func(self, module, internal_name):
+        '''
+        Gets function by key (module + internal_name)
+        :param module:
+        :param name:
+        '''
+        self.check_func(module, internal_name)
+        return self.funcs[','.join([module, internal_name])]
     
     def get_funcs(self, module_name):
+        '''
+        Gets all functions in a module.
+        :param module_name: Name of the module
+        '''
         return [{k:v} for k,v in self.funcs.items() if k.split(',')[0] == module_name]     
     
-    def get_modbyinternalname(self, func_name):
+    def get_modbyinternalname(self, internal_name):
+        '''
+        Get a module name by internal_name
+        :param internal_name:
+        '''
         for k, v in self.funcs.items():
             mod_func = split(k)
             if mod_func[1] == funcname:
                 return mod_func[0]
             
     def get_module_by_funcname(self, func_name):
+        '''
+        Get module name by the function name.
+        :param func_name:
+        '''
         for k, v in self.funcs.items():
             if v[0] == func_name:
                 mod_func = k.split(',')
                 return mod_func[0]
-            
+        raise "Function {0} does not exist.".format(func_name)
+        
     def __str__(self):
+        '''
+        A string representation of this table.
+        '''
         display = ""
         if self.vars:
             sym_name = "Symbol Name"
@@ -104,11 +170,21 @@ class SymbolTable():
 
         
 class Context:
+    '''
+    The context for parsing and interpretation.
+    '''
     def __init__(self, parent = None):
+        '''
+        Initializes this object.
+        :param parent:
+        '''
         self.libraries = []
         self.reload()
     
     def reload(self):
+        '''
+        Reinitializes this object for new processing.
+        '''
         self.symtab = SymbolTable()
         self.symtab_stack = []
         self.out = []
@@ -116,6 +192,10 @@ class Context:
         self.add_libraries_to_symtab()
         
     def get_var(self, name):
+        '''
+        Gets a variable from symbol stack and symbol table
+        :param name:
+        '''
         for s in reversed(self.symtab_stack):
             if s.var_exists(name):
                 return s.get_var(name)
@@ -128,10 +208,14 @@ class Context:
         return self.symtab.update_var(name, value)
     
     def var_exists(self, name):
+        '''
+        Checks if a variable exists in any of the symbol tables.
+        :param name: variable name
+        '''
         for s in reversed(self.symtab_stack):
-            if name in s.vars:
+            if s.var_exists(name):
                 return True
-        return name in self.symtab.vars
+        return self.symtab.var_exists(name)
             
     def load_libraries(self, library_def_file):
         with open(library_def_file, 'r') as json_data:
@@ -159,6 +243,11 @@ class Context:
                     self.symtab.add_func(p["module"] if p.get("module") else None, internal_name, name, params)
                 
     def iequal(self, str1, str2):
+        '''
+        Compares two strings for case insensitive equality.
+        :param str1:
+        :param str2:
+        '''
         if str1 == None:
             return str2 == None
         if str2 == None:
@@ -166,30 +255,43 @@ class Context:
         return str1.lower() == str2.lower()
     
     def write(self, *args):
+        '''
+        Writes a line of strings in out context.
+        '''
         self.out.append("{0}".format(', '.join(map(str, args))))
     
     def error(self, *args):
+        '''
+        Writes a line of strings in err context.
+        '''
         self.err.append("{0}".format(', '.join(map(str, args))))
     
     def append_local_symtab(self):
+        '''
+        Appends a new symbol table to the symbol table stack.
+        '''
         self.symtab_stack.append(SymbolTable())
         return self.symtab_stack[len(self.symtab_stack) - 1]
     
     def pop_local_symtab(self):
+        '''
+        Pop a symbol table from the symbol table stack.
+        '''
         if self.symtab_stack:
             self.symtab_stack.pop() 
                 
 class PhenoWLInterpreter:
+    '''
+    The interpreter for PhenoWL DSL
+    '''
     def __init__(self):
         self.context = Context()
-
-    def dolist(self, expr):
-        v = []
-        for e in expr:
-            v.append(self.eval(e))
-        return v
-    
+   
     def dofunc(self, expr):
+        '''
+        Execute func expression.
+        :param expr:
+        '''
         func_name = self.context.func_to_internal_name(expr[0])
         if not func_name:
             raise Exception(r"'{0}' doesn't exist.".format(expr[0]))
@@ -200,6 +302,10 @@ class PhenoWLInterpreter:
         return func_resolver.call_func(self.context, module_name, func_name, v)
 
     def dorelexpr(self, expr):
+        '''
+        Executes relative expression.
+        :param expr:
+        '''
         left = self.eval(expr[0])
         right = self.eval(expr[2])
         operator = expr[1]
@@ -215,6 +321,10 @@ class PhenoWLInterpreter:
             return left == right
     
     def doand(self, expr):
+        '''
+        Executes "and" expression.
+        :param expr:
+        '''
         if expr is empty:
             return True
         elif len(expr) == 1:
@@ -222,6 +332,10 @@ class PhenoWLInterpreter:
         return self.eval(expr[0]) and self.eval(expr[1])
     
     def dolog(self, expr):
+        '''
+        Executes a logical expression.
+        :param expr:
+        '''
         left = self.eval(expr[0])
         if len(expr) == 1:
             return left
@@ -232,12 +346,20 @@ class PhenoWLInterpreter:
         return left + right if expr[1] == '+' else left - right
     
     def domult(self, expr):
+        '''
+        Executes a multiplication/division operation
+        :param expr:
+        '''
         if len(expr) <= 1:
             return self.eval(expr)
         else:
             return self.eval(expr[0])/self.eval(expr[2]) if expr[1] == '/' else self.eval(expr[0]) * self.eval(expr[2])
 
     def doarithmetic(self, expr):
+        '''
+        Executes arithmetic operation.
+        :param expr:
+        '''
         left = self.eval(expr[0])
         if len(expr) == 1:
             return left
@@ -248,6 +370,10 @@ class PhenoWLInterpreter:
         return left + right if expr[1] == '+' else left - right
     
     def doif(self, expr):
+        '''
+        Executes if statement.
+        :param expr:
+        '''
         cond = self.eval(expr[1])
         if cond:
             self.context.append_local_symtab()
@@ -263,9 +389,17 @@ class PhenoWLInterpreter:
                 self.context.pop_local_symtab()
         
     def doassign(self, expr):
+        '''
+        Evaluates an assignment expression.
+        :param expr:
+        '''
         self.context.symtab.add_var(expr[0], self.eval(expr[1]))
         
     def dofor(self, expr):
+        '''
+        Execute a for expression.
+        :param expr:
+        '''
         local_symtab = self.context.append_local_symtab()
         local_symtab.add_var(expr[1], None)
         try:
@@ -276,6 +410,10 @@ class PhenoWLInterpreter:
             self.context.pop_local_symtab()
     
     def eval_value(self, str_value):
+        '''
+        Evaluate a single expression for value.
+        :param str_value:
+        '''
         try:
             t = ast.literal_eval(str_value)
             if type(t) in [int, float, bool, complex]:
@@ -298,13 +436,20 @@ class PhenoWLInterpreter:
             return str_value
     
     def dolist(self, expr):
+        '''
+        Executes a list operation.
+        :param expr:
+        '''
         v = []
         for e in expr:
             v.append(self.eval(e))
         return v
     
-    # Evaluate an expression
     def eval(self, expr):        
+        '''
+        Evaluate an expression
+        :param expr: The expression in AST tree form.
+        '''
         if not isinstance(expr, list):
             return self.eval_value(expr)
         if not expr:
@@ -341,10 +486,20 @@ class PhenoWLInterpreter:
 
     # Run it
     def run(self, prog):
-        self.context.reload()
-        self.eval(prog.asList())
+        '''
+        Run a new program.
+        :param prog: Pyparsing ParseResults
+        '''
+        try:
+            self.context.reload()
+            self.eval(prog.asList())
+        except Exception as err:
+            self.context.err(err)
 
 class BasicGrammar():
+    '''
+    The base grammar for PhenoWL parser.
+    '''
     RELATIONAL_OPERATORS = "< > <= >= == !=".split()
     def __init__(self):
         self.build_grammar()
@@ -406,6 +561,9 @@ class BasicGrammar():
         self.program = self.stmtlist
 
 class PythonGrammar(BasicGrammar):
+    '''
+    A Python style grammar.
+    '''
     
     def __init__(self):
         self.build_grammar()
@@ -421,6 +579,9 @@ class PythonGrammar(BasicGrammar):
         super().build_program()                                 
                                  
 class PhenoWLGrammar(BasicGrammar):
+    '''
+    The PhenoWL grammar.
+    '''
     
     def __init__(self):
         self.build_grammar()
@@ -428,13 +589,16 @@ class PhenoWLGrammar(BasicGrammar):
     def build_grammar(self):
         super().build_grammar()
         
-        self.compoundstmt = Group(Suppress("{") + self.stmtlist + Suppress("}"))#.setParseAction(lambda t: ['body'] + t.asList())
+        self.compoundstmt = Group(Suppress("{") + self.stmtlist + Suppress("}"))
         self.ifstmt = Group(Keyword("if") + self.logexpr + self.compoundstmt + Group(Optional(Keyword("else") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
         self.forstmt = Group(Keyword("for") + self.identifier("var") + Keyword("in") + Group(self.expr("range")) + self.compoundstmt).setParseAction(lambda t : ['FOR'] + t.asList())                                 
                                  
         super().build_program()
                  
 class PhenoWLParser(object):
+    '''
+    The parser for PhenoWL DSL.
+    '''
 
     def __init__(self, grammar = None):
         if grammar is None:
@@ -477,7 +641,7 @@ if __name__ == "__main__":
     test_program_example = """
         
         x = 20
-        print("/home/phenodoop/discus-p2irc/data_for_testing/Registration_test_images/", "/home/phenodoop/phenoproc/data")
+        Register("/home/phenodoop/discus-p2irc/data_for_testing/Registration_test_images/", "/home/phenodoop/phenoproc/data")
         
     """
     
