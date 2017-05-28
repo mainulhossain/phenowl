@@ -204,7 +204,7 @@
                 });
             }
             
-            self.beginLogin();
+            //self.beginLogin();
         }
         function AddTaskViewModel() {
             var self = this;
@@ -248,7 +248,8 @@
             var self = this;
             self.username = ko.observable();
             self.password = ko.observable();
- 
+            tasksViewModel.login('mainulhossain@gmail.com', 'mainul');
+            
             self.login = function() {
                 $('#login').modal('hide');
                 tasksViewModel.login(self.username(), self.password());
