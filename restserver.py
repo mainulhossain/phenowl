@@ -73,6 +73,7 @@ class TaskListAPI(Resource):
         print(args['script'], sys.stderr)
         script = args['script']
         try:
+            interpreter.context.reload()
             parser = PhenoWLParser(PythonGrammar())   
             prog = parser.parse(script)
             interpreter.run(prog)
