@@ -15,25 +15,35 @@
         </div>
     </div>
     <div id="main" class="container">
-        <table class="table table-striped">
-            <tr><td><b>Function</b></td><td><b>Module</b></td><td><b>Internal Name</b></td></tr>
-            <!-- ko foreach: tasks -->
-            <tr>
-                <td><span data-bind="text: name"></span></td>
-                <td><span data-bind="text: module"></span></td>
-                <td>
-                    <span data-bind="text: internal" class="label label-success">Done</span>
-                </td>
-            </tr>
-            <!-- /ko -->
-        </table>
-        <label>Script:</label>
-        <textarea rows="10" style="min-width: 60%" id="script"></textarea><br>
-        <button data-bind="click: runPhenoWL" class="btn">Run</button><br>
-        <label>Output:</label>
-        <textarea rows="10" style="min-width: 60%" id="output"></textarea><br>
-        <label>Error:</label>
-        <textarea rows="10" style="min-width: 60%" id="error"></textarea>
+        <div class="row">
+            <div class="col-sm-4">
+		        <label>Script:</label>
+		        <textarea rows="10" style="min-width: 40%" id="script"></textarea><br>
+		        <button data-bind="click: runPhenoWL" class="btn">Run</button><br>
+		        <label>Output:</label>
+		        <textarea rows="10" style="min-width: 40%" id="output"></textarea><br>
+		        <label>Error:</label>
+		        <textarea rows="10" style="min-width: 40%" id="error"></textarea>
+            </div>
+            <div class="col-sm-4">
+		        <table class="table table-striped">
+		            <tr>
+			            <td class="col-sm-2"><b>Function</b></td>
+			            <td class="col-sm-2"><b>Module</b></td>
+		<!-- 	            <td class="col-md-2"><b>Internal Name</b></td> -->
+		            </tr>
+		            <!-- ko foreach: tasks -->
+		            <tr>
+		                <td><span data-bind="text: name"></span></td>
+		                <td><span data-bind="text: module"></span></td>
+		<!--                 <td> -->
+		<!--                     <span data-bind="text: internal" class="label label-success">Done</span> -->
+		<!--                 </td> -->
+		            </tr>
+		            <!-- /ko -->
+		        </table>
+            </div>
+        </div>
     </div>
     <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
         <div class="modal-header">
