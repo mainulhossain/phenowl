@@ -555,6 +555,7 @@ class BasicGrammar():
         self.assignstmt = (self.identifier("var") + Literal("=") + Group((self.expr("exp") + Optional(self.listidx)) | self.listdecl)).setParseAction(lambda t: ['ASSIGN'] + [t[0], t[2]])
                                   
         self.funccallstmt = self.funccall
+        
     def build_program(self):
         self.stmt << Group(self.retstmt | self.ifstmt | self.forstmt | self.funccallstmt | self.assignstmt)
         self.stmtlist << ZeroOrMore(self.stmt)
@@ -615,9 +616,6 @@ class PhenoWLParser(object):
         try:
             self.tokens = self.grammar.program.ignore(pythonStyleComment).parseString(text, parseAll=True)
             return self.tokens
-        except SemanticException as err:
-            print(err)
-            self.error(err)
         except ParseException as err:
             print(err)
             self.error(err)
@@ -629,12 +627,12 @@ class PhenoWLParser(object):
         try:
             self.tokens = self.grammar.program.ignore(pythonStyleComment).parseFile(filename, parseAll=True)
             return self.tokens
-        except SemanticException as err:
-            print(err)
-            exit(3)
         except ParseException as err:
             print(err)
             exit(3)
+        except Exception as err:
+            print(err)
+            self.error(err)
         
 if __name__ == "__main__":
     
