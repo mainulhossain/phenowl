@@ -7,6 +7,7 @@
 <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+<script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
     <div class="navbar">
@@ -129,6 +130,27 @@
         </div>
     </div>
     <script type="text/javascript">
+    
+    // configure ace.js for code editor
+    var textarea = $("#script");
+    
+    var editDiv = $('<div>', {
+        position: 'absolute',
+        width: textarea.width(),
+        height: textarea.height(),
+        'class': textarea.attr('class')
+    }).insertBefore(textarea);
+
+    textarea.css('visibility', 'hidden');
+
+    var editor = ace.edit(editDiv[0]);
+    editor.renderer.setShowGutter(false);
+    editor.getSession().setValue(textarea.val());
+    editor.getSession().setMode("ace/mode/python");
+    //editor.setKeyboardHandler("ace/keyboard/vim");
+    //   editor.setTheme("ace/theme/idle_fingers");
+    editor.setTheme("ace/theme/twilight");
+    
         function TasksViewModel() {
             var self = this;
             self.tasksURI = 'todo/api/v1.0/tasks';
@@ -166,7 +188,7 @@
                 $('#add').modal('show');
             }
             self.runPhenoWL = function(task) {
-                self.ajax(self.tasksURI, 'POST', {'script': $("#script").val()}).done(function(data) {
+                self.ajax(self.tasksURI, 'POST', {'script': editor.getSession().getValue()}).done(function(data) {
                 	text = '';
                     $.each(data.out, function(i, t) {
                     	text += t + '\n';
