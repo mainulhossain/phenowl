@@ -309,13 +309,13 @@ class PhenoWLInterpreter:
         left = self.eval(expr[0])
         right = self.eval(expr[2])
         operator = expr[1]
-        if operator is '<':
+        if operator == '<':
             return left < right
-        elif operator is '>':
+        elif operator == '>':
             return left > right
-        elif operator is '<=':
+        elif operator == '<=':
             return left <= right
-        elif operator is '>=':
+        elif operator == '>=':
             return left >= right
         else:
             return left == right
@@ -669,9 +669,9 @@ if __name__ == "__main__":
     
     test_program_example = """
         
-        x = 10
-        y = 20
-        if x > y or x > 5:
+        x = 30
+        y = 50
+        if x < y and x >= 10:
            print(x)
         
     """
