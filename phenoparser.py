@@ -327,58 +327,67 @@ class PhenoWLInterpreter:
         '''
         if expr is empty:
             return True
-        elif len(expr) == 1:
-            return self.eval(expr[0])
-        return self.eval(expr[0]) and self.eval(expr[1])
+        right = self.eval(expr[-1])
+        if len(expr) == 1:
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['ANDEXPR'] + left
+        left = self.eval(left)
+        return left and right
     
     def dolog(self, expr):
         '''
         Executes a logical expression.
         :param expr:
         '''
-        left = self.eval(expr[0])
+        right = self.eval(expr[-1])
         if len(expr) == 1:
-            return left
-        right = expr[2:]
-        if len(right) > 1:
-            right = ['LOGEXPR'] + expr[2:]
-        right = self.eval(right)
-        return left + right if expr[1] == '+' else left - right
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['LOGEXPR'] + left
+        left = self.eval(left)
+        return left or right
     
     def domult(self, expr):
         '''
         Executes a multiplication/division operation
         :param expr:
         '''
-        if len(expr) <= 1:
-            return self.eval(expr)
-        else:
-            return self.eval(expr[0])/self.eval(expr[2]) if expr[1] == '/' else self.eval(expr[0]) * self.eval(expr[2])
+        right = self.eval(expr[-1])
+        if len(expr) == 1:
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['MULTEXPR'] + left
+        left = self.eval(left)
+        return left / right if expr[-2] == '/' else left * right
 
     def doarithmetic(self, expr):
         '''
         Executes arithmetic operation.
         :param expr:
         '''
-        left = self.eval(expr[0])
+        right = self.eval(expr[-1])
         if len(expr) == 1:
-            return left
-        right = expr[2:]
-        if len(right) > 1:
-            right = ['NUMEXPR'] + expr[2:]
-        right = self.eval(right)
-        return left + right if expr[1] == '+' else left - right
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['NUMEXPR'] + left
+        left = self.eval(left)
+        return left + right if expr[-2] == '+' else left - right
     
     def doif(self, expr):
         '''
         Executes if statement.
         :param expr:
         '''
-        cond = self.eval(expr[1])
+        cond = self.eval(expr[0])
         if cond:
             self.context.append_local_symtab()
             try:
-                return self.eval(expr[2])
+                return self.eval(expr[1])
             finally:
                 self.context.pop_local_symtab()
         elif len(expr) > 4 and len(expr[4]) > 1:
@@ -445,6 +454,10 @@ class PhenoWLInterpreter:
             v.append(self.eval(e))
         return v
     
+    def dolistidx(self, expr):
+        val = self.context.get_var(expr[0])
+        return val[self.eval(expr[1])]
+    
     def eval(self, expr):        
         '''
         Evaluate an expression
@@ -478,6 +491,8 @@ class PhenoWLInterpreter:
             return self.dolist(expr[1])
         elif expr[0] == "FUNCCALL":
             return self.dofunc(expr[1])
+        elif expr[0] == "LISTIDX":
+            return self.dolistidx(expr[1])
         else:
             val = []
             for subexpr in expr:
@@ -528,23 +543,39 @@ class BasicGrammar():
         self.arguments = Forward()
         self.funccall = Group((self.identifier("name") + FollowedBy("(")) + 
                               Group(Suppress("(") + Optional(self.arguments)("args") + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
-        self.listidx = Group(self.identifier("name") + Literal("[") + self.expr("idx") + Literal("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
-        self.expr << (self.funccall |
-                      self.listidx |  
-                      self.constant |
-                      self.identifier("name") | 
-                      Group(Suppress("(") + self.numexpr + Suppress(")")) | 
-                      Group(oneOf("+ -") + self.expr)).setParseAction(lambda x : x.asList())
-                      
-        self.multexpr << Group((self.expr + ZeroOrMore(self.multop + self.expr)).setParseAction(lambda t: ['MULTEXPR'] + t.asList()))
+        self.listidx = Group(self.identifier("name") + Suppress("[") + self.expr("idx") + Suppress("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
+        
+        e = CaselessKeyword( "E" )
+        pi    = CaselessKeyword( "PI" )
+        fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+        plus, minus, mult, div = map(Literal, "+-*/")
+        lpar, rpar = map(Suppress, "()")
+        expop = Literal( "**" )
+        
+        #atom = ((0,None)*minus + ( pi | e | fnumber | self.identifier + lpar + self.expr + rpar | self.identifier ) | Group( lpar + self.expr + rpar ))
+        atom = (( pi | e | fnumber | self.identifier + lpar + self.expr + rpar | self.identifier ) | Group( lpar + self.expr + rpar ))
+        
+        # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left exponents, instead of left-to-righ
+        # that is, 2^3^2 = 2^(3^2), not (2^3)^2.
+        factor = Forward()
+        factor << atom + ZeroOrMore(expop + factor )
+        
+        self.multexpr << Group((factor + ZeroOrMore(self.multop + factor)).setParseAction(lambda t: ['MULTEXPR'] + t.asList()))
         self.numexpr << Group((self.multexpr + ZeroOrMore(self.addop + self.multexpr)).setParseAction(lambda t: ['NUMEXPR'] + t.asList()))
+        
+                
+        self.expr << ( 
+                      self.string | self.funccall | self.listidx | self.numexpr
+                      ).setParseAction(lambda x : x.asList())
+        
         self.arguments << (delimitedList(Group(self.expr("exp"))))
         # Definitions of rules for logical expressions (these are without parenthesis support)
         self.andexpr = Forward()
         self.logexpr = Forward()
-        self.relexpr = Group((self.numexpr + self.relop + self.numexpr).setParseAction(lambda t: ['RELEXPR'] + t.asList()))
-        self.andexpr << Group(self.relexpr("exp") + ZeroOrMore(Keyword("and") + self.relexpr("exp"))).setParseAction(lambda t : ["ANDEXPR"] + t.asList())
-        self.logexpr << Group(Group(self.andexpr("exp") + ZeroOrMore(Keyword("or") + self.andexpr("exp"))).setParseAction(lambda t : ["LOGEXPR"] + t.asList()))
+        self.relexpr = Group((Suppress(Optional(lpar)) + self.numexpr + self.relop + self.numexpr + Suppress(Optional(rpar))).setParseAction(lambda t: ['RELEXPR'] + t.asList()))
+        self.andexpr << Group((self.relexpr("exp") + ZeroOrMore(Keyword("and") + self.relexpr("exp"))).setParseAction(lambda t : ["ANDEXPR"] + t.asList()))
+        self.logexpr << Group((self.andexpr("exp") + ZeroOrMore(Keyword("or") + self.andexpr("exp"))).setParseAction(lambda t : ["LOGEXPR"] + t.asList())) 
+        #Group(self.andexpr("exp") + ZeroOrMore(Keyword("or") + self.andexpr("exp"))).setParseAction(lambda t : ["LOGEXPR"] + t.asList())
 
         # Definitions of rules for statements
         self.stmt = Forward()
@@ -557,7 +588,7 @@ class BasicGrammar():
         self.funccallstmt = self.funccall
         
     def build_program(self):
-        self.stmt << Group(self.retstmt | self.ifstmt | self.forstmt | self.funccallstmt | self.assignstmt)
+        self.stmt << Group(self.retstmt | self.ifstmt | self.forstmt | self.funccallstmt | self.assignstmt | self.expr)
         self.stmtlist << ZeroOrMore(self.stmt)
         self.program = self.stmtlist
 
@@ -574,7 +605,7 @@ class PythonGrammar(BasicGrammar):
         
         indentStack = [1]
         self.compoundstmt = indentedBlock(self.stmt, indentStack)
-        self.ifstmt = Group(Keyword("if") + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Keyword("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
+        self.ifstmt = Group(Suppress(Keyword("if")) + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Keyword("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
         self.forstmt = Group(Keyword("for") + self.identifier("var") + Keyword("in") + Group(self.expr("range"))  + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['FOR'] + t.asList())
         
         super().build_program()                                 
@@ -638,12 +669,14 @@ if __name__ == "__main__":
     
     test_program_example = """
         
-        x = 20
-        Register("/home/phenodoop/discus-p2irc/data_for_testing/Registration_test_images/", "/home/phenodoop/phenoproc/data")
+        x = 10
+        y = 20
+        if x > y or x > 5:
+           print(x)
         
     """
     
-    p = PhenoWLParser(PhenoWLGrammar())
+    p = PhenoWLParser(PythonGrammar())
     tokens = p.parse(test_program_example)
     tokens.pprint()
     print(tokens.asXML())
