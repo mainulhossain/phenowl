@@ -12,13 +12,17 @@ class TaskManager:
         
     def submit_func(self, func, *args):
         self.cleanup_pool()
-        self.futures.append(self.pool.submit(func, *args))
+        future = self.pool.submit(func, *args)
+        self.futures.append(future)
+        return future.result()
     
     def submit(self, argv):
         self.cleanup_pool()
         execfile = argv[:1]
         args = argv[1:]
-        self.futures.append(self.pool.submit(check_output, ' '.join(argv), shell=True))
+        future = self.pool.submit(check_output, ' '.join(argv), shell=True)
+        self.futures.append(future)
+        return future.result()
         
     def cleanup_pool(self):
         self.futures = list(filter(lambda f : f and not f.done(), self.futures))
