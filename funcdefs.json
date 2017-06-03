@@ -1,103 +1,111 @@
-{  
-   "libraries":[  
-      {  
-         "org":"p2irc",
-         "desc":"Libraries created and maintained by p2irc group",
-         "packages":[  
+{
+	"functions": [
+	   {
+	       "org": "p2irc",
+           "package": "p2irc",
+           "module": "p2irc.image_tools.registration",
+           "name":"Register",
+           "internal":"register_channels",
+           "desc": "Takes a folder of images and registers them together.",
+           "params":[  
             {  
-               "title":"P2IRC",
-               "package":"p2irc",
-               "module":"p2irc.image_tools.registration",
-               "functions":[  
-                  {  
-                     "name":"Register",
-                     "internal":"register_channels",
-                     "params":[  
-                        {  
-                           "name":"source",
-                           "type":"string"
-                        }
-                     ],
-                     "returns":"byte[]"
-                  }
-               ]
+               "name":"source",
+               "type":"string"
             },
+            {
+                "name": "destination",
+                "type": "string"
+            }            
+            ],
+            "example":"Register('storage/register/', 'storage/output/')"
+	   },
+	   {
+           "org": "p2irc",
+           "package": "p2irc",
+           "module": "p2irc.plot_segmentation.plot_segmentation",
+           "name":"SegmentPlots",
+           "internal":"main",
+           "desc": "Do plot segmentation upon a single stitched image: compute bounding boxes in pixel coordinates for every plot in this image, based upon the provided list of lists of pixels delineating the physical field rows, and a description of the plots",
+           "params":[  
             {  
-               "title":"P2IRC",
-               "package":"p2irc",
-               "module":"p2irc.image_tools.plot_segmentation.plot_segmentation",
-               "functions":[  
-                  {  
-                     "name":"SegmentPlots",
-                     "internal":"main",
-                     "params":[  
-                        {  
-                           "name":"PathOfImageDatabase",
-                           "type":"string"
-                        },
-                        {  
-                           "name":"Rows",
-                           "type":"Integer"
-                        }
-                     ],
-                     "returns":"byte[]"
-                  }
-               ]
-            }
-         ]
-      },
-      {  
-         "org":"SRLAB",
-         "desc":"Libraries created and maintained by SRLAB of USASK",
-         "packages":[  
-            {  
-               "title":"Phenoproc",
-               "package":"Phenoproc",
-               "module":"phenoproc.hadoop",
-               "functions":[  
-
-               ]
+               "name":"img_db_path",
+               "type":"string"
             },
+            {
+                "name": "rows",
+                "type": "int"
+            }            
+            ],
+            "example":"SegmentPlots('dbname', 10)"
+       },
+       {
+           "org": "Python",
+           "package": "Python",
+           "name":"print",
+           "internal":"print",
+           "desc": "Prints one or more things.",
+           "params":[  
             {  
-               "title":"local",
-               "package":"local",
-               "functions":[  
-                  {  
-                     "name":"print",
-                     "internal":"print",
-                     "returns":"string"
-                  }
-               ]
-            }
-         ]
-      },
-      {  
-         "org":"python",
-         "desc":"standard python libraries",
-         "packages":[  
+               "name":"expression",
+               "type":"any"
+            }            
+            ],
+            "returns": "string[]",
+            "example": "print('Hello World!')"
+       },
+       {
+           "org": "Python",
+           "package": "Python",
+           "module": "os",
+           "name":"getcwd",
+           "internal":"getcwd",
+           "desc": "Gets the current working directory.",
+            "returns": "string",
+            "example": "getcwd()"
+       },
+       {
+           "org": "Python",
+           "package": "Python",
+           "name":"range",
+           "internal":"range",
+           "returns": "[]",
+           "desc": "Generates a range of numbers.",
+           "example": "range(1, 10)"
+       },
+       {
+           "org": "SRLAB",
+           "package": "Phenoproc",
+           "module": "phenodoop.wordcount.action",
+           "name":"CountWords",
+           "internal":"count_words",
+           "desc": "Count number of individual words in a collection of documents.",
+           "returns": "string",
+           "example": "CountWords('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "Phenoproc",
+           "module": "phenodoop",
+           "name":"SearchWord",
+           "internal":"search_word",
+           "desc": "Searches a regular expression inside a directory of documents.",
+           "returns": "string",
+           "example": "SearchWord('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', '[a-z]*')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "Utility",
+           "module": "utility",
+           "name":"Download",
+           "internal":"download",
+           "desc": "Downloads a file or files.",
+           "params":[  
             {  
-               "title":"os",
-               "package":"os",
-               "module":"os",
-               "functions":[  
-                  {  
-                     "name":"getcwd",
-                     "internal":"getcwd",
-                     "returns":"string"
-                  }
-               ]
-            },
-            {  
-               "title":"os",
-               "functions":[  
-                  {  
-                     "name":"range",
-                     "internal":"range",
-                     "returns":"list"
-                  }
-               ]
-            }
-         ]
-      }
-   ]
+               "name":"filename",
+               "type":"string"
+            }            
+            ],           
+           "returns": "string"
+       }
+	]
 }

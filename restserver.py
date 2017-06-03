@@ -28,12 +28,8 @@ interpreter = PhenoWLInterpreter()
 interpreter.context.load_libraries("funcdefs.json")
     
 tasks = []
-for l in interpreter.context.libraries:
-    for p in l["packages"]:
-        for f in p["functions"]:
-            name = f["name"] if f.get("name") else f["internal"]
-            internal = f["internal"] if f.get("internal") else f["name"]
-            tasks.append({"module": p["module"] if p.get('module') else "", "name": name, "internal": internal}) 
+for f in interpreter.context.libraries:
+    tasks.append({"package_name": f["package"] if f.get('package') else "", "name": f["name"], "internal": f["internal"], "example": f["example"] if f.get("example") else "", "desc": f["desc"] if f.get("desc") else ""}) 
 
 @auth.get_password
 def get_password(username):
@@ -49,9 +45,11 @@ def unauthorized():
     return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 task_fields = {
-    'module': fields.String,
+    'package_name': fields.String,
     'name': fields.String,
-    'internal': fields.String
+    'internal': fields.String,
+    'example': fields.String,
+    'desc': fields.String
 }
 
 
@@ -70,9 +68,10 @@ class TaskListAPI(Resource):
     #@cors.crossdomain(origin='*')
     def post(self):
         args = self.reqparse.parse_args()
-        print(args['script'], sys.stderr)
         script = args['script']
         try:
+            os.chdir(os.path.dirname(os.path.abspath(__file__))) #set dir of this file to current directory
+            
             interpreter.context.reload()
             parser = PhenoWLParser(PythonGrammar())   
             prog = parser.parse(script)
@@ -89,7 +88,9 @@ class TaskAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('module', type=str, location='json')
         self.reqparse.add_argument('name', type=str, location='json')
-        self.reqparse.add_argument('internal', type=bool, location='json')
+        self.reqparse.add_argument('internal', type=str, location='json')
+        self.reqparse.add_argument('example', type=str, location='json')
+        self.reqparse.add_argument('desc', type=str, location='json')
         super(TaskAPI, self).__init__()
 
     #@cors.crossdomain(origin='*')

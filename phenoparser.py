@@ -220,27 +220,22 @@ class Context:
     def load_libraries(self, library_def_file):
         with open(library_def_file, 'r') as json_data:
             d = json.load(json_data)
-            self.libraries = d["libraries"]
+            self.libraries = d["functions"]
+            self.libraries = sorted(self.libraries, key = lambda k : k['package'].lower())
         return self.libraries
     
     def func_to_internal_name(self, funcname):
-        for l in self.libraries:
-            for p in l["packages"]:
-                for f in p["functions"]:
-                    if f.get("name") and self.iequal(f["name"], funcname):
-                        return f["internal"] if f.get("internal") else f["name"]
+        for f in self.libraries:
+            if f.get("name") and self.iequal(f["name"], funcname):
+                return f["internal"]
                      
     def add_libraries_to_symtab(self):
-        for l in self.libraries:
-            for p in l["packages"]:
-                for f in p["functions"]:
-                    name = f["name"].lower() if f.get("name") else None
-                    internal_name = f["internal"] if f.get("internal") else None
-                    params = []
-                    if (f.get("params")):
-                        for param in f["params"]:
-                            params.append(param) 
-                    self.symtab.add_func(p["module"] if p.get("module") else None, internal_name, name, params)
+        for f in self.libraries:
+            params = []
+            if (f.get("params")):
+                for param in f["params"]:
+                    params.append(param) 
+            self.symtab.add_func(f["module"] if f.get("module") else None, f.get("internal"), f["name"].lower(), params)
                 
     def iequal(self, str1, str2):
         '''
@@ -668,12 +663,9 @@ class PhenoWLParser(object):
 if __name__ == "__main__":
     
     test_program_example = """
-        
-        x = 30
-        y = 50
-        if x < y and x >= 10:
-           print(x)
-        
+    
+        CountWords('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output')
+                
     """
     
     p = PhenoWLParser(PythonGrammar())

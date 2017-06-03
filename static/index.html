@@ -3,46 +3,65 @@
 <head>
 <title>PhenoWL Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-<script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<style>
+.active div{
+  background-color:red!important;
+}
+</style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-inner">
-            <a class="brand" href="#">PhenoWL Demo</a>
+    <div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">PhenoWL</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#">Home</a></li>
+            </ul>
         </div>
     </div>
+</div>
     <div id="main" class="container">
         <div class="row">
-            <div class="col-sm-4">
-		        <label>Script:</label>
-		        <textarea rows="10" style="min-width: 40%" id="script"></textarea><br>
+            <div class="col-md-6">
+		        <label>Create a pipeline with script (Drag functions from the right)</label>
+		        <textarea rows="20" style="min-width: 100%" id="script"></textarea><br>
 		        <button data-bind="click: runPhenoWL" class="btn">Run</button><br>
 		        <label>Output:</label>
-		        <textarea rows="10" style="min-width: 40%" id="output"></textarea><br>
+		        <textarea rows="10" style="min-width: 100%" id="output"></textarea><br>
 		        <label>Error:</label>
-		        <textarea rows="10" style="min-width: 40%" id="error"></textarea>
+		        <textarea rows="5" style="min-width: 100%" id="error"></textarea>
             </div>
-            <div class="col-sm-4">
-		        <table class="table table-striped">
-		            <tr>
-			            <td class="col-sm-2"><b>Function</b></td>
-			            <td class="col-sm-2"><b>Module</b></td>
-		<!-- 	            <td class="col-md-2"><b>Internal Name</b></td> -->
-		            </tr>
-		            <!-- ko foreach: tasks -->
-		            <tr>
-		                <td><span data-bind="text: name"></span></td>
-		                <td><span data-bind="text: module"></span></td>
-		<!--                 <td> -->
-		<!--                     <span data-bind="text: internal" class="label label-success">Done</span> -->
-		<!--                 </td> -->
-		            </tr>
-		            <!-- /ko -->
-		        </table>
+            <div class="col-sm-4" id="functions">
+	            <div class="panel panel-default">
+	                <div class="panel-heading">
+	                   <div class="row">
+	                       <div class="col-sm-4"><h5 class="">Functions</h5></div>
+	                       <div class="col-sm-4"><h5 class="">Package</h5></div>
+	                   </div>
+	                </div>
+	                <div class="panel-body draggable-functions">
+	                        <!-- ko foreach: tasks -->
+	                        <div class="row" data-bind="attr: { title: desc }">
+	                           <div class="col-sm-4 draggable-func" data-bind="text: name"></div>
+	                           <div class="col-sm-4" data-bind="text: package_name"></div>
+	                        </div>
+	                        <!-- /ko -->
+	                </div>
+	            </div>
             </div>
         </div>
     </div>
@@ -131,25 +150,83 @@
     </div>
     <script type="text/javascript">
     
+
+    $(window).on('load', function() {
+    	
+    	 $('div.draggable-func').click(function() {
+    	       $('div.draggable-func').removeClass('active');
+    	       $(this).addClass('active');
+    	   });
+    	 
+         $('.draggable-functions').each(function() {
+             // inner scope
+             var phrase = $(this);
+             
+             $(this).find('div.draggable-func').each(function() {
+                 // cache jquery object
+                 var current = $(this);
+//                 current.addClass("draggable-func");
+                 current.draggable({
+                     revert : 'invalid',
+                     stack : '.draggable-func',
+                     helper : 'clone'
+                 });
+//                  current.on("dragstart", function(e) {
+//                 	 e.originalEvent.dataTransfer.setData("text/plain", this.textContent)
+//                  });
+                 
+//                  current.bind('dragstart', function(e) {
+//                         e.dataTransfer.setData("text/plain", this.textContent)
+//                  });
+                 
+             });
+         });
+         
+    });
     // configure ace.js for code editor
     var textarea = $("#script");
     
     var editDiv = $('<div>', {
         position: 'absolute',
+        id: 'aceeditor',
         width: textarea.width(),
         height: textarea.height(),
-        'class': textarea.attr('class')
+        'class': textarea.attr('class'),
+        'css': 'border:2px solid black'
     }).insertBefore(textarea);
-
+        
     textarea.css('visibility', 'hidden');
-
+    var offset = editDiv.offset();
+    textarea.attr('rows', 1);
+    
     var editor = ace.edit(editDiv[0]);
     editor.renderer.setShowGutter(false);
     editor.getSession().setValue(textarea.val());
     editor.getSession().setMode("ace/mode/python");
     //editor.setKeyboardHandler("ace/keyboard/vim");
-    //   editor.setTheme("ace/theme/idle_fingers");
-    editor.setTheme("ace/theme/twilight");
+    //editor.setTheme("ace/theme/idle_fingers");
+    //editor.setTheme("ace/theme/twilight");
+    editor.setTheme("ace/theme/iplastic");
+//     editor.setOptions({       
+//         fontSize: "12pt"
+//       });
+    
+    $("#aceeditor").droppable({
+
+        activeClass: "ui-state-default",
+        hoverClass: "ui-state-hover",
+        accept: ":not(.ui-sortable-helper)",
+
+        drop: function(event, ui) {
+          var pos = editor.renderer.screenToTextCoordinates(event.clientX, event.clientY)
+          var v = ko.dataFor(ui.draggable[0]);
+          example = ''
+          if (v)
+        	  example = v.example() ? v.example() : v.name() + "()";
+          editor.session.insert(pos, example)
+          return true
+        }
+      });
     
         function TasksViewModel() {
             var self = this;
@@ -179,9 +256,11 @@
             }
             self.updateTask = function(task, newTask) {
                 var i = self.tasks.indexOf(task);
-                self.tasks()[i].module(newTask.module);
+                self.tasks()[i].package_name(newTask.package_name);
                 self.tasks()[i].name(newTask.name);
                 self.tasks()[i].internal(newTask.internal);
+                self.tasks()[i].example(newTask.example);
+                self.tasks()[i].desc(newTask.desc);
             }
 
             self.beginAdd = function() {
@@ -193,14 +272,14 @@
                     $.each(data.out, function(i, t) {
                     	text += t + '\n';
                     });
-                	$("#output").html(text);
+                	$("#output").val(text);
                     
                 	text = '';
                     $.each(data.err, function(i, t) {
                         text += t + '\n';
                     });
                     
-                    $("#error").html(text);
+                    $("#error").val(text);
                 });
             }
             self.beginEdit = function(task) {
@@ -236,9 +315,11 @@
                 self.ajax(self.tasksURI, 'GET').done(function(data) {
                     for (var i = 0; i < data.tasks.length; i++) {
                         self.tasks.push({
-                            module: ko.observable(data.tasks[i].module),
+                            package_name: ko.observable(data.tasks[i].package_name),
                             name: ko.observable(data.tasks[i].name),
-                            internal: ko.observable(data.tasks[i].internal)
+                            internal: ko.observable(data.tasks[i].internal),
+                            example: ko.observable(data.tasks[i].example),
+                            desc: ko.observable(data.tasks[i].desc)
                         });
                     }
                 }).fail(function(jqXHR) {
@@ -246,44 +327,46 @@
                         setTimeout(self.beginLogin, 500);
                 });
             }
-            
             //self.beginLogin();
         }
         function AddTaskViewModel() {
             var self = this;
-            self.module = ko.observable();
+            self.package_name = ko.observable();
             self.name = ko.observable();
  
             self.addTask = function() {
                 $('#add').modal('hide');
                 tasksViewModel.add({
-                    module: self.module(),
+                    package_name: self.package_name(),
                     name: self.name()
                 });
-                self.module("");
+                self.package_name("");
                 self.name("");
             }
         }
         function EditTaskViewModel() {
             var self = this;
-            self.module = ko.observable();
+            self.package_name = ko.observable();
             self.name = ko.observable();
             self.internal = ko.observable();
+            self.example = ko.observable();
  
             self.setTask = function(task) {
                 self.task = task;
-                self.module(task.module());
+                self.package_name(task.package_name());
                 self.name(task.name());
                 self.internal(task.internal());
+                self.example(task.example());
                 $('edit').modal('show');
             }
  
             self.editTask = function() {
                 $('#edit').modal('hide');
                 tasksViewModel.edit(self.task, {
-                	module: self.module(),
-                	name: self.name() ,
-                    internal: self.internal()
+                	package_name: self.package_name(),
+                	name: self.name(),
+                    internal: self.internal(),
+                    example: self.example()
                 });
             }
         }
@@ -304,8 +387,8 @@
         var editTaskViewModel = new EditTaskViewModel();
         var loginViewModel = new LoginViewModel();
         ko.applyBindings(tasksViewModel, $('#main')[0]);
-        ko.applyBindings(addTaskViewModel, $('#add')[0]);
-        ko.applyBindings(editTaskViewModel, $('#edit')[0]);
+//         ko.applyBindings(addTaskViewModel, $('#add')[0]);
+//         ko.applyBindings(editTaskViewModel, $('#edit')[0]);
         ko.applyBindings(loginViewModel, $('#login')[0]);
     </script>
 </body>
