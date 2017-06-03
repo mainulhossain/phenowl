@@ -21,6 +21,6 @@ class TaskManager:
         self.futures.append(self.pool.submit(check_output, ' '.join(argv), shell=True))
         
     def cleanup_pool(self):
-        list(filter(lambda f : f and not f.done(), self.futures))
+        self.futures = list(filter(lambda f : f and not f.done(), self.futures))
                 
 task_manager = TaskManager()
