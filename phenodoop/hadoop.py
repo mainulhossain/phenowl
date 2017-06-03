@@ -11,7 +11,8 @@ def run_hadoop(mapper, reducer, input, output, **kwargs):
         # GENERIC_OPTIONS -files -libjars -D
         # COMMAND_OPTIONS -mapper -reducer -input -output
         hadoopPath = '/usr/bin/hadoop'
-        streamPath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-streaming-2.7.3.2.5.0.0-1245.jar'
+        #streamPath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-streaming-2.7.3.2.5.0.0-1245.jar'
+        streamPath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-streaming.jar'
         jobid = str(uuid.uuid4())
         
         generic_options = ''
@@ -29,5 +30,12 @@ def run_hadoop(mapper, reducer, input, output, **kwargs):
         print(hadoopPath + " " + args, file=sys.stderr)
         task_manager.submit([hadoopPath, args])
 
+def run_hadoop_example(program, input, output, expr):
+        hadoopPath = '/usr/bin/hadoop'
+        examplePath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-mapreduce-examples.jar'
+        args = 'jar {0} {1} {2} {3} {4}'.format(examplePath, program, input, output, expr)
+        print(hadoopPath + " " + args, file=sys.stderr)
+        task_manager.submit([hadoopPath, args])
+        
 if __name__ == "__main__":
     run_hadoop(sys.argv[1], sys.argv[2])
