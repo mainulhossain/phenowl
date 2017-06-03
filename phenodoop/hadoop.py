@@ -26,7 +26,7 @@ def run_hadoop(mapper, reducer, input, output, **kwargs):
             mapper_arg = mapper_arg + " " + kwargs['mapper_arg']
                               
         args = 'jar {0} -files {1},{2} {3} -D mapreduce.input.fileinputformat.input.dir.recursive=true -D mapreduce.job.name="{4}" {5} -mapper "{6}" -reducer {7} -input {8} -output {9}'.format(streamPath, mapper, reducer, generic_options, jobid, command_options, mapper_arg, os.path.basename(reducer), input, output)
-        #print(args, file=sys.stderr)
+        print(hadoopPath + " " + args, file=sys.stderr)
         task_manager.submit([hadoopPath, args])
 
 if __name__ == "__main__":
