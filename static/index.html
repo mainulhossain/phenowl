@@ -39,7 +39,9 @@
             <div class="col-md-6">
 		        <label>Create a pipeline with script (Drag functions from the right)</label>
 		        <textarea rows="20" style="min-width: 100%" id="script"></textarea><br>
-		        <button data-bind="click: runPhenoWL" class="btn">Run</button><br>
+		        <button class="btn pull-left" data-bind="click: runPhenoWL">Run</button>
+		        <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
+		        <br><br>
 		        <label>Output:</label>
 		        <textarea rows="10" style="min-width: 100%" id="output"></textarea><br>
 		        <label>Error:</label>
@@ -152,8 +154,10 @@
     
 
     $(window).on('load', function() {
+    	    	
+    	$('#refresh').hide();
     	
-    	 $('div.draggable-func').click(function() {
+    	$('div.draggable-func').click(function() {
     	       $('div.draggable-func').removeClass('active');
     	       $(this).addClass('active');
     	   });
@@ -267,7 +271,10 @@
                 $('#add').modal('show');
             }
             self.runPhenoWL = function(task) {
+            	$('#refresh').show();
                 self.ajax(self.tasksURI, 'POST', {'script': editor.getSession().getValue()}).done(function(data) {
+                	$('#refresh').hide();
+                	
                 	text = '';
                     $.each(data.out, function(i, t) {
                     	text += t + '\n';
