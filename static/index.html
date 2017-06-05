@@ -10,6 +10,9 @@
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <style>
+.active div{
+  background-color:red!important;
+}
 
 .odd-row {
 background-color: LightGray;
@@ -161,7 +164,12 @@ background-color: White;
     $(window).on('load', function() {
     	    	
     	$('#refresh').hide();
-    	   	 
+    	
+    	$('div.draggable-func').click(function() {
+    	       $('div.draggable-func').removeClass('active');
+    	       $(this).addClass('active');
+    	   });
+    	 
          $('.draggable-functions').each(function() {
              // inner scope
              var phrase = $(this);
