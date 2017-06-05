@@ -89,7 +89,7 @@
             } 
             ],
            "desc": "Count number of individual words in a collection of documents.",
-           "example": "CountWords('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/output')"
+           "example": "CountWords('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output')"
        },
        {
            "org": "SRLAB",
@@ -112,7 +112,7 @@
             } 
             ],
            "desc": "Searches a regular expression inside a directory of documents.",
-           "example": "SearchWord('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/output', '[a-z]+')"
+           "example": "SearchWord('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output', '[a-z]+')"
        },
        {
            "org": "SRLAB",
@@ -127,7 +127,25 @@
             }            
             ],           
            "returns": "byte[]",
-           "example": "Read('/storage/example.txt')"
+           "example": "Read('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents/4300-0.txt')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "io",
+           "name":"Write",
+           "internal":"write",
+           "desc": "Writes data to a file.",
+           "params":[  
+            {  
+               "name":"filename",
+               "type":"string"
+            },
+            {  
+               "name":"content",
+               "type":"any"
+            }              
+            ],           
+           "example": "Write('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/temp.txt')"
        },
        {
            "org": "SRLAB",

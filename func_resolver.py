@@ -32,6 +32,10 @@ def call_func(context, module_name, func_name, arguments):
             if not arguments:
                 raise "Read must have one argument."
             return IOHelper.read(arguments[0])
+        elif func_name.lower() == "write":
+            if len(arguments) < 2:
+                raise "Write must have two arguments."
+            return IOHelper.write(arguments[0], arguments[1])
         elif func_name.lower() == "get_files":
             return IOHelper.get_files(arguments[0])
         elif func_name.lower() == "get_folders":

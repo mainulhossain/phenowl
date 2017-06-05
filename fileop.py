@@ -46,6 +46,10 @@ class PosixFileSystem():
         with open(path) as reader:
             return reader.read()
         
+    def write(self, path, content):
+        with open(path, 'w') as writer:
+            return writer.write(content)
+            
 class HadoopFileSystem():
     def __init__(self, addr, user):
         self.client = InsecureClient(addr, user=user)
@@ -101,8 +105,12 @@ class HadoopFileSystem():
     
     def read(self, path):
         path = self.normaize_path(path)
-        with client.read(path) as reader:
+        with self.client.read(path) as reader:
             return reader.read()
+    
+    def write(self, path, content):
+        path = self.normaize_path(path)
+        self.client.write(path, content, encoding='utf-8')
             
 class IOHelper():
     @staticmethod
@@ -140,6 +148,11 @@ class IOHelper():
     def read(path):
         filesystem = IOHelper.getFileSystem(path)
         return filesystem.read(path)
+    
+    @staticmethod
+    def write(path, content):
+        filesystem = IOHelper.getFileSystem(path)
+        return filesystem.write(path, content)
         
 if __name__ == "__main__":
     print("Hello World")
