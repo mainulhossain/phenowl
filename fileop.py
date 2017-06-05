@@ -69,6 +69,8 @@ class HadoopFileSystem():
             print(e)
     
     def get_files(self, path):
+        u = urlparse(path)
+        path = u.path
         files = []
         for f in self.client.list(path):
             status = self.client.status(join(path, f), False)
@@ -77,13 +79,15 @@ class HadoopFileSystem():
         return files
     
     def get_folders(self, path):
+        u = urlparse(path)
+        path = u.path
         folders = []
         for f in self.client.list(path):
             status = self.client.status(join(path, f), False)
             if status['type'] == "DIRECTORY":
                 folders.append(f)
         return folders
-
+    
 class IOHelper():
     @staticmethod
     def getFileSystem(url):
