@@ -548,7 +548,7 @@ class BasicGrammar():
         expop = Literal( "**" )
         
         #atom = ((0,None)*minus + ( pi | e | fnumber | self.identifier + lpar + self.expr + rpar | self.identifier ) | Group( lpar + self.expr + rpar ))
-        atom = (( pi | e | fnumber | self.identifier + lpar + self.expr + rpar | self.identifier ) | Group( lpar + self.expr + rpar ))
+        atom = (( pi | e | fnumber | self.string | self.identifier + lpar + self.expr + rpar | self.identifier ) | Group( lpar + self.expr + rpar ))
         
         # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left exponents, instead of left-to-righ
         # that is, 2^3^2 = 2^(3^2), not (2^3)^2.
