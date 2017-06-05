@@ -145,7 +145,7 @@
                "type":"any"
             }              
             ],           
-           "example": "Write('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/temp.txt')"
+           "example": "Write('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/temp.txt', 'Text to write')"
        },
        {
            "org": "SRLAB",

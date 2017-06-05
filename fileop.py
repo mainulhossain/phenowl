@@ -110,7 +110,7 @@ class HadoopFileSystem():
     
     def write(self, path, content):
         path = self.normaize_path(path)
-        self.client.write(path, content, encoding='utf-8')
+        self.client.write(path, content)
             
 class IOHelper():
     @staticmethod
