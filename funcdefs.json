@@ -89,7 +89,7 @@
             } 
             ],
            "desc": "Count number of individual words in a collection of documents.",
-           "example": "CountWords('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output')"
+           "example": "CountWords('/user/phenodoop/documents', '/user/phenodoop/output')"
        },
        {
            "org": "SRLAB",
@@ -112,7 +112,7 @@
             } 
             ],
            "desc": "Searches a regular expression inside a directory of documents.",
-           "example": "SearchWord('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output', '[a-z]+')"
+           "example": "SearchWord('/user/phenodoop/documents', '/user/phenodoop/output', '[a-z]+')"
        },
        {
            "org": "SRLAB",
