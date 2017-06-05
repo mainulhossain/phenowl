@@ -10,7 +10,7 @@ from flask.ext.httpauth import HTTPBasicAuth
 from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
 import os
 import sys
-
+import json
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
@@ -119,9 +119,40 @@ class TaskAPI(Resource):
         tasks.remove(task[0])
         return {'result': True}
 
+def load_samples(sample_def_file):
+    with open(sample_def_file, 'r') as json_data:
+        d = json.load(json_data)
+        return d["samples"]
+    
+samples = []
+for s in load_samples('samples.json'):
+    samples.append({"name": s["name"], "desc": s["desc"], "sample": '\n'.join(s["sample"])}) 
+
+sample_fields = {
+    'name': fields.String,
+    'desc': fields.String,
+    'sample': fields.String,
+}
+
+class SamplesAPI(Resource):
+    #decorators = [auth.login_required]
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        super(SamplesAPI, self).__init__()
+
+    #@cors.crossdomain(origin='*')
+    def get(self):
+        return {'samples': [marshal(sample, sample_fields) for sample in samples]}
+
+    #@cors.crossdomain(origin='*')
+    def post(self):
+        args = self.reqparse.parse_args()
+        return { 'out': '', 'err': ''}, 201
 
 api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<string:id>', endpoint='task')
+api.add_resource(SamplesAPI, '/todo/api/v1.0/samples', endpoint='samples')
 
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path

@@ -1,0 +1,45 @@
+{
+    "samples": [
+       {
+           "name": "Count Words in Hadoop",
+           "desc": "Count the number of individual words in a directory of SRLAB's Phenodoop server.",
+           "sample": [
+           "# First remove the output directory. Otherwise, Hadoop streaming",
+           "# will reject the script if the directory already exists.",
+           "outdir = 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output'",
+           "Remove(outdir)",
+           "",
+           "# Now count the words. This is a distributed operation over hadoop cluster.",
+           "# Depending on number of documents and document size, it may take time.",
+           "CountWords('/user/phenodoop/documents', '/user/phenodoop/output')",
+           "",
+           "files = GetFiles(outdir)",
+           "for f in files:",
+           "    path = outdir + '/' + f",
+           "    data = Read(path)",
+           "    print(data)"
+           ]
+       },
+       {
+           "name": "Search word or regex in Hadoop",
+           "desc": "Search a word or regular expression in a directory of SRLAB's Phenodoop server.",
+           "sample": [
+           "# First remove the output directory. Otherwise, Hadoop streaming",
+           "# will reject the script if the directory already exists.",
+           "outdir = 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output'",
+           "Remove(outdir)",
+           "",
+           "# Now count the words. This is a distributed operation over hadoop cluster.",
+           "# Depending on number of documents and document size, it may take time.",
+           "SearchWord('/user/phenodoop/documents', '/user/phenodoop/output', 'The[a-z]*')",
+           "",
+           "files = GetFiles(outdir)",
+           "for f in files:",
+           "    path = outdir + '/' + f",
+           "    data = Read(path)",
+           "    print(data)"
+           ]
+       }
+    ]
+}
+
