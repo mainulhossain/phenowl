@@ -10,9 +10,14 @@
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <style>
-.active div{
-  background-color:red!important;
+
+.odd-row {
+background-color: LightGray;
 }
+.even-row {
+background-color: White;
+}
+
 </style>
 </head>
 <body>
@@ -57,7 +62,7 @@
 	                </div>
 	                <div class="panel-body draggable-functions">
 	                        <!-- ko foreach: tasks -->
-	                        <div class="row" data-bind="attr: { title: desc }">
+	                        <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
 	                           <div class="col-sm-4 draggable-func" data-bind="text: name"></div>
 	                           <div class="col-sm-4" data-bind="text: package_name"></div>
 	                        </div>
@@ -156,12 +161,7 @@
     $(window).on('load', function() {
     	    	
     	$('#refresh').hide();
-    	
-    	$('div.draggable-func').click(function() {
-    	       $('div.draggable-func').removeClass('active');
-    	       $(this).addClass('active');
-    	   });
-    	 
+    	   	 
          $('.draggable-functions').each(function() {
              // inner scope
              var phrase = $(this);
