@@ -31,10 +31,15 @@ def call_func(context, module_name, func_name, arguments):
         elif func_name.lower() == "read":
             if not arguments:
                 raise "Read must have one argument."
+            return IOHelper.read(arguments[0])
         elif func_name.lower() == "get_files":
             return IOHelper.get_files(arguments[0])
         elif func_name.lower() == "get_folders":
             return IOHelper.get_folders(arguments[0])
+        elif func_name.lower() == "remove":
+            return IOHelper.remove(arguments[0])
+        elif func_name.lower() == "makedirs":
+            return IOHelper.makedirs(arguments[0])
         else:
             raise "{0} function not implemented".format(func_name)
 #             possibles = globals().copy()

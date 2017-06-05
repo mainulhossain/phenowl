@@ -142,7 +142,7 @@
             }            
             ],           
            "returns": "string[]",
-           "example": "GetFiles('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents')"
+           "example": "GetFiles('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents')"
        },
        {
            "org": "SRLAB",
@@ -157,7 +157,35 @@
             }            
             ],           
            "returns": "string[]",
-           "example": "GetFolders('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents')"
+           "example": "GetFolders('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "io",
+           "name":"Remove",
+           "internal":"remove",
+           "desc": "Removes a file or directory.",
+           "params":[  
+            {  
+               "name":"path",
+               "type":"string"
+            }            
+            ],           
+           "example": "Remove('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/output1')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "io",
+           "name":"CreateFolder",
+           "internal":"makedirs",
+           "desc": "Creates a directory.",
+           "params":[  
+            {  
+               "name":"path",
+               "type":"string"
+            }            
+            ],           
+           "example": "CreateFolder('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/output1')"
        }
 	]
 }

@@ -24,7 +24,7 @@ class PosixFileSystem():
             os.makedirs(path) 
         return path
     
-    def delete(self, path):
+    def remove(self, path):
         if os.path.isdir(path):
             shutil.rmtree(path)
         elif os.path.isfile(path):
@@ -42,35 +42,47 @@ class PosixFileSystem():
     def get_folders(self, path):
         return [f for f in listdir(path) if isdir(join(path, f))]
     
+    def read(self, path):
+        with open(path) as reader:
+            return reader.read()
+        
 class HadoopFileSystem():
     def __init__(self, addr, user):
         self.client = InsecureClient(addr, user=user)
     
+    def normaize_path(self, path):
+        u = urlparse(path)
+        return u.path
+        
     def makedirs(self, path):
-        try: 
+        try:
+            path = self.normaize_path(path)
             self.client.makedirs(path)
         except:
             return None
         return path
     
-    def delete(self, path):
+    def remove(self, path):
         try: 
+            path = self.normaize_path(path)
             if self.client.status(path, False) is not None:
                 self.client.delete(path, True)
         except Exception as e: print(e)
         
     def addfolder(self, path):
+        path = self.normaize_path(path)
         return self.makedirs(path)
     
     def rename(self, oldpath, newpath):
         try:
+            oldpath = self.normaize_path(oldpath)
+            newpath = self.normaize_path(newpath)
             self.client.rename(oldpath, newpath)
         except Exception as e:
             print(e)
     
     def get_files(self, path):
-        u = urlparse(path)
-        path = u.path
+        path = self.normaize_path(path)
         files = []
         for f in self.client.list(path):
             status = self.client.status(join(path, f), False)
@@ -79,8 +91,7 @@ class HadoopFileSystem():
         return files
     
     def get_folders(self, path):
-        u = urlparse(path)
-        path = u.path
+        path = self.normaize_path(path)
         folders = []
         for f in self.client.list(path):
             status = self.client.status(join(path, f), False)
@@ -88,6 +99,11 @@ class HadoopFileSystem():
                 folders.append(f)
         return folders
     
+    def read(self, path):
+        path = self.normaize_path(path)
+        with client.read(path) as reader:
+            return reader.read()
+            
 class IOHelper():
     @staticmethod
     def getFileSystem(url):
@@ -109,7 +125,21 @@ class IOHelper():
     def get_folders(path):
         filesystem = IOHelper.getFileSystem(path)
         return filesystem.get_folders(path)
- 
+    
+    @staticmethod
+    def remove(path):
+        filesystem = IOHelper.getFileSystem(path)
+        filesystem.remove(path)
+        
+    @staticmethod
+    def makedirs(path):
+        filesystem = IOHelper.getFileSystem(path)
+        filesystem.makedirs(path)
+        
+    @staticmethod
+    def read(path):
+        filesystem = IOHelper.getFileSystem(path)
+        return filesystem.read(path)
         
 if __name__ == "__main__":
     print("Hello World")
