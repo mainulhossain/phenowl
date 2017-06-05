@@ -92,8 +92,9 @@ class IOHelper():
             if u.scheme:
                 p = urlunparse((u.scheme, u.netloc, '', '', '', ''))
                 return HadoopFileSystem(p, 'hdfs')
-        finally:
-            return PosixFileSystem()
+        except:
+            pass
+        return PosixFileSystem()
     
     @staticmethod
     def get_files(path):
