@@ -664,7 +664,8 @@ if __name__ == "__main__":
     
     test_program_example = """
     
-        CountWords('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output')
+        s = GetFiles('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents')
+        print(s)
                 
     """
     

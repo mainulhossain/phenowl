@@ -1,4 +1,6 @@
 from importlib import import_module
+from fileop import IOHelper
+
 #from phenoparser import Context
 
 def load_module(modulename):
@@ -22,10 +24,17 @@ def call_func(context, module_name, func_name, arguments):
     :param arguments: The arguments for the function
     '''
     if not module_name or module_name == "None":
-        if func_name == "print".lower():
+        if func_name.lower() == "print":
             return context.write(*arguments)
-        elif func_name == "range".lower():
+        elif func_name.lower() == "range":
             return range(*arguments)
+        elif func_name.lower() == "read":
+            if not arguments:
+                raise "Read must have one argument."
+        elif func_name.lower() == "get_files":
+            return IOHelper.get_files(arguments[0])
+        elif func_name.lower() == "get_folders":
+            return IOHelper.get_folders(arguments[0])
         else:
             raise "{0} function not implemented".format(func_name)
 #             possibles = globals().copy()
@@ -35,4 +44,4 @@ def call_func(context, module_name, func_name, arguments):
     else:           
         module_obj = load_module(module_name)
         function = getattr(module_obj, func_name)
-        return function(*arguments)        
+        return function(*arguments)

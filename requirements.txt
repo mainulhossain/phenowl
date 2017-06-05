@@ -8,3 +8,4 @@ itsdangerous
 six
 pyparsing
 future
+hdfs==2.0.15

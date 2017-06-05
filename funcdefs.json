@@ -89,7 +89,7 @@
             } 
             ],
            "desc": "Count number of individual words in a collection of documents.",
-           "example": "CountWords('/user/phenodoop/documents', '/user/phenodoop/output')"
+           "example": "CountWords('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/output')"
        },
        {
            "org": "SRLAB",
@@ -112,22 +112,52 @@
             } 
             ],
            "desc": "Searches a regular expression inside a directory of documents.",
-           "example": "SearchWord('/user/phenodoop/documents', '/user/phenodoop/output', '[a-z]+')"
+           "example": "SearchWord('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents', 'http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/output', '[a-z]+')"
        },
        {
            "org": "SRLAB",
-           "package": "Utility",
-           "module": "utility",
-           "name":"Download",
-           "internal":"download",
-           "desc": "Downloads a file or files.",
+           "package": "io",
+           "name":"Read",
+           "internal":"read",
+           "desc": "Reads a file.",
            "params":[  
             {  
                "name":"filename",
                "type":"string"
             }            
             ],           
-           "returns": "string"
+           "returns": "byte[]",
+           "example": "Read('/storage/example.txt')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "io",
+           "name":"GetFiles",
+           "internal":"get_files",
+           "desc": "Gets the names of files in a directory.",
+           "params":[  
+            {  
+               "name":"path",
+               "type":"string"
+            }            
+            ],           
+           "returns": "string[]",
+           "example": "GetFiles('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "io",
+           "name":"GetFolders",
+           "internal":"get_folders",
+           "desc": "Gets the names of folders in a directory.",
+           "params":[  
+            {  
+               "name":"path",
+               "type":"string"
+            }            
+            ],           
+           "returns": "string[]",
+           "example": "GetFolders('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents')"
        }
 	]
 }
