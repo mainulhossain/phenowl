@@ -67,4 +67,4 @@ class ImageProcessor():
             # Use warpAffine for Translation, Euclidean and Affine
             im2_aligned = cv2.warpAffine(im2, warp_matrix, (sz[1],sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP);
         
-        cv2.imwrite(dstfile, im2_aligned)
+        cv2.imwrite(destfile, im2_aligned)
