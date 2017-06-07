@@ -243,7 +243,7 @@
                "type":"int"
             }            
             ],           
-           "example": "ConvertColor('images/test_image.jpg', 'output/test_image.jpg')"
+           "example": "ConvertColor('images/test_image.jpg', 'output/test_image.jpg', 6) # code (3rd param) is conversion code from opencv cv2.COLOR_BGR2GRAY=6"
        }
 	]
 }
