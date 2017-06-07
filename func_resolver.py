@@ -51,6 +51,8 @@ def call_func(context, module_name, func_name, arguments):
             return IOHelper.makedirs(arguments[0])
         elif func_name.lower() == "reduce_noise":
             return ImageProcessor.reduce_noise(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]))
+        elif func_name.lower() == "convert_color":
+            return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
         else:
             raise "{0} function not implemented".format(func_name)
 #             possibles = globals().copy()
