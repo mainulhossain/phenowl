@@ -385,10 +385,10 @@ class PhenoWLInterpreter:
                 return self.eval(expr[1])
             finally:
                 self.context.pop_local_symtab()
-        elif len(expr) > 4 and len(expr[4]) > 1:
+        elif len(expr) > 3 and expr[3]:
             self.context.append_local_symtab()
             try:
-                return self.eval(expr[4][1])
+                return self.eval(expr[3])
             finally:
                 self.context.pop_local_symtab()
         
@@ -600,7 +600,7 @@ class PythonGrammar(BasicGrammar):
         
         indentStack = [1]
         self.compoundstmt = indentedBlock(self.stmt, indentStack)
-        self.ifstmt = Group(Suppress(Keyword("if")) + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Keyword("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
+        self.ifstmt = Group(Suppress(Keyword("if")) + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Suppress("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
         self.forstmt = Group(Keyword("for") + self.identifier("var") + Keyword("in") + Group(self.expr("range"))  + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['FOR'] + t.asList())
         
         super().build_program()                                 
