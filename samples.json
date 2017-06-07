@@ -57,9 +57,10 @@
            "# code (3rd param) is conversion code from opencv cv2.COLOR_BGR2GRAY=6",
            "ConvertColor('output/test_image.jpg', 'output/test_image.jpg', 6)",
            "",
+           "outdir = 'output'",
            "files = GetFiles(outdir)",
            "for f in files:",
-           "    path = 'output' + '/' + f",
+           "    path = outdir + '/' + f",
            "    print(path)"
            ]
        }
