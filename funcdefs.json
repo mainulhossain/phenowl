@@ -116,7 +116,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "io",
+           "package": "I/O",
            "name":"Read",
            "internal":"read",
            "desc": "Reads a file.",
@@ -131,7 +131,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "io",
+           "package": "I/O",
            "name":"Write",
            "internal":"write",
            "desc": "Writes data to a file.",
@@ -149,7 +149,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "io",
+           "package": "I/O",
            "name":"GetFiles",
            "internal":"get_files",
            "desc": "Gets the names of files in a directory.",
@@ -164,7 +164,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "io",
+           "package": "I/O",
            "name":"GetFolders",
            "internal":"get_folders",
            "desc": "Gets the names of folders in a directory.",
@@ -179,7 +179,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "io",
+           "package": "I/O",
            "name":"Remove",
            "internal":"remove",
            "desc": "Removes a file or directory.",
@@ -193,7 +193,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "io",
+           "package": "I/O",
            "name":"CreateFolder",
            "internal":"makedirs",
            "desc": "Creates a directory.",
@@ -204,6 +204,24 @@
             }            
             ],           
            "example": "CreateFolder('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/output1')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "Image Processing",
+           "name":"ReduceNoise",
+           "internal":"reduce_noise",
+           "desc": "Reduce noises from an image.",
+           "params":[  
+            {  
+               "name":"source",
+               "type":"string"
+            },
+            {  
+               "name":"destination",
+               "type":"string"
+            }            
+            ],           
+           "example": "ReduceNoise('images/noise_reduction.jpg', 'output/noise_reduction.jpg')"
        }
 	]
 }

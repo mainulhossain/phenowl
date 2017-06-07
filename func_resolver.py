@@ -1,5 +1,7 @@
 from importlib import import_module
 from fileop import IOHelper
+from imgproc.imagefuncs import ImageProcessor
+from os import path
 
 #from phenoparser import Context
 
@@ -23,6 +25,9 @@ def call_func(context, module_name, func_name, arguments):
     :param func_name: Name of the function
     :param arguments: The arguments for the function
     '''
+    
+    localdir = path.join(path.abspath(path.dirname(__file__)), 'storage')
+    
     if not module_name or module_name == "None":
         if func_name.lower() == "print":
             return context.write(*arguments)
@@ -44,6 +49,8 @@ def call_func(context, module_name, func_name, arguments):
             return IOHelper.remove(arguments[0])
         elif func_name.lower() == "makedirs":
             return IOHelper.makedirs(arguments[0])
+        elif func_name.lower() == "reduce_noise":
+            return ImageProcessor.reduce_noise(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]))
         else:
             raise "{0} function not implemented".format(func_name)
 #             possibles = globals().copy()
