@@ -244,6 +244,24 @@
             }            
             ],           
            "example": "ConvertColor('images/test_image.jpg', 'output/test_image.jpg', 6) # code (3rd param) is conversion code from opencv cv2.COLOR_BGR2GRAY=6"
+       },
+       {
+           "org": "SRLAB",
+           "package": "Image Processing",
+           "name":"RegisterImage",
+           "internal":"register_image",
+           "desc": "Image registration (alignment). https://www.learnopencv.com/image-alignment-ecc-in-opencv-c-python/",
+           "params":[  
+            {  
+               "name":"source",
+               "type":"string"
+            },
+            {  
+               "name":"destination",
+               "type":"string"
+            }           
+            ],           
+           "example": "RegisterImage('images/test_image.jpg', 'output/test_image.jpg')"
        }
 	]
 }
