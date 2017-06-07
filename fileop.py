@@ -10,7 +10,7 @@ import shutil
 import tempfile
 from urllib.parse import urlparse, urlunparse
 from os import listdir
-from os.path import isfile, join, isdir
+from os.path import isfile, join, isdir, abspath, dirname
 
 try:
     from hdfs import InsecureClient
@@ -20,7 +20,7 @@ except:
 class PosixFileSystem():
     
     def __init__(self):
-        self.localdir = path.join(path.abspath(path.dirname(__file__)), 'storage')
+        self.localdir = join(abspath(dirname(__file__)), 'storage')
     
     def normaize_path(self, path):
         return join(self.localdir, path)
