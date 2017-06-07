@@ -19,34 +19,48 @@ except:
 
 class PosixFileSystem():
     
+    def __init__(self):
+        self.localdir = path.join(path.abspath(path.dirname(__file__)), 'storage')
+    
+    def normaize_path(self, path):
+        return join(self.localdir, path)
+        
     def makedirs(self, path):
+        path = self.normaize_path(path)
         if not os.path.exists(path):
             os.makedirs(path) 
         return path
     
     def remove(self, path):
+        path = self.normaize_path(path)
         if os.path.isdir(path):
             shutil.rmtree(path)
         elif os.path.isfile(path):
             os.remove(path)
             
     def addfolder(self, path):
+        path = self.normaize_path(path)
         return self.makedirs(path)
     
     def rename(self, oldpath, newpath):
+        path = self.normaize_path(path)
         os.rename(oldpath, newpath)
     
     def get_files(self, path):
+        path = self.normaize_path(path)
         return [f for f in listdir(path) if isfile(join(path, f))]
     
     def get_folders(self, path):
+        path = self.normaize_path(path)
         return [f for f in listdir(path) if isdir(join(path, f))]
     
     def read(self, path):
+        path = self.normaize_path(path)
         with open(path) as reader:
             return reader.read()
         
     def write(self, path, content):
+        path = self.normaize_path(path)
         with open(path, 'w') as writer:
             return writer.write(content)
             
