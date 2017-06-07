@@ -54,7 +54,7 @@ def call_func(context, module_name, func_name, arguments):
         elif func_name.lower() == "convert_color":
             return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
         elif func_name.lower() == "register_image":
-            return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]))
+            return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
         else:
             raise "{0} function not implemented".format(func_name)
 #             possibles = globals().copy()
