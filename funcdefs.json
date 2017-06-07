@@ -221,7 +221,29 @@
                "type":"string"
             }            
             ],           
-           "example": "ReduceNoise('images/noise_reduction.jpg', 'output/noise_reduction.jpg')"
+           "example": "ReduceNoise('images/test_image.jpg', 'output/test_image.jpg')"
+       },
+       {
+           "org": "SRLAB",
+           "package": "Image Processing",
+           "name":"ConvertColor",
+           "internal":"convert_color",
+           "desc": "Converts an image from one color space to another.",
+           "params":[  
+            {  
+               "name":"source",
+               "type":"string"
+            },
+            {  
+               "name":"destination",
+               "type":"string"
+            },
+            {  
+               "name":"code",
+               "type":"int"
+            }            
+            ],           
+           "example": "ConvertColor('images/test_image.jpg', 'output/test_image.jpg')"
        }
 	]
 }
