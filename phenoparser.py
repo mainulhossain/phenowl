@@ -405,11 +405,11 @@ class PhenoWLInterpreter:
         :param expr:
         '''
         local_symtab = self.context.append_local_symtab()
-        local_symtab.add_var(expr[1], None)
+        local_symtab.add_var(expr[0], None)
         try:
-            for var in self.eval(expr[3]):
-                local_symtab.update_var(expr[1], var)
-                self.eval(expr[4])
+            for var in self.eval(expr[1]):
+                local_symtab.update_var(expr[0], var)
+                self.eval(expr[2])
         finally:
             self.context.pop_local_symtab()
     
@@ -578,7 +578,7 @@ class BasicGrammar():
         self.retstmt = (Keyword("return") + self.expr("exp"))
 #       
         self.listdecl = Group(Suppress("[") + Optional(delimitedList(self.expr("exp"))) + Suppress("]")).setParseAction(lambda t: ["LIST"] + t.asList())                           
-        self.assignstmt = (self.identifier("var") + Literal("=") + Group((self.expr("exp") + Optional(self.listidx)) | self.listdecl)).setParseAction(lambda t: ['ASSIGN'] + [t[0], t[2]])
+        self.assignstmt = (self.identifier("var") + Literal("=") + Group(self.expr("exp") + Optional(self.listidx)) | self.listdecl).setParseAction(lambda t: ['ASSIGN'] + [t[0], t[2]])
                                   
         self.funccallstmt = self.funccall
         
@@ -600,8 +600,8 @@ class PythonGrammar(BasicGrammar):
         
         indentStack = [1]
         self.compoundstmt = indentedBlock(self.stmt, indentStack)
-        self.ifstmt = Group(Suppress(Keyword("if")) + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Suppress("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
-        self.forstmt = Group(Keyword("for") + self.identifier("var") + Keyword("in") + Group(self.expr("range"))  + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['FOR'] + t.asList())
+        self.ifstmt = Group(Suppress("if") + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Suppress("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
+        self.forstmt = Group(Suppress("for") + self.identifier("var") + Suppress("in") + Group(self.expr("range"))  + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['FOR'] + t.asList())
         
         super().build_program()                                 
                                  
@@ -664,8 +664,16 @@ if __name__ == "__main__":
     
     test_program_example = """
     
-        s = GetFiles('http://sr-p2irc-big7.usask.ca:50070/user/phenodoop/documents')
-        print(s)
+x = 10 + 5
+y = 20
+z = range(1, 20)
+for v in z:
+    if v < x:
+        a = x - v
+    else:
+        b = y - v
+
+print(a)
                 
     """
     
