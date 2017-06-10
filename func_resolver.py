@@ -1,9 +1,19 @@
 from importlib import import_module
 from fileop import IOHelper
-from imgproc.imagefuncs import ImageProcessor
+#from imgproc.imagefuncs import ImageProcessor
 from os import path
 
+from subprocess import Popen, PIPE, STDOUT
+
 #from phenoparser import Context
+
+def func_exec(app, *args):
+
+    cmd = app
+    if args:
+        cmd += ' ' + ' '.join(argv)
+    p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=False)
+    return p.stdout.read()
 
 def load_module(modulename):
     '''
@@ -55,6 +65,8 @@ def call_func(context, module_name, func_name, arguments):
             return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
         elif func_name.lower() == "register_image":
             return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
+        elif func_name.lower() == "exec":
+            return func_exec(arguments[0], *arguments[1:])
         else:
             raise "{0} function not implemented".format(func_name)
 #             possibles = globals().copy()

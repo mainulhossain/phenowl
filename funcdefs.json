@@ -207,6 +207,21 @@
        },
        {
            "org": "SRLAB",
+           "package": "System",
+           "name":"exec",
+           "internal":"exec",
+           "desc": "Runs certain programs. The allowable programs are implementation dependant.",
+           "params":[  
+            {  
+               "name":"program",
+               "type":"string"
+            }            
+            ],
+            "returns": "string",
+           "example": "exec('cat', 'texts/test.txt')"
+       },
+       {
+           "org": "SRLAB",
            "package": "Image Processing",
            "name":"ReduceNoise",
            "internal":"reduce_noise",
