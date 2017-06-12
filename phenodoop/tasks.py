@@ -14,7 +14,6 @@ class TaskManager:
         self.cleanup_pool()
         future = self.pool.submit(func, *args)
         self.futures.append(future)
-        return future.result()
     
     def submit(self, argv):
         self.cleanup_pool()
@@ -26,5 +25,18 @@ class TaskManager:
         
     def cleanup_pool(self):
         self.futures = list(filter(lambda f : f and not f.done(), self.futures))
+    
+    def wait(self):
+        for future in self.futures:
+            future.result()
+            
+    def idle(self):
+        '''
+        True if no task is running
+        '''
+        for future in self.futures:
+            if not future.done():
+                return False
+        return True
                 
 task_manager = TaskManager()

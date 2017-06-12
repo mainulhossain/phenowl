@@ -11,6 +11,7 @@ from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
 import os
 import sys
 import json
+from timer import Timer
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
@@ -71,11 +72,12 @@ class TaskListAPI(Resource):
         script = args['script']
         try:
             os.chdir(os.path.dirname(os.path.abspath(__file__))) #set dir of this file to current directory
-            
-            interpreter.context.reload()
-            parser = PhenoWLParser(PythonGrammar())   
-            prog = parser.parse(script)
-            interpreter.run(prog)
+            with Timer() as t:
+                interpreter.context.reload()
+                parser = PhenoWLParser(PythonGrammar())   
+                prog = parser.parse(script)
+                interpreter.run(prog)
+                
         except:
             interpreter.context.err.append("Error in parse and interpretation")
         return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201
