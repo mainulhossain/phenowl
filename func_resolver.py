@@ -15,7 +15,7 @@ def func_exec(app, *args):
     p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=False)
     return p.stdout.read()
 
-def func_exec_run(*args):
+def func_exec_run(app, *args):
     cmd = app
     if args:
         cmd += ' ' + ' '.join(args)
