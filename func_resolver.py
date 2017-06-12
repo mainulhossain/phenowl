@@ -16,7 +16,10 @@ def func_exec(app, *args):
     return p.stdout.read()
 
 def func_exec_run(*args):
-    p = run(list(args), stdout=PIPE, stderr=STDOUT, shell=True)
+    cmd = app
+    if args:
+        cmd += ' ' + ' '.join(args)
+    p = run(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
     return p.stdout.decode('utf-8')
 
 def load_module(modulename):
@@ -70,7 +73,7 @@ def call_func(context, module_name, func_name, arguments):
         elif func_name.lower() == "register_image":
             return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
         elif func_name.lower() == "exec":
-            return func_exec_run(*arguments)
+            return func_exec_run(arguments[0], *arguments[1:])
         #    return func_exec(arguments[0], *arguments[1:])
         else:
             raise "{0} function not implemented".format(func_name)
