@@ -164,6 +164,11 @@ class IOHelper():
         return filesystem.read(path)
     
     @staticmethod
+    def normaize_path(path):
+        filesystem = IOHelper.getFileSystem(path)
+        return filesystem.normaize_path(path)
+    
+    @staticmethod
     def write(path, content):
         filesystem = IOHelper.getFileSystem(path)
         return filesystem.write(path, content)
