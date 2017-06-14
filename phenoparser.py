@@ -204,7 +204,7 @@ class Context:
             for s in reversed(self.symtab_stack[threading.get_ident()]):
                 if s.var_exists(name):
                     return s.get_var(name)
-            return self.symtab.get_var(name)
+        return self.symtab.get_var(name)
     
     def add_var(self, name, value):
         
