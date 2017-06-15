@@ -8,7 +8,9 @@
 <script src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
-<script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<!-- <script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script> -->
+<script src="ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="ace-builds/src-min-noconflict/ext-language_tools.js"></script>
 <style>
 
 .odd-row {
@@ -244,6 +246,8 @@ background-color: White;
     editor.renderer.setShowGutter(false);
     editor.getSession().setValue(textarea.val());
     editor.getSession().setMode("ace/mode/python");
+    editor.setOptions({highlightSelectedWord: true, enableBasicAutocompletion: true});
+    editor.renderer.setOptions({showGutter: true, displayIndentGuides: true});
     //editor.setKeyboardHandler("ace/keyboard/vim");
     //editor.setTheme("ace/theme/idle_fingers");
     //editor.setTheme("ace/theme/twilight");
