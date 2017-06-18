@@ -30,7 +30,7 @@ interpreter.context.load_libraries("funcdefs.json")
     
 tasks = []
 for f in interpreter.context.libraries:
-    tasks.append({"package_name": f["package"] if f.get('package') else "", "name": f["name"], "internal": f["internal"], "example": f["example"] if f.get("example") else "", "desc": f["desc"] if f.get("desc") else ""}) 
+    tasks.append({"package_name": f["package"] if f.get('package') else "", "name": f["name"], "internal": f["internal"], "example": f["example"] if f.get("example") else "", "desc": f["desc"] if f.get("desc") else "", "runmode": f["runmode"] if f.get("runmode") else "local"}) 
 
 @auth.get_password
 def get_password(username):
@@ -50,7 +50,8 @@ task_fields = {
     'name': fields.String,
     'internal': fields.String,
     'example': fields.String,
-    'desc': fields.String
+    'desc': fields.String,
+    'runmode': fields.String
 }
 
 
