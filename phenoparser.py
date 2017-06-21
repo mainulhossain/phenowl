@@ -712,9 +712,12 @@ class PhenoWLParser(object):
             self.error(err)
         
 if __name__ == "__main__":
-    
-    test_program_example = """
-    
+    with Timer() as t:
+        p = PhenoWLParser(PythonGrammar())
+        if len(sys.argv) > 1:
+            tokens = p.parse_file(sys.argv[1])
+        else:
+            test_program_example = """
 y = 20
 parallel:
     lock(lockobj):
@@ -732,11 +735,10 @@ with:
 with:
     s = "test"
     print(s)
-        
-    """
-    with Timer() as t:
-        p = PhenoWLParser(PythonGrammar())
-        tokens = p.parse(test_program_example)
+            
+            """
+            tokens = p.parse(test_program_example)
+            
         tokens.pprint()
         print(tokens.asXML())
         integrator = PhenoWLInterpreter()
