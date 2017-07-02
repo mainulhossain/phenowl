@@ -1,7 +1,7 @@
 from importlib import import_module
 from fileop import IOHelper
 #from imgproc.imagefuncs import ImageProcessor
-from os import path
+from os import path, getcwd
 from subprocess import Popen, PIPE, STDOUT, run
 import json
 
@@ -149,6 +149,8 @@ class Library():
                 return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
             elif function.lower() == "register_image":
                 return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
+            elif function.lower() == "getcwd":
+                return getcwd()
             elif function.lower() == "exec":
                 return func_exec_run(arguments[0], *arguments[1:])
             #    return func_exec(arguments[0], *arguments[1:])

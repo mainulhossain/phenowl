@@ -903,12 +903,12 @@ class BasicGrammar():
         self.numexpr = Forward()
         self.arguments = Forward()
         modpref = Combine(OneOrMore(self.identifier + Literal(".")))
-        self.funccall = Group((Optional(modpref) + self.identifier("name") + FollowedBy("(")) + 
-                              Group(Suppress("(") + Optional(self.arguments)("args") + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
+        self.funccall = Group((Optional(modpref) + self.identifier + FollowedBy("(")) + 
+                              Group(Suppress("(") + Optional(self.arguments) + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
         self.listidx = Group(self.identifier("name") + Suppress("[") + self.expr("idx") + Suppress("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
         
-        e = CaselessKeyword( "E" )
-        pi    = CaselessKeyword( "PI" )
+        
+        pi = CaselessKeyword( "PI" )
         fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
         plus, minus, mult, div = map(Literal, "+-*/")
         self.lpar, self.rpar = map(Suppress, "()")
@@ -929,7 +929,8 @@ class BasicGrammar():
                       self.string | self.funccall | self.listidx | self.numexpr
                       ).setParseAction(lambda x : x.asList())
         
-        self.arguments << (delimitedList(self.expr("exp")))
+        self.arguments << delimitedList(Group(self.expr))
+        
         # Definitions of rules for logical expressions (these are without parenthesis support)
         self.andexpr = Forward()
         self.logexpr = Forward()
