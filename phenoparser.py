@@ -1,14 +1,60 @@
 from pyparsing import *
+from pyparsing import _bslash
 from sys import stdin, stdout, stderr, argv, exit
 import os
 import json
 import sys
 import ast
 import func_resolver
+from func_resolver import Library
 from phenodoop.tasks import TaskManager
 import threading
 import _thread
 from timer import Timer
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+def myIndentedBlock(blockStatementExpr, indentStack, indent=True):
+    '''
+    Modifies the pyparsing indentedBlock to build the AST correctly
+    '''
+    def checkPeerIndent(s,l,t):
+        if l >= len(s): return
+        curCol = col(l,s)
+        if curCol != indentStack[-1]:
+            if curCol > indentStack[-1]:
+                raise ParseFatalException(s,l,"illegal nesting")
+            raise ParseException(s,l,"not a peer entry")
+
+    def checkSubIndent(s,l,t):
+        curCol = col(l,s)
+        if curCol > indentStack[-1]:
+            indentStack.append( curCol )
+        else:
+            raise ParseException(s,l,"not a subentry")
+
+    def checkUnindent(s,l,t):
+        if l >= len(s): return
+        curCol = col(l,s)
+        if not(indentStack and curCol < indentStack[-1] and curCol <= indentStack[-2]):
+            raise ParseException(s,l,"not an unindent")
+#        indentStack.pop()
+
+    NL = OneOrMore(LineEnd().setWhitespaceChars("\t ").suppress())
+    INDENT = (Empty() + Empty().setParseAction(checkSubIndent)).setName('INDENT')
+    PEER   = Empty().setParseAction(checkPeerIndent).setName('')
+    UNDENT = Empty().setParseAction(checkUnindent).setName('UNINDENT')
+    if indent:
+        smExpr = Group( Optional(NL) +
+            #~ FollowedBy(blockStatementExpr) +
+            INDENT + (OneOrMore( PEER + Group(blockStatementExpr) + Optional(NL) )) + UNDENT)
+    else:
+        smExpr = Group( Optional(NL) +
+            (OneOrMore( PEER + Group(blockStatementExpr) + Optional(NL) )) )
+    blockStatementExpr.ignore(_bslash + LineEnd())
+    return smExpr.setName('indented block')
 
 class SymbolTable():
     '''
@@ -177,12 +223,12 @@ class Context:
     '''
     The context for parsing and interpretation.
     '''
-    def __init__(self, parent = None):
+    def __init__(self):
         '''
         Initializes this object.
         :param parent:
         '''
-        self.libraries = []
+        self.library = Library()
         self.reload()
     
     def reload(self):
@@ -193,7 +239,6 @@ class Context:
         self.symtab_stack = {}
         self.out = []
         self.err = []
-        self.add_libraries_to_symtab()
         
     def get_var(self, name):
         '''
@@ -252,25 +297,8 @@ class Context:
                 self.symtab_stack[threading.get_ident()].pop() 
         
     def load_libraries(self, library_def_file):
-        with open(library_def_file, 'r') as json_data:
-            d = json.load(json_data)
-            self.libraries = d["functions"]
-            self.libraries = sorted(self.libraries, key = lambda k : k['package'].lower())
-        return self.libraries
-    
-    def func_to_internal_name(self, funcname):
-        for f in self.libraries:
-            if f.get("name") and self.iequal(f["name"], funcname):
-                return f["internal"]
-                     
-    def add_libraries_to_symtab(self):
-        for f in self.libraries:
-            params = []
-            if (f.get("params")):
-                for param in f["params"]:
-                    params.append(param) 
-            self.symtab.add_func(f["module"] if f.get("module") else None, f.get("internal"), f["name"].lower(), params)
-                
+        self.library = Library.load(library_def_file)
+                   
     def iequal(self, str1, str2):
         '''
         Compares two strings for case insensitive equality.
@@ -295,26 +323,287 @@ class Context:
         '''
         self.err.append("{0}".format(', '.join(map(str, args))))
                    
+class PhenoWLCodeGenerator:
+    '''
+    The code generator for PhenoWL DSL
+    '''
+    def __init__(self):
+        self.context = Context()
+        self.code = ''
+        self.imports = ''
+        self.indent = 0
+
+    def indent_stmt(self, str):
+        return " " * self.indent + str
+    
+    def dofunc(self, expr):
+        '''
+        Execute func expression.
+        :param expr:
+        '''
+        function = expr[0].lower() if len(expr) < 3 else expr[1]
+        package = expr[0][:-1] if len(expr) > 2 else None
+        if not self.context.library.check_function(function, package):
+            raise Exception(r"'{0}' doesn't exist.".format(function))
+        params = expr[1] if len(expr) < 3 else expr[2]
+        v = []
+        for e in params:
+            v.append(self.eval(e))
+        return self.context.library.call_func(self.context, package, function, v)
+
+    def dorelexpr(self, expr):
+        '''
+        Executes relative expression.
+        :param expr:
+        '''
+        left = self.eval(expr[0])
+        right = self.eval(expr[2])
+        operator = expr[1]
+        if operator == '<':
+            return "{0} < {1}".format(str(left), str(right))
+        elif operator == '>':
+            return "{0} > {1}".format(str(left), str(right))
+        elif operator == '<=':
+            return "{0} <= {1}".format(str(left), str(right))
+        elif operator == '>=':
+            return "{0} >= {1}".format(str(left), str(right))
+        else:
+            return "{0} == {1}".format(str(left), str(right))
+    
+    def doand(self, expr):
+        '''
+        Executes "and" expression.
+        :param expr:
+        '''
+        if expr is empty:
+            return True
+        right = self.eval(expr[-1])
+        if len(expr) == 1:
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['ANDEXPR'] + left
+        left = self.eval(left)
+        return "{0} and {1}".format(str(left), str(right))
+    
+    def dopar(self, expr):
+        for stmt in expr:
+            taskManager.submit_func(self.dopar_stmt, stmt)
+            
+    def dopar_stmt(self, expr):
+        '''
+        Execute a parallel expression.
+        :param expr:
+        '''
+        self.run_multstmt(lambda: self.eval(expr))
+    
+    def run_multstmt(self, f):
+        return f()
+            
+    def dolog(self, expr):
+        '''
+        Executes a logical expression.
+        :param expr:
+        '''
+        right = self.eval(expr[-1])
+        if len(expr) == 1:
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['LOGEXPR'] + left
+        left = self.eval(left)
+        return "{0} or {1}".format(str(left), str(right))
+    
+    def domult(self, expr):
+        '''
+        Executes a multiplication/division operation
+        :param expr:
+        '''
+        right = self.eval(expr[-1])
+        if len(expr) == 1:
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['MULTEXPR'] + left
+        left = self.eval(left)
+        return "{0} / {1}".format(str(left), str(right)) if expr[-2] == '/' else "{0} * {1}".format(str(left), str(right))
+
+    def doarithmetic(self, expr):
+        '''
+        Executes arithmetic operation.
+        :param expr:
+        '''
+        right = self.eval(expr[-1])
+        if len(expr) == 1:
+            return right
+        left = expr[:-2]
+        if len(left) > 1:
+            left = ['NUMEXPR'] + left
+        left = self.eval(left)
+        return "{0} + {1}".format(str(left), str(right)) if expr[-2] == '+' else "{0} - {1}".format(str(left), str(right))
+    
+    def doif(self, expr):
+        '''
+        Executes if statement.
+        :param expr:
+        '''
+        code = "if " + self.eval(expr[0]) + ":\n"
+        code += self.run_multstmt(lambda: self.eval(expr[1]))
+        if len(expr) > 3:
+            code += "else:\n"
+            code += self.run_multstmt(lambda: self.eval(expr[3]))
+        return code
+    
+    def dolock(self, expr):
+        if not self.context.symtab.var_exists(expr[0]) or not isinstance(self.context.symtab.get_var(expr[0]), _thread.RLock):
+            self.context.symtab.add_var(expr[0], threading.RLock())    
+        with self.context.symtab.get_var(expr[0]):
+            self.eval(expr[1])
+        pass
+        
+    def doassign(self, expr):
+        '''
+        Evaluates an assignment expression.
+        :param expr:
+        '''
+        return "{0} = {1}\n".format(expr[0], self.eval(expr[1]))
+        
+    def dofor(self, expr):
+        '''
+        Execute a for expression.
+        :param expr:
+        '''
+        code = "for {0} in {1}:\n".format(self.eval(expr[0]), self.eval(expr[1]))
+        code += self.run_multstmt(lambda: self.eval(expr[2]))
+        return code
+    
+    def eval_value(self, str_value):
+        '''
+        Evaluate a single expression for value.
+        :param str_value:
+        '''
+        return str_value
+    
+    def dolist(self, expr):
+        '''
+        Executes a list operation.
+        :param expr:
+        '''
+        v = []
+        for e in expr:
+            v.append(self.eval(e))
+        return v
+    
+    def dolistidx(self, expr):
+        val = self.context.get_var(expr[0])
+        return val[self.eval(expr[1])]
+    
+    def dostmt(self, expr):
+        if len(expr) > 1:
+            logging.debug("Processing line: {0}".format(expr[0]))
+            self.line = int(expr[0])
+            return self.indent_stmt(self.eval(expr[1:]))
+            
+    def eval(self, expr):        
+        '''
+        Evaluate an expression
+        :param expr: The expression in AST tree form.
+        '''
+        if not isinstance(expr, list):
+            return self.eval_value(expr)
+        if not expr:
+            return
+        if len(expr) == 1:
+            return self.eval(expr[0])
+        if expr[0] == "FOR":
+            return self.dofor(expr[1])
+        elif expr[0] == "ASSIGN":
+            return self.doassign(expr[1:])
+        elif expr[0] == "CONST":
+            return self.eval_value(expr[1])
+        elif expr[0] == "NUMEXPR":
+            return self.doarithmetic(expr[1:])
+        elif expr[0] == "MULTEXPR":
+            return self.domult(expr[1:])
+        elif expr[0] == "LOGEXPR":
+            return self.dolog(expr[1:])
+        elif expr[0] == "ANDEXPR":
+            return self.doand(expr[1:])
+        elif expr[0] == "RELEXPR":
+            return self.dorelexpr(expr[1:])
+        elif expr[0] == "IF":
+            return self.doif(expr[1])
+        elif expr[0] == "LIST":
+            return self.dolist(expr[1])
+        elif expr[0] == "FUNCCALL":
+            return self.dofunc(expr[1])
+        elif expr[0] == "LISTIDX":
+            return self.dolistidx(expr[1])
+        elif expr[0] == "PAR":
+            return self.dopar(expr[1])
+        elif expr[0] == "LOCK":
+            return self.dolock(expr[1:])
+        elif expr[0] == "STMT":
+            return self.dostmt(expr[1:])
+        elif expr[0] == "MULTISTMT":
+            self.indent = int(expr[1].pop()) - 1
+            try:
+                return self.eval(expr[2:])
+            finally:
+                self.indent = int(expr[1].pop()) - 1
+        else:
+            code = ''
+            for subexpr in expr:
+                code += self.eval(subexpr)
+            return code
+
+    # Run it
+    def run(self, prog):
+        '''
+        Run a new program.
+        :param prog: Pyparsing ParseResults
+        '''
+        try:
+            self.context.reload()
+            stmt = prog.asList()
+            self.code = self.eval(stmt)
+        except Exception as err:
+            self.context.err.append("Error at line {0}: {1}".format(self.line, err))
+
 class PhenoWLInterpreter:
     '''
     The interpreter for PhenoWL DSL
     '''
     def __init__(self):
         self.context = Context()
-   
+        self.line = 0
+    
+    def get_params(self, expr):
+        v = []
+        for e in expr:
+            v.append(self.eval(e))
+        return v
+        
     def dofunc(self, expr):
         '''
         Execute func expression.
         :param expr:
         '''
-        func_name = self.context.func_to_internal_name(expr[0])
-        if not func_name:
-            raise Exception(r"'{0}' doesn't exist.".format(expr[0]))
-        module_name = self.context.symtab.get_module_by_funcname(expr[0].lower())
-        v = []
-        for e in expr[1]:
-            v.append(self.eval(e))
-        return func_resolver.call_func(self.context, module_name, func_name, v)
+        function = expr[0].lower() if len(expr) < 3 else expr[1]
+        package = expr[0][:-1] if len(expr) > 2 else None
+        
+        params = expr[1] if len(expr) < 3 else expr[2]
+        v = self.get_params(params)
+        
+        # call task if exists
+        if package is None:
+            if function in self.context.library.tasks:
+                return self.context.library.run_task(function, v, self.dotaskstmt)
+
+        if not self.context.library.check_function(function, package):
+            raise Exception(r"'{0}' doesn't exist.".format(function))
+            
+        return self.context.library.call_func(self.context, package, function, v)
 
     def dorelexpr(self, expr):
         '''
@@ -362,12 +651,15 @@ class PhenoWLInterpreter:
         Execute a for expression.
         :param expr:
         '''
+        self.run_multstmt(lambda: self.eval(expr))
+    
+    def run_multstmt(self, f):
         local_symtab = self.context.append_local_symtab()
         try:
-            self.eval(expr)
+            f()
         finally:
             self.context.pop_local_symtab()
-    
+            
     def dolog(self, expr):
         '''
         Executes a logical expression.
@@ -417,17 +709,9 @@ class PhenoWLInterpreter:
         '''
         cond = self.eval(expr[0])
         if cond:
-            self.context.append_local_symtab()
-            try:
-                return self.eval(expr[1])
-            finally:
-                self.context.pop_local_symtab()
+            self.run_multstmt(lambda: self.eval(expr[1]))
         elif len(expr) > 3 and expr[3]:
-            self.context.append_local_symtab()
-            try:
-                return self.eval(expr[3])
-            finally:
-                self.context.pop_local_symtab()
+            self.run_multstmt(lambda: self.eval(expr[3]))
     
     def dolock(self, expr):
         if not self.context.symtab.var_exists(expr[0]) or not isinstance(self.context.symtab.get_var(expr[0]), _thread.RLock):
@@ -497,6 +781,33 @@ class PhenoWLInterpreter:
         val = self.context.get_var(expr[0])
         return val[self.eval(expr[1])]
     
+    def dostmt(self, expr):
+        if len(expr) > 1:
+            logging.debug("Processing line: {0}".format(expr[0]))
+            self.line = int(expr[0])
+            return self.eval(expr[1:])
+    
+    def dotaskdefstmt(self, expr):
+        if not expr[0]:
+            v = self.get_params(expr[1])
+            self.dotaskstmt(expr, v)
+        else:
+            self.context.library.add_task(expr[0], expr)
+    
+    def dotaskstmt(self, expr, args):
+        server = args[0] if len(args) > 0 else None
+        user = args[1] if len(args) > 1 else None
+        password = args[2] if len(args) > 2 else None
+        
+        if not server:
+            server = self.eval(expr[1][0]) if len(expr[1]) > 0 else None
+        if not user:
+            user = self.eval(expr[1][1]) if len(expr[1]) > 1 else None
+        if not password:
+            password = self.eval(expr[1][2]) if len(expr[1]) > 2 else None
+
+        return self.eval(expr[2])
+                
     def eval(self, expr):        
         '''
         Evaluate an expression
@@ -536,6 +847,12 @@ class PhenoWLInterpreter:
             return self.dopar(expr[1])
         elif expr[0] == "LOCK":
             return self.dolock(expr[1:])
+        elif expr[0] == "STMT":
+            return self.dostmt(expr[1:])
+        elif expr[0] == "MULTISTMT":
+            return self.eval(expr[2:])
+        elif expr[0] == "TASK":
+            return self.dotaskdefstmt(expr[1:])
         else:
             val = []
             for subexpr in expr:
@@ -553,7 +870,7 @@ class PhenoWLInterpreter:
             stmt = prog.asList()
             self.eval(stmt)
         except Exception as err:
-            self.context.err(err)
+            self.context.err.append("Error at line {0}: {1}".format(self.line, err))
 
 class BasicGrammar():
     '''
@@ -585,7 +902,8 @@ class BasicGrammar():
         self.multexpr = Forward()
         self.numexpr = Forward()
         self.arguments = Forward()
-        self.funccall = Group((self.identifier("name") + FollowedBy("(")) + 
+        modpref = Combine(OneOrMore(self.identifier + Literal(".")))
+        self.funccall = Group((Optional(modpref) + self.identifier("name") + FollowedBy("(")) + 
                               Group(Suppress("(") + Optional(self.arguments)("args") + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
         self.listidx = Group(self.identifier("name") + Suppress("[") + self.expr("idx") + Suppress("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
         
@@ -611,7 +929,7 @@ class BasicGrammar():
                       self.string | self.funccall | self.listidx | self.numexpr
                       ).setParseAction(lambda x : x.asList())
         
-        self.arguments << (delimitedList(Group(self.expr("exp"))))
+        self.arguments << (delimitedList(self.expr("exp")))
         # Definitions of rules for logical expressions (these are without parenthesis support)
         self.andexpr = Forward()
         self.logexpr = Forward()
@@ -627,11 +945,11 @@ class BasicGrammar():
 #       
         self.listdecl = Group(Suppress("[") + Optional(delimitedList(self.expr("exp"))) + Suppress("]")).setParseAction(lambda t: ["LIST"] + t.asList())                           
         self.assignstmt = (self.identifier("var") + Literal("=") + Group(self.expr("exp") + Optional(self.listidx)) | self.listdecl).setParseAction(lambda t: ['ASSIGN'] + [t[0], t[2]])
-                                  
+        
         self.funccallstmt = self.funccall
         
     def build_program(self):
-        self.stmt << Group(self.parstmt | self.retstmt | self.ifstmt | self.forstmt | self.lockstmt | self.funccallstmt | self.assignstmt | self.expr)
+        self.stmt << Group((self.taskdefstmt | self.parstmt | self.retstmt | self.ifstmt | self.forstmt | self.lockstmt | self.funccallstmt | self.assignstmt | self.expr).setParseAction(lambda s,l,t :  ['STMT'] + [lineno(l, s)] + [t]))
         self.stmtlist << ZeroOrMore(self.stmt)
         self.program = self.stmtlist
 
@@ -643,16 +961,21 @@ class PythonGrammar(BasicGrammar):
     def __init__(self):
         self.build_grammar()
     
+    def parseCompoundStmt(self, s, l, t):
+        expr = ["MULTISTMT"] + [list(self.indentStack)] + t.asList()
+        self.indentStack.pop()
+        return expr
+    
     def build_grammar(self):
         super().build_grammar()
         
-        indentStack = [1]
-        self.compoundstmt = indentedBlock(self.stmt, indentStack)
-        self.ifstmt = Group(Suppress("if") + self.logexpr  + Suppress(":") + self.compoundstmt + Group(Optional(Suppress("else") + Suppress(":") + self.compoundstmt)).setParseAction(lambda t : ['ELSE'] + t.asList())).setParseAction(lambda t : ['IF'] + t.asList())
+        self.indentStack = [1]
+        self.compoundstmt = Group(myIndentedBlock(self.stmt, self.indentStack, True).setParseAction(self.parseCompoundStmt))
+        self.ifstmt = Group(Suppress("if") + self.logexpr  + Suppress(":") + self.compoundstmt + Optional((Suppress("else") + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['ELSE'] + t.asList()))).setParseAction(lambda t : ['IF'] + t.asList())
         self.forstmt = Group(Suppress("for") + self.identifier("var") + Suppress("in") + Group(self.expr("range"))  + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['FOR'] + t.asList())
         self.parstmt = Group(Suppress("parallel") + Suppress(":") + self.compoundstmt + ZeroOrMore(Suppress("with:") + self.compoundstmt)).setParseAction(lambda t : ['PAR'] + t.asList())
         self.lockstmt = (Suppress("lock") + Suppress(self.lpar) + self.identifier + Suppress(self.rpar) + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['LOCK'] + t.asList())
-                
+        self.taskdefstmt = (Suppress("task") + Optional(self.identifier, None) + Suppress("(")  + Group(Optional(self.arguments)) + Suppress(")") + Suppress(":") + self.compoundstmt).setParseAction(lambda t : ['TASK'] + t.asList())         
         super().build_program()                                 
                                  
 class PhenoWLGrammar(BasicGrammar):
@@ -718,33 +1041,38 @@ if __name__ == "__main__":
             tokens = p.parse_file(sys.argv[1])
         else:
             test_program_example = """
-y = 20
-parallel:
-    lock(lockobj):
-        y = 20
-        print(y)
-    x = 10
-    print(x)
-with:
-    lock(lockobj):
-        y = 21
-        print(y)
-with:
-    z = 30
-    print(z)
-with:
-    s = "test"
-    print(s)
-            
+x = 10
+y = 10
+z = 30
+for k in range(1,10):
+    p =30
+    q = 40
+    if x <= 20:
+        r = 40
+        s = 50
+        if y >= 10:
+            t = 60
+            s = 70
+            #print(z)
+if p < q:
+    print(p + 5)
+task sparktest('s', 'u', 'p'):
+    print(q)
+    print(p + 5)
+sparktest('server', 'user', 'password')
+#sparktest()
             """
             tokens = p.parse(test_program_example)
             
         tokens.pprint()
-        print(tokens.asXML())
+        #print(tokens.asXML())
         integrator = PhenoWLInterpreter()
+        #integrator = PhenoWLCodeGenerator()
         
         integrator.context.load_libraries("funcdefs.json")
         integrator.run(tokens)
     print(integrator.context.symtab)
+    print(integrator.context.library)
     print(integrator.context.out)
     print(integrator.context.err)
+    #print(integrator.code)

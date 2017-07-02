@@ -28,7 +28,7 @@ class TaskManager:
     
     def wait(self):
         for future in self.futures:
-            future.result()
+            future.result() # blocks and forward exceptions
             
     def idle(self):
         '''
