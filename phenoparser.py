@@ -239,6 +239,7 @@ class Context:
         self.symtab_stack = {}
         self.out = []
         self.err = []
+        self.dci = []
         
     def get_var(self, name):
         '''
@@ -322,7 +323,19 @@ class Context:
         Writes a line of strings in err context.
         '''
         self.err.append("{0}".format(', '.join(map(str, args))))
-                   
+
+    def append_dci(self, server, user, password):
+        self.dci.append([server, user, password])
+    
+    def pop_dci(self):
+        if self.dci:
+            return self.dci.pop()
+    
+    def get_active_dci(self):
+        if self.dci:
+            return None
+        return self.dci[-1]
+            
 class PhenoWLCodeGenerator:
     '''
     The code generator for PhenoWL DSL
@@ -589,16 +602,15 @@ class PhenoWLInterpreter:
         Execute func expression.
         :param expr:
         '''
-        function = expr[0].lower() if len(expr) < 3 else expr[1]
+        function = expr[0].lower() if len(expr) < 3 else expr[1].lower()
         package = expr[0][:-1] if len(expr) > 2 else None
         
         params = expr[1] if len(expr) < 3 else expr[2]
         v = self.get_params(params)
         
         # call task if exists
-        if package is None:
-            if function in self.context.library.tasks:
-                return self.context.library.run_task(function, v, self.dotaskstmt)
+        if package is None and function in self.context.library.tasks:
+            return self.context.library.run_task(function, v, self.dotaskstmt)
 
         if not self.context.library.check_function(function, package):
             raise Exception(r"'{0}' doesn't exist.".format(function))
@@ -805,8 +817,14 @@ class PhenoWLInterpreter:
             user = self.eval(expr[1][1]) if len(expr[1]) > 1 else None
         if not password:
             password = self.eval(expr[1][2]) if len(expr[1]) > 2 else None
-
-        return self.eval(expr[2])
+        
+        self.context.append_dci()
+        try:
+            return self.eval(expr[2])
+        finally:
+            self.context.pop_dci()
+            
+        
                 
     def eval(self, expr):        
         '''
@@ -1042,26 +1060,26 @@ if __name__ == "__main__":
             tokens = p.parse_file(sys.argv[1])
         else:
             test_program_example = """
-x = 10
-y = 10
-z = 30
-for k in range(1,10):
-    p =30
-    q = 40
-    if x <= 20:
-        r = 40
-        s = 50
-        if y >= 10:
-            t = 60
-            s = 70
-            #print(z)
-if p < q:
-    print(p + 5)
-task sparktest('s', 'u', 'p'):
-    print(q)
-    print(p + 5)
-sparktest('server', 'user', 'password')
-#sparktest()
+shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phenowl/storage/images', '/home/phenodoop/phenowl/storage/output')           
+# x = 10
+# y = 10
+# z = 30
+# for k in range(1,10):
+#     p =30
+#     q = 40
+#     if x <= 20:
+#         r = 40
+#         s = 50
+#         if y >= 10:
+#             t = 60
+#             s = 70
+#             #print(z)
+# if p < q:
+#     print(p + 5)
+# task sparktest('s', 'u', 'p'):
+#     print(q)
+#     print(p + 5)
+# sparktest('server', 'user', 'password')
             """
             tokens = p.parse(test_program_example)
             

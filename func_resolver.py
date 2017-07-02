@@ -4,6 +4,7 @@ from fileop import IOHelper
 from os import path, getcwd
 from subprocess import Popen, PIPE, STDOUT, run
 import json
+from shippi.runner import run
 
 #from phenoparser import Context
 
@@ -160,10 +161,22 @@ class Library():
     #             possibles.update(locals())
     #             function = possibles.get(function)
     #             return function(*arguments)
-        else:           
-            module_obj = load_module(module_name)
-            function = getattr(module_obj, function)
-            return function(*arguments)
+        else:
+            if package == 'shippi':
+                if function == 'registerimage':
+#                     p = IOHelper.getServerPath(arguments[0])
+#                     server = p[0] if p[0] else '127.0.0.1'
+#                     src = p[1]
+#                     dest = arguments[1]
+#                     uname = arguments[2]
+#                     password = arguments[3]
+                    if len(arguments) < 5:
+                        raise "Wrong number of arguments for image registration."
+                    run(*arguments)                     
+            else:           
+                module_obj = load_module(module_name)
+                function = getattr(module_obj, function)
+                return function(*arguments)
 
     def code_func(self, context, package, function, arguments):
         '''
