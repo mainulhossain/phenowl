@@ -296,7 +296,7 @@ class Context:
             if self.symtab_stack[threading.get_ident()]:
                 self.symtab_stack[threading.get_ident()].pop() 
         
-    def load_libraries(self, library_def_file):
+    def load_library(self, library_def_file):
         self.library = Library.load(library_def_file)
                    
     def iequal(self, str1, str2):
@@ -1069,7 +1069,7 @@ sparktest('server', 'user', 'password')
         integrator = PhenoWLInterpreter()
         #integrator = PhenoWLCodeGenerator()
         
-        integrator.context.load_libraries("funcdefs.json")
+        integrator.context.load_library("funcdefs.json")
         integrator.run(tokens)
     print(integrator.context.symtab)
     print(integrator.context.library)

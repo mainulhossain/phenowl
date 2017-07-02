@@ -35,13 +35,15 @@ def load_module(modulename):
     return import_module(modulename)
 
 class Function():
-    def __init__(self, name, internal, package = None, module = None, runmode = 'local', params = []):
+    def __init__(self, name, internal, package = None, module = None, params = [], example = None, desc = None, runmode = None):
         self.name = name
         self.internal = internal
         self.package = package
         self.module = module
-        self.runmode = runmode
         self.params = params
+        self.example = example
+        self.desc = desc
+        self.runmode = runmode
         
 class Library():
     def __init__(self, funcs = {}):
@@ -68,16 +70,18 @@ class Library():
                 internal = f["internal"] if f.get("internal") else f["name"].lower()
                 module = f["module"] if f.get("module") else None
                 package = f["package"] if f.get("package") else None
+                example = f["example"] if f.get("example") else None
+                desc = f["desc"] if f.get("desc") else None
                 runmode = f["runmode"] if f.get("runmode") else None
                 params = []
                 if (f.get("params")):
                     for param in f["params"]:
                         params.append(param)
-                f = Function(name, internal, package, module, runmode, params)
+                func = Function(name, internal, package, module, params, example, desc, runmode)
                 if name in library.funcs:
-                    library.funcs[name].append(f)
+                    library.funcs[name].append(func)
                 else:
-                    library.funcs[name] = [f]
+                    library.funcs[name] = [func]
                     
         return library
     

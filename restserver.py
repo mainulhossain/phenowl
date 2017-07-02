@@ -8,6 +8,7 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask_restful.utils import cors
 from flask.ext.httpauth import HTTPBasicAuth
 from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
+from func_resolver import Library, Function
 import os
 import sys
 import json
@@ -26,11 +27,12 @@ def after_request(response):
     return response
 
 interpreter = PhenoWLInterpreter()
-interpreter.context.load_libraries("funcdefs.json")
+interpreter.context.load_library("funcdefs.json")
     
 tasks = []
-for f in interpreter.context.libraries:
-    tasks.append({"package_name": f["package"] if f.get('package') else "", "name": f["name"], "internal": f["internal"], "example": f["example"] if f.get("example") else "", "desc": f["desc"] if f.get("desc") else "", "runmode": f["runmode"] if f.get("runmode") else "local"}) 
+for k,funcs in interpreter.context.library.funcs.items():
+    for f in funcs:
+        tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
 
 @auth.get_password
 def get_password(username):
