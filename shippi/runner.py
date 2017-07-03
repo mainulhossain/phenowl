@@ -9,7 +9,6 @@ def run(script, *args):
     args.insert(0, '/usr/bin/python')
     args.insert(1, cmd)
     args = list(map(str, args))
-    print(args)
     p = subprocess.Popen(args, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return p.communicate()
 
