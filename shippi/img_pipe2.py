@@ -1421,7 +1421,7 @@ def callImgSeg():
 
 #127.0.0.1 akm523 523@mitm /hadoopdata/reg_test_images /result '*' 4 .75 0 0
 def callImgReg():
-    print(sys.argv[2:11])
+    print(sys.argv[2:12])
     server = sys.argv[2]
     uname = sys.argv[3]
     upass = sys.argv[4]
@@ -1562,8 +1562,8 @@ def plotSegment():
         pipes.commonSave(ploted_img)
 
 if(__name__=="__main__"):
-    print(print(sys.argv[0:11]))
-    if sys.argv[1] == "RegisterImage":
+    print(sys.argv[0:11])
+    if sys.argv[1] == "registerimage":
         callImgReg()
     #callImgReg()
     #callImgSeg()

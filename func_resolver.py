@@ -173,6 +173,18 @@ class Library():
                     if len(arguments) < 5:
                         raise "Wrong number of arguments for image registration."
                     
+                    arguments = list(arguments)
+                    arguments.insert(0, function)
+                    if len(arguments) < 7:
+                        arguments.append("*")
+                    if len(arguments) < 8:
+                        arguments.append(4)
+                    if len(arguments) < 9:
+                        arguments.append(0.75)
+                    if len(arguments) < 10:
+                        arguments.append(0)
+                    if len(arguments) < 11:
+                        arguments.append(0)
                     dci = None
                     if context.dci:
                         dci = context.get_activedci()
