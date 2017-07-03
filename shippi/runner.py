@@ -6,9 +6,11 @@ def run(script, *args):
     this_dir = dirname(os.path.abspath(__file__))
     cmd = join(this_dir, script)
     args = list(args)
-    args.insert(0, cmd)
+    args.insert(0, '/usr/bin/python')
+    args.insert(1, cmd)
+    args = list(map(str, args))
     print(args)
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(args, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return p.communicate()
 
 def run_hippi(*args):
