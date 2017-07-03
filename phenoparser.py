@@ -331,7 +331,7 @@ class Context:
         if self.dci:
             return self.dci.pop()
     
-    def get_active_dci(self):
+    def get_activedci(self):
         if self.dci:
             return None
         return self.dci[-1]

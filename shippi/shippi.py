@@ -2477,19 +2477,19 @@ def singleHdfsSeg():
         print(e)
 #127.0.0.1 akm523 523@mitm /hadoopdata/reg_test_images /result '*' 4 .75 0 0
 def callImgReg():
-    print sys.argv[1:10]
-    server = sys.argv[1]
-    uname = sys.argv[2]
-    upass = sys.argv[3]
+    print sys.argv[2:11]
+    server = sys.argv[2]
+    uname = sys.argv[3]
+    upass = sys.argv[4]
     print 'From web .............'
     print uname
-    data_path = sys.argv[4]
-    save_path = sys.argv[5]
-    img_type = sys.argv[6]
-    no_of_match = int(sys.argv[7])
-    ratio = float(sys.argv[8])
-    reproj_thresh = float(sys.argv[9])
-    base_img_idx = int(sys.argv[10])
+    data_path = sys.argv[5]
+    save_path = sys.argv[6]
+    img_type = sys.argv[7]
+    no_of_match = int(sys.argv[8])
+    ratio = float(sys.argv[9])
+    reproj_thresh = float(sys.argv[10])
+    base_img_idx = int(sys.argv[11])
     img_registration2(sc, server, uname, upass, data_path, save_path, img_type, no_of_match, ratio, reproj_thresh,
                      base_img_idx)
 
@@ -3303,6 +3303,8 @@ if(__name__=="__main__"):
     sc = spark.sparkContext
     sqlContext = SQLContext(sc)
     npartitions = 12
+    if sys.argv[1] == "RegisterImage":
+        callImgReg()
     #loger = sc._jvm.org.apache.log4j
     #logger = loger.LogManager.getRootLogger()
     #callOneStepReg()
@@ -3329,5 +3331,5 @@ if(__name__=="__main__"):
     #minhdfsClustering()
     #singleHdfsSeg()
     # goodFlowerCount()
-    singlehdfsFlower()
+    #singlehdfsFlower()
     sc.stop()

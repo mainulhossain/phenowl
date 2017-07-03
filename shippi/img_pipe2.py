@@ -1562,6 +1562,7 @@ def plotSegment():
         pipes.commonSave(ploted_img)
 
 if(__name__=="__main__"):
+    print(print(sys.argv[0:11]))
     if sys.argv[1] == "RegisterImage":
         callImgReg()
     #callImgReg()

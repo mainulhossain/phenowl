@@ -4,7 +4,7 @@ from fileop import IOHelper
 from os import path, getcwd
 from subprocess import Popen, PIPE, STDOUT, run
 import json
-from shippi.runner import run
+from shippi import runner
 
 #from phenoparser import Context
 
@@ -172,7 +172,14 @@ class Library():
 #                     password = arguments[3]
                     if len(arguments) < 5:
                         raise "Wrong number of arguments for image registration."
-                    run(*arguments)                     
+                    
+                    dci = None
+                    if context.dci:
+                        dci = context.get_activedci()
+                    if dci and dci[0]:
+                        runner.run_shippi(*arguments) 
+                    else:
+                        runner.run_hippi(*arguments)                     
             else:           
                 module_obj = load_module(module_name)
                 function = getattr(module_obj, function)
