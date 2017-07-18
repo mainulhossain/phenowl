@@ -362,7 +362,7 @@ class PhenoWLCodeGenerator:
         v = []
         for e in params:
             v.append(self.eval(e))
-        return self.context.library.call_func(self.context, package, function, v)
+        return self.context.library.code_func(self.context, package, function, v)
 
     def dorelexpr(self, expr):
         '''
@@ -412,7 +412,7 @@ class PhenoWLCodeGenerator:
     
     def run_multstmt(self, f):
         return f()
-            
+
     def dolog(self, expr):
         '''
         Executes a logical expression.
