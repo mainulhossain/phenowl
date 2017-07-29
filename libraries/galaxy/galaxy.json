@@ -1,0 +1,26 @@
+{
+    "functions": [
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"GetWorkflows",
+           "internal":"get_workflows",
+           "desc": "Gets the names of all workflows.",
+           "returns": "string[]",
+            "example":"GetWorkflows()",
+            "runmode": "dist"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"RunWorkflow",
+           "internal":"run_workflow",
+           "desc": "Runs a named workflow.",
+           "returns": "string[]",
+           "example":"RunWorkflow(workflow_name)",
+           "runmode": "dist"
+       }
+   ]
+}

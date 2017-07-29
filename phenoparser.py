@@ -297,8 +297,8 @@ class Context:
             if self.symtab_stack[threading.get_ident()]:
                 self.symtab_stack[threading.get_ident()].pop() 
         
-    def load_library(self, library_def_file):
-        self.library = Library.load(library_def_file)
+    def load_library(self, library_def_dir_or_file):
+        self.library = Library.load(library_def_dir_or_file)
                    
     def iequal(self, str1, str2):
         '''
@@ -818,7 +818,7 @@ class PhenoWLInterpreter:
         if not password:
             password = self.eval(expr[1][2]) if len(expr[1]) > 2 else None
         
-        self.context.append_dci()
+        self.context.append_dci(server, user, password)
         try:
             return self.eval(expr[2])
         finally:
@@ -1060,7 +1060,7 @@ if __name__ == "__main__":
             tokens = p.parse_file(sys.argv[1])
         else:
             test_program_example = """
-shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phenowl/storage/images', '/home/phenodoop/phenowl/storage/output')           
+#shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phenowl/storage/images', '/home/phenodoop/phenowl/storage/output')           
 # x = 10
 # y = 10
 # z = 30
@@ -1073,13 +1073,18 @@ shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phe
 #         if y >= 10:
 #             t = 60
 #             s = 70
-#             #print(z)
+#             print(z)
 # if p < q:
 #     print(p + 5)
 # task sparktest('s', 'u', 'p'):
 #     print(q)
 #     print(p + 5)
 # sparktest('server', 'user', 'password')
+
+task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
+    w = GetWorkflows()
+    print(w)
+
             """
             tokens = p.parse(test_program_example)
             
@@ -1088,7 +1093,7 @@ shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phe
         integrator = PhenoWLInterpreter()
         #integrator = PhenoWLCodeGenerator()
         
-        integrator.context.load_library("funcdefs.json")
+        integrator.context.load_library("libraries")
         integrator.run(tokens)
     print(integrator.context.symtab)
     print(integrator.context.library)
