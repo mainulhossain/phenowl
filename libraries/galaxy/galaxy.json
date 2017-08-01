@@ -81,6 +81,17 @@
            "org": "srlab",
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
+           "name":"GetHistoryDatasets",
+           "internal":"get_history_datasets",
+           "desc": "Uploads a file to history or data library.",
+           "returns": "string[]",
+           "example":"GetHistoryDatasets(history_id, [dataset_id])",
+           "runmode": "dist"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
            "name":"RunWorkflow",
            "internal":"run_workflow",
            "desc": "Runs a named workflow.",

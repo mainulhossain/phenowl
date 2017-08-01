@@ -54,7 +54,14 @@ def get_history(*args):
     for j in wf:
         if j['id'] == args[3]:
             return j
-                
+
+def get_history_datasets(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    #history = get_history(*args)
+    #if history is not None:
+    #return gi.histories.show_matching_datasets(args[3])
+    return gi.histories.show_history(args[3], contents=True)
+                        
 def upload(*args):
     gi = GalaxyInstance(args[0], args[1])
     library = get_library(*args)

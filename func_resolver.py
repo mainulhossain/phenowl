@@ -119,7 +119,9 @@ class Library():
             
     def get_function(self, name, package = None):
         if package is not None:
-            return [f for f in chain.from_iterable(self.funcs)]
+            for func in self.funcs[name]:
+                if func.package == package:
+                    return [func]
         else:
             return self.funcs[name]
     

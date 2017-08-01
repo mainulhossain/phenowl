@@ -30,9 +30,12 @@ interpreter = PhenoWLInterpreter()
 interpreter.context.load_library("libraries")
     
 tasks = []
-for k,funcs in interpreter.context.library.funcs.items():
-    for f in funcs:
-        tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
+funcs = []
+for k,f in interpreter.context.library.funcs.items():
+    funcs.extend(f)
+funcs = sorted(funcs, key=lambda k : k.package)
+for f in funcs:
+    tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
 
 @auth.get_password
 def get_password(username):
