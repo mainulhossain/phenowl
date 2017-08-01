@@ -67,6 +67,16 @@
        {
            "org": "Python",
            "package": "Python",
+           "module": "os",
+           "name":"len",
+           "internal":"len",
+           "desc": "Gets lenght of a list or string.",
+            "returns": "integer",
+            "example": "len([])"
+       },
+       {
+           "org": "Python",
+           "package": "Python",
            "name":"range",
            "internal":"range",
            "returns": "[]",
