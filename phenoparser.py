@@ -1082,8 +1082,18 @@ if __name__ == "__main__":
 # sparktest('server', 'user', 'password')
 
 task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
-    w = GetWorkflows()
-    print(w)
+    ws = GetHistoryIDs()
+    print(len(ws))
+    l = len(ws)
+    if l > 0:
+        print(ws[0])
+        w = GetHistory(ws[0])
+        r = Upload(w['id'], '/home/phenodoop/phenowl/storage/texts/test.txt')
+        print(r)
+        #print(w)
+        #print(len(w))
+        #print(w)
+        #print(w['name'])
 
             """
             tokens = p.parse(test_program_example)

@@ -27,7 +27,7 @@ def after_request(response):
     return response
 
 interpreter = PhenoWLInterpreter()
-interpreter.context.load_library("funcdefs.json")
+interpreter.context.load_library("libraries")
     
 tasks = []
 for k,funcs in interpreter.context.library.funcs.items():

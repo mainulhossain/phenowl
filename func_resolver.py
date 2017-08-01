@@ -164,6 +164,8 @@ class Library():
                 return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
             elif function.lower() == "getcwd":
                 return getcwd()
+            elif function.lower() == "len":
+                return len(arguments[0])
             elif function.lower() == "exec":
                 return func_exec_run(arguments[0], *arguments[1:])
             #    return func_exec(arguments[0], *arguments[1:])
