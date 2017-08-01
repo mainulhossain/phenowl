@@ -3,3 +3,10 @@
 /.project
 /.pydevproject
 /log.txt
+/metastore_db/
+/derby.log
+/get-pip.py
+/.metadata/
+*.pyc
+/.settings
+/phenowl.sock
