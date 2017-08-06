@@ -85,7 +85,7 @@ class Library():
     @staticmethod
     def load_funcs(library_def_file):
         funcs = {}
-        if not os.path.isfile(library_def_file) or not library_def_file.endswith("json"):
+        if not os.path.isfile(library_def_file) or not library_def_file.endswith(".json"):
             return funcs
         
         with open(library_def_file, 'r') as json_data:
@@ -128,6 +128,12 @@ class Library():
     def check_function(self, name, package = None):
         functions = self.get_function(name, package)
         return functions is not None and len(functions) > 0
+        
+    def funcs_flat(self):
+        funcs = []
+        for v in self.funcs.values():
+            funcs.extend(v)
+        return funcs
        
     def call_func(self, context, package, function, arguments):
         '''
@@ -276,12 +282,9 @@ class Library():
         return key in self.funcs
     def __iter__(self):
         return iter(self.funcs.keys())
-    
+
     def __str__(self):
-        funcs = []
-        for k, v in self.funcs.items():
-            funcs.extend(v)
-        
+        funcs = self.funcs_flat();
         #funcs = [num for elem in funcs for num in elem]
             
         if len(funcs) > 0:
@@ -321,3 +324,4 @@ class Library():
                 i += 1
                 
         return display
+

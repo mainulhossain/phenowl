@@ -53,6 +53,8 @@ background-color: White;
 		        <textarea rows="20" style="min-width: 100%" id="script"></textarea><br>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runPhenoWL">Run</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
+		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
+		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginEditLibrary">Edit Library</button>
 		        <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
 		        <br><br>
 		        <label>Output:</label>
@@ -96,35 +98,47 @@ background-color: White;
         </div>
     </div>
 
-    <div id="add" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true">
+    <div id="add" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true" style="width: 600px; height: 720px; background: #fff">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="addDialogLabel">Add Task</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã—</button>
+            <h3 id="addDialogLabel">Add Library</h3>
         </div>
         <div class="modal-body">
             <form class="form-horizontal">
                 <div class="control-group">
-                    <label class="control-label" for="inputTask">Task</label>
+                    <label class="control-label" for="package">Package</label>
                     <div class="controls">
-                        <input data-bind="value: module" type="text" id="inputTask" placeholder="Module" style="width: 150px;">
+                        <input data-bind="value: name" type="text" id="package" placeholder="Package" style="width: 150px;">
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="inpunamen">name</label>
+                    <label class="control-label" for="organization">Organization</label>
                     <div class="controls">
-                        <input data-bind="value: name" type="text" id="inputDescription" placeholder="Name" style="width: 300px;">
+                        <input data-bind="value: org" type="text" id="organization" placeholder="Org" style="width: 300px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="module">Module</label>
+                    <div class="controls">
+                        <input type="file" id="module">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="mapper">Module to JSON mapper:</label>
+                    <div class="controls">
+                        <textarea rows="20" style="width: 560px;" id="mapper"></textarea>
                     </div>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button data-bind="click: addTask" class="btn btn-primary">Add Task</button>
+            <button data-bind="click: addLibrary" class="btn btn-primary">Add Library</button>
             <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
         </div>
     </div>
-    <div id="edit" class="modal hide fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true">
+    <div id="edit" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true" style="background: #fff">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã—</button>
             <h3 id="editDialogLabel">Edit Task</h3>
         </div>
         <div class="modal-body">
@@ -325,8 +339,17 @@ background-color: White;
                 self.tasks()[i].desc(newTask.desc);
                 self.tasks()[i].desc(newTask.runmode);
             }
+            
+            self.centerDialog = function(dlg) {
+            	var windowHeight = $(window).height();
+            	var windowWidth = $(window).width();
+                var boxHeight = dlg.height();
+                var boxWidth = dlg.width();
+                dlg.css({'margin-left' : ((windowWidth - boxWidth )/2), 'margin-top' : ((windowHeight - boxHeight )/2)});
+            }
 
-            self.beginAdd = function() {
+            self.beginAddLibrary = function() {
+            	self.centerDialog($('#add'));
                 $('#add').modal('show');
             }
             self.runPhenoWL = function(task) {
@@ -348,8 +371,8 @@ background-color: White;
                     $("#error").val(text);
                 });
             }
-            self.beginEdit = function(task) {
-                editTaskViewModel.setTask(task);
+            self.beginEditLibrary = function(task) {
+               // editTaskViewModel.setTask(task);
                 $('#edit').modal('show');
             }
             self.edit = function(task, data) {
@@ -458,19 +481,90 @@ background-color: White;
             }
         }
         
-        function AddTaskViewModel() {
+        function AddLibraryViewModel() {
             var self = this;
-            self.package_name = ko.observable();
+            self.tasksURI = 'todo/api/v1.0/tasks';
+            
             self.name = ko.observable();
+            self.org = ko.observable();
  
-            self.addTask = function() {
-                $('#add').modal('hide');
-                tasksViewModel.add({
-                    package_name: self.package_name(),
-                    name: self.name()
+            // configure ace.js for code editor
+            var mapperArea = $("#mapper");
+            
+            var mapperDiv = $('<div>', {
+                position: 'absolute',
+                id: 'aceeditor',
+                width: mapperArea.width(),
+                height: 320,//mapperArea.height(),
+                'class': mapperArea.attr('class'),
+                'css': 'border:2px solid black'
+            }).insertBefore(mapperArea);
+                
+            mapperArea.css('visibility', 'hidden');
+            var offset = mapperDiv.offset();
+            mapperArea.attr('rows', 1);
+            
+            var mapperEditor = ace.edit(mapperDiv[0]);
+            mapperEditor.renderer.setShowGutter(false);
+            mapperEditor.getSession().setValue(mapperArea.val());
+            mapperEditor.getSession().setMode("ace/mode/json");
+            mapperEditor.setOptions({highlightSelectedWord: true, enableBasicAutocompletion: true});
+            mapperEditor.renderer.setOptions({showGutter: true, displayIndentGuides: true});
+            //editor.setKeyboardHandler("ace/keyboard/vim");
+            //editor.setTheme("ace/theme/idle_fingers");
+            //editor.setTheme("ace/theme/twilight");
+            mapperEditor.setTheme("ace/theme/iplastic");
+//             editor.setOptions({       
+//                 fontSize: "12pt"
+//               });
+
+            self.ajax = function(uri, method, data) {
+                var request = {
+                    url: uri,
+                    type: method,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: data,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", 
+                            "Basic " + btoa('mainulhossain@gmail.com' + ":" + 'mainul'));
+                    },
+                    error: function(jqXHR) {
+                        console.log("ajax error " + jqXHR.status);
+                    }
+                };
+                return $.ajax(request);
+            }
+            
+            self.addLibrary = function(task) {
+            	$('#add').modal('hide');
+            	
+            	var files = $("#module").get(0).files;
+            	var formdata = new FormData();
+            	formdata.append('library', files[0]); //use get('files')[0]
+            	formdata.append('mapper', mapperEditor.getSession().getValue());//you can append it to formdata with a proper parameter name
+            	
+            	if (self.name() !== undefined)
+            		formdata.append('package', self.name());
+            	if (self.org() !== undefined)
+            		   formdata.append('org', self.org());
+
+                self.ajax(self.tasksURI, 'POST', formdata).done(function(data) {
+                                   	
+                    text = '';
+                    $.each(data.out, function(i, t) {
+                        text += t + '\n';
+                    });
+                    $("#output").val(text);
+                    
+                    text = '';
+                    $.each(data.err, function(i, t) {
+                        text += t + '\n';
+                    });
+                    
+                    $("#error").val(text);
                 });
-                self.package_name("");
-                self.name("");
             }
         }
         function EditTaskViewModel() {
@@ -513,14 +607,14 @@ background-color: White;
         }
         
         var tasksViewModel = new TasksViewModel();
-        var addTaskViewModel = new AddTaskViewModel();
+        var addLibraryViewModel = new AddLibraryViewModel();
         var editTaskViewModel = new EditTaskViewModel();
         var loginViewModel = new LoginViewModel();
 //        var samplesViewModel = new SamplesViewModel();
 //        samplesViewModel.loadSamples('mainulhossain@gmail.com', 'mainul')
         ko.applyBindings(tasksViewModel, $('#main')[0]);
-//         ko.applyBindings(addTaskViewModel, $('#add')[0]);
-//         ko.applyBindings(editTaskViewModel, $('#edit')[0]);
+        ko.applyBindings(addLibraryViewModel, $('#add')[0]);
+        ko.applyBindings(editTaskViewModel, $('#edit')[0]);
         ko.applyBindings(loginViewModel, $('#login')[0]);
 //        ko.applyBindings(samplesViewModel, $('#samples')[0]);
     </script>

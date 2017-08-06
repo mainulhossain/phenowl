@@ -7,6 +7,7 @@ from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask_restful.utils import cors
 from flask.ext.httpauth import HTTPBasicAuth
+from werkzeug.datastructures import MultiDict, FileStorage
 from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
 from func_resolver import Library, Function
 import os
@@ -31,7 +32,7 @@ interpreter.context.load_library("libraries")
     
 tasks = []
 funcs = []
-for k,f in interpreter.context.library.funcs.items():
+for f in interpreter.context.library.funcs.values():
     funcs.extend(f)
 funcs = sorted(funcs, key=lambda k : k.package)
 for f in funcs:
@@ -65,7 +66,11 @@ class TaskListAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('script', type=str, required=True, help='No script provided', location='json')
+        self.reqparse.add_argument('script', type=str, required=False, help='No script provided', location='json')
+        self.reqparse.add_argument('library', location='files', required=False, type=FileStorage)
+        self.reqparse.add_argument('mapper', location='form', required=False)
+        self.reqparse.add_argument('package', location='form', required=False)
+        self.reqparse.add_argument('org', location='form', required=False)
         super(TaskListAPI, self).__init__()
 
     #@cors.crossdomain(origin='*')
@@ -74,19 +79,60 @@ class TaskListAPI(Resource):
 
     #@cors.crossdomain(origin='*')
     def post(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__))) #set dir of this file to current directory
         args = self.reqparse.parse_args()
-        script = args['script']
-        try:
-            os.chdir(os.path.dirname(os.path.abspath(__file__))) #set dir of this file to current directory
-            with Timer() as t:
+        if args['script']:
+            try:
                 interpreter.context.reload()
                 parser = PhenoWLParser(PythonGrammar())   
-                prog = parser.parse(script)
-                interpreter.run(prog)
+                with Timer() as t:
+                    prog = parser.parse(args['script'])
+                    interpreter.run(prog)
+            except:
+                interpreter.context.err.append("Error in parse and interpretation")
+            return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201
+        elif args['library']:
+            try:
+                file = args['library']#.files['file']
+                filename = file.filename#secure_filename(file.filename)
+                this_path = os.path.dirname(os.path.abspath(__file__))
+                rel_path = 'libraries/users/mainulhossain'.replace('/', os.sep)
+                this_path = os.path.join(this_path, rel_path)
+                if not os.path.isdir(this_path):
+                    os.makedirs(this_path)
+                path = os.path.join(this_path, filename)
+                if os.path.exists(path):
+                    os.remove(path)
+                file.save(path)
                 
-        except:
-            interpreter.context.err.append("Error in parse and interpretation")
-        return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201
+                if args['mapper']:
+                    base, _ = os.path.splitext(path)
+                    base += '.json'
+                    with open(base, 'w') as mapper:
+                        mapper.write(args['mapper'])
+                    package = args['package'] if args['package'] else None
+                    org = args['org'] if args['org'] else None
+                    rel_path = os.path.join(rel_path, filename)
+                    rel_path, _ = os.path.splitext(rel_path)
+                    rel_path = rel_path.replace(os.sep, '.')
+                    
+                    with open(base, 'r') as json_data:
+                        data = json.load(json_data)
+                        libraries = data["functions"]
+                        for f in libraries:
+                            f['module'] = rel_path
+                            if package:
+                                f['package'] = package
+                            if org:
+                                f['org'] = org
+                                
+                    os.remove(base)
+                    with open(base, 'w') as f:
+                        json.dump(data, f, indent=4)
+                        
+            except:
+                interpreter.context.err.append("Error in parse and interpretation")
+            return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201
 
 
 class TaskAPI(Resource):
