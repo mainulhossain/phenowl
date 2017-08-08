@@ -235,7 +235,6 @@ class Context:
         '''
         Reinitializes this object for new processing.
         '''
-        self.symtab = SymbolTable()
         self.symtab_stack = {}
         self.out = []
         self.err = []
@@ -250,24 +249,18 @@ class Context:
             for s in reversed(self.symtab_stack[threading.get_ident()]):
                 if s.var_exists(name):
                     return s.get_var(name)
-        return self.symtab.get_var(name)
     
     def add_var(self, name, value):
-        
-        if isinstance(threading.current_thread(), threading._MainThread):
-            return self.symtab.add_var(name, value)
-        else:
-            if not threading.get_ident() in self.symtab_stack:
-                raise "Thread symbol table does not exist."
-            return self.symtab_stack[threading.get_ident()][-1].add_var(name, value)
+        if not threading.get_ident() in self.symtab_stack:
+            self.symtab_stack[threading.get_ident()] = [SymbolTable()]
+        return self.symtab_stack[threading.get_ident()][-1].add_var(name, value)
             
     def update_var(self, name, value):
         if threading.get_ident() in self.symtab_stack:
             for s in reversed(self.symtab_stack[threading.get_ident()]):
                 if s.var_exists(name):
                     return s.update_var(name, value)
-        return self.symtab.update_var(name, value)
-    
+                    
     def var_exists(self, name):
         '''
         Checks if a variable exists in any of the symbol tables.
@@ -277,7 +270,6 @@ class Context:
             for s in reversed(self.symtab_stack[threading.get_ident()]):
                 if s.var_exists(name):
                     return True
-        return self.symtab.var_exists(name)
     
     def append_local_symtab(self):
         '''
