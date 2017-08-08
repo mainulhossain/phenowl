@@ -9,7 +9,7 @@
            "desc": "Gets the names of all workflows.",
            "returns": "string[]",
            "example":"GetWorkflows()",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -20,7 +20,7 @@
            "desc": "Gets the properties of a workflow.",
            "returns": "string[]",
            "example":"GetWorkflow(workflow_id)",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -31,7 +31,7 @@
            "desc": "Gets the ids of all libraries.",
            "returns": "string[]",
            "example":"GetLibraryIDs()",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -42,7 +42,7 @@
            "desc": "Gets the properties of a workflow.",
            "returns": "string[]",
            "example":"GetLibrary(library_id)",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -53,7 +53,7 @@
            "desc": "Gets the ids of all histories.",
            "returns": "string[]",
            "example":"GetHistoryIDs()",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -64,7 +64,7 @@
            "desc": "Gets the properties of a history.",
            "returns": "string[]",
            "example":"GetHistory(history_id)",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -75,7 +75,7 @@
            "desc": "Uploads a file to history or data library.",
            "returns": "string[]",
            "example":"Upload(history_id/library_id, path_to_file)",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -86,7 +86,7 @@
            "desc": "Uploads a file to history or data library.",
            "returns": "string[]",
            "example":"GetHistoryDatasets(history_id, [dataset_id])",
-           "runmode": "dist"
+           "runmode": "distributed"
        },
        {
            "org": "srlab",
@@ -97,7 +97,7 @@
            "desc": "Runs a named workflow.",
            "returns": "string[]",
            "example":"RunWorkflow(workflow_id)",
-           "runmode": "dist"
+           "runmode": "distributed"
        }
    ]
 }

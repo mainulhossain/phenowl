@@ -59,7 +59,7 @@ class Library():
     
     def run_task(self, name, args, dotaskstmt):
         if name in self.tasks:
-            dotaskstmt(self.tasks[name], args)
+            return dotaskstmt(self.tasks[name], args)
     
     @staticmethod
     def load(library_def_file):
@@ -93,7 +93,7 @@ class Library():
             libraries = d["functions"]
             libraries = sorted(libraries, key = lambda k : k['package'].lower())
             for f in libraries:
-                name = f["name"].lower() if f.get("name") else f["internal"]
+                name = f["name"] if f.get("name") else f["internal"].lower()
                 internal = f["internal"] if f.get("internal") else f["name"].lower()
                 module = f["module"] if f.get("module") else None
                 package = f["package"] if f.get("package") else None
@@ -229,46 +229,75 @@ class Library():
         :param function: Name of the function
         :param arguments: The arguments for the function
         '''
+        args = ','.join(arguments)
         if not package or package == "None":
             if function.lower() == "print":
-                return context.write(*arguments)
+                return "print({0})".format(args)
             elif function.lower() == "range":
-                return range(*arguments)
+                return "range({0})".format(args)
             elif function.lower() == "read":
-                if not arguments:
-                    raise "Read must have one argument."
-                return IOHelper.read(arguments[0])
+                return "IOHelper.read({0})".format(args)
             elif function.lower() == "write":
-                if len(arguments) < 2:
-                    raise "Write must have two arguments."
-                return IOHelper.write(arguments[0], arguments[1])
+                return "IOHelper.write({0})".format(args)
             elif function.lower() == "get_files":
-                return IOHelper.get_files(arguments[0])
+                return "IOHelper.getfiles({0})".format(args)
             elif function.lower() == "get_folders":
-                return IOHelper.get_folders(arguments[0])
+                return "IOHelper.getfolders({0})".format(args)
             elif function.lower() == "remove":
-                return IOHelper.remove(arguments[0])
+                return "IOHelper.remove({0})".format(args)
             elif function.lower() == "makedirs":
-                return IOHelper.makedirs(arguments[0])
+                return "IOHelper.makedirs({0})".format(args)
             elif function.lower() == "reduce_noise":
-                return ImageProcessor.reduce_noise(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]))
+                return "ImageProcessor.reduce_noise(path.join(localdir, {0}), path.join(localdir, {1}))".format(arguments[0], arguments[1])
             elif function.lower() == "convert_color":
-                return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
+                return "ImageProcessor.convert_color(path.join(localdir, {0}), path.join(localdir, {1}), {2})".format(arguments[0], arguments[1], arguments[2])
             elif function.lower() == "register_image":
-                return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
+                return "ImageProcessor.register_image(path.join(localdir, {0}), path.join(localdir, {1}), path.join(localdir, {2}))".format(arguments[0], arguments[1], arguments[2])
+            elif function.lower() == "getcwd":
+                return "getcwd()"
+            elif function.lower() == "len":
+                return "len({0})".format(arguments[0])
             elif function.lower() == "exec":
-                return func_exec_run(arguments[0], *arguments[1:])
-            #    return func_exec(arguments[0], *arguments[1:])
-            else:
-                raise "{0} function not implemented".format(function)
-    #             possibles = globals().copy()
-    #             possibles.update(locals())
-    #             function = possibles.get(function)
-    #             return function(*arguments)
-        else:           
-            module_obj = load_module(module_name)
-            function = getattr(module_obj, function)
-            return function(*arguments)
+                return "func_exec_run({0}, {1})".format(arguments[0], arguments[1])
+
+        if package == 'shippi':
+            if function == 'registerimage':
+#                     p = IOHelper.getServerPath(arguments[0])
+#                     server = p[0] if p[0] else '127.0.0.1'
+#                     src = p[1]
+#                     dest = arguments[1]
+#                     uname = arguments[2]
+#                     password = arguments[3]
+                if len(arguments) < 5:
+                    raise "Wrong number of arguments for image registration."
+                
+                arguments = list(arguments)
+                arguments.insert(0, function)
+                if len(arguments) < 7:
+                    arguments.append("*")
+                if len(arguments) < 8:
+                    arguments.append(4)
+                if len(arguments) < 9:
+                    arguments.append(0.75)
+                if len(arguments) < 10:
+                    arguments.append(0)
+                if len(arguments) < 11:
+                    arguments.append(0)
+                dci = None
+                if context.dci:
+                    dci = context.get_activedci()
+                if dci and dci[0]:
+                    runner.run_shippi(*arguments) 
+                else:
+                    runner.run_hippi(*arguments)                     
+
+        func = self.get_function(function, package)
+        code = "module_obj = load_module({0})\n".format(func[0].module)
+        code += "function = getattr(module_obj, {0})\n".format(func[0].internal)
+        if context.dci and context.dci[-1]:
+            args = [context.dci[-1]] + args
+        code += "function({0})".format(args)
+        return code
             
     def __repr__(self):
         return "Library: " + repr(self.funcs)

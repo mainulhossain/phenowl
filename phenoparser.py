@@ -346,6 +346,12 @@ class PhenoWLCodeGenerator:
         self.imports = ''
         self.indent = 0
 
+    def get_params(self, expr):
+        v = []
+        for e in expr:
+            v.append(self.eval(e))
+        return v
+            
     def indent_stmt(self, str):
         return " " * self.indent + str
     
@@ -354,16 +360,21 @@ class PhenoWLCodeGenerator:
         Execute func expression.
         :param expr:
         '''
-        function = expr[0].lower() if len(expr) < 3 else expr[1]
+        function = expr[0].lower() if len(expr) < 3 else expr[1].lower()
         package = expr[0][:-1] if len(expr) > 2 else None
+        
+        params = expr[1] if len(expr) < 3 else expr[2]
+        v = self.get_params(params)
+        
+        # call task if exists
+        if package is None and function in self.context.library.tasks:
+            return self.context.library.run_task(function, v, self.dotaskstmt)
+
         if not self.context.library.check_function(function, package):
             raise Exception(r"'{0}' doesn't exist.".format(function))
-        params = expr[1] if len(expr) < 3 else expr[2]
-        v = []
-        for e in params:
-            v.append(self.eval(e))
+            
         return self.context.library.code_func(self.context, package, function, v)
-
+    
     def dorelexpr(self, expr):
         '''
         Executes relative expression.
@@ -479,7 +490,7 @@ class PhenoWLCodeGenerator:
         Evaluates an assignment expression.
         :param expr:
         '''
-        return "{0} = {1}\n".format(expr[0], self.eval(expr[1]))
+        return "{0} = {1}".format(expr[0], self.eval(expr[1]))
         
     def dofor(self, expr):
         '''
@@ -515,7 +526,36 @@ class PhenoWLCodeGenerator:
         if len(expr) > 1:
             logging.debug("Processing line: {0}".format(expr[0]))
             self.line = int(expr[0])
-            return self.indent_stmt(self.eval(expr[1:]))
+            return self.indent_stmt(self.eval(expr[1:])) + '\n'
+
+    def dotaskdefstmt(self, expr):
+        if not expr[0]:
+            v = self.get_params(expr[1])
+            return self.dotaskstmt(expr, v)
+        else:
+            params = ','.join(self.eval(expr[1]))
+            code = "def {0}({1}):\n{2}".format(expr[0], params, self.eval(expr[2]))
+            return code
+
+            #self.context.library.add_task(expr[0], expr)
+    
+    def dotaskstmt(self, expr, args):
+        server = args[0] if len(args) > 0 else None
+        user = args[1] if len(args) > 1 else None
+        password = args[2] if len(args) > 2 else None
+        
+        if not server:
+            server = self.eval(expr[1][0]) if len(expr[1]) > 0 else None
+        if not user:
+            user = self.eval(expr[1][1]) if len(expr[1]) > 1 else None
+        if not password:
+            password = self.eval(expr[1][2]) if len(expr[1]) > 2 else None
+        
+        self.context.append_dci(server, user, password)
+        try:
+            return self.eval(expr[2])
+        finally:
+            self.context.pop_dci()
             
     def eval(self, expr):        
         '''
@@ -558,6 +598,8 @@ class PhenoWLCodeGenerator:
             return self.dolock(expr[1:])
         elif expr[0] == "STMT":
             return self.dostmt(expr[1:])
+        elif expr[0] == "TASK":
+            return self.dotaskdefstmt(expr[1:])
         elif expr[0] == "MULTISTMT":
             self.indent = int(expr[1].pop()) - 1
             try:
@@ -579,7 +621,7 @@ class PhenoWLCodeGenerator:
         try:
             self.context.reload()
             stmt = prog.asList()
-            self.code = self.eval(stmt)
+            self.context.out = self.eval(stmt)
         except Exception as err:
             self.context.err.append("Error at line {0}: {1}".format(self.line, err))
 
@@ -802,7 +844,7 @@ class PhenoWLInterpreter:
     def dotaskdefstmt(self, expr):
         if not expr[0]:
             v = self.get_params(expr[1])
-            self.dotaskstmt(expr, v)
+            return self.dotaskstmt(expr, v)
         else:
             self.context.library.add_task(expr[0], expr)
     
@@ -824,8 +866,6 @@ class PhenoWLInterpreter:
         finally:
             self.context.pop_dci()
             
-        
-                
     def eval(self, expr):        
         '''
         Evaluate an expression
@@ -1076,20 +1116,21 @@ if __name__ == "__main__":
 #             print(z)
 # if p < q:
 #     print(p + 5)
-# task sparktest('s', 'u', 'p'):
-#     print(q)
-#     print(p + 5)
-# sparktest('server', 'user', 'password')
 
-task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
-    ws = GetHistoryIDs()
-    print(len(ws))
-    l = len(ws)
-    if l > 0:
-        print(ws[0])
-        w = GetHistory(ws[0])
-        r = Upload(w['id'], '/home/phenodoop/phenowl/storage/texts/test.txt')
-        print(r)
+task sparktest(s, u, p):
+    print(q)
+    print(p + 5)
+sparktest('server', 'user', 'password')
+
+# task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
+#     ws = GetHistoryIDs()
+#     print(len(ws))
+#     l = len(ws)
+#     if l > 0:
+#         print(ws[0])
+#         w = GetHistory(ws[0])
+#         r = Upload(w['id'], '/home/phenodoop/phenowl/storage/texts/test.txt')
+#         print(r)
         #print(w)
         #print(len(w))
         #print(w)
@@ -1100,8 +1141,8 @@ task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
             
         tokens.pprint()
         #print(tokens.asXML())
-        integrator = PhenoWLInterpreter()
-        #integrator = PhenoWLCodeGenerator()
+        #integrator = PhenoWLInterpreter()
+        integrator = PhenoWLCodeGenerator()
         
         integrator.context.load_library("libraries")
         integrator.run(tokens)

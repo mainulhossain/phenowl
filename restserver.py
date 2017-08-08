@@ -8,7 +8,7 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask_restful.utils import cors
 from flask.ext.httpauth import HTTPBasicAuth
 from werkzeug.datastructures import MultiDict, FileStorage
-from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar
+from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar, PhenoWLCodeGenerator
 from func_resolver import Library, Function
 import os
 import sys
@@ -37,6 +37,9 @@ for f in interpreter.context.library.funcs.values():
 funcs = sorted(funcs, key=lambda k : k.package)
 for f in funcs:
     tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
+
+codeGenerator = PhenoWLCodeGenerator()
+codeGenerator.context.load_library("libraries")
 
 @auth.get_password
 def get_password(username):
@@ -67,6 +70,7 @@ class TaskListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('script', type=str, required=False, help='No script provided', location='json')
+        self.reqparse.add_argument('code', type=str, required=False, location='json')
         self.reqparse.add_argument('library', location='files', required=False, type=FileStorage)
         self.reqparse.add_argument('mapper', location='form', required=False)
         self.reqparse.add_argument('package', location='form', required=False)
@@ -81,16 +85,18 @@ class TaskListAPI(Resource):
     def post(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__))) #set dir of this file to current directory
         args = self.reqparse.parse_args()
-        if args['script']:
+        if args['script'] or args['code']:
+            machine = interpreter if args['script'] else codeGenerator
+            script =  args['script'] if args['script'] else args['code']
             try:
-                interpreter.context.reload()
+                machine.context.reload()
                 parser = PhenoWLParser(PythonGrammar())   
                 with Timer() as t:
-                    prog = parser.parse(args['script'])
-                    interpreter.run(prog)
+                    prog = parser.parse(script)
+                    machine.run(prog)
             except:
-                interpreter.context.err.append("Error in parse and interpretation")
-            return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201
+                machine.context.err.append("Error in parse and interpretation")
+            return { 'out': machine.context.out, 'err': machine.context.err}, 201
         elif args['library']:
             try:
                 file = args['library']#.files['file']

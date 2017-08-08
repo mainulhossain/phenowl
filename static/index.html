@@ -50,17 +50,17 @@ background-color: White;
                     <span>Drag functions from the right.</span>
                 </div>
 		        
-		        <textarea rows="20" style="min-width: 100%" id="script"></textarea><br>
+		        <textarea rows="16" style="min-width: 100%" id="script"></textarea><br>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runPhenoWL">Run</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginEditLibrary">Edit Library</button>
+		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Generate Python Code</button>
 		        <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
 		        <br><br>
 		        <label>Output:</label>
-		        <textarea rows="10" style="min-width: 100%" id="output"></textarea><br>
+		        <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
 		        <label>Error:</label>
-		        <textarea rows="5" style="min-width: 100%" id="error"></textarea>
+		        <textarea rows="3" style="min-width: 100%" id="error"></textarea>
             </div>
             <div class="col-sm-4" id="functions">
 	            <div   class="panel panel-default">
@@ -364,6 +364,21 @@ background-color: White;
                 	$("#output").val(text);
                     
                 	text = '';
+                    $.each(data.err, function(i, t) {
+                        text += t + '\n';
+                    });
+                    
+                    $("#error").val(text);
+                });
+            }
+            self.generatePythonCode = function(task) {
+                $('#refresh').show();
+                self.ajax(self.tasksURI, 'POST', {'code': editor.getSession().getValue()}).done(function(data) {
+                    $('#refresh').hide();
+
+                    $("#output").val(data.out);
+                    
+                    text = '';
                     $.each(data.err, function(i, t) {
                         text += t + '\n';
                     });
