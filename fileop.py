@@ -23,6 +23,9 @@ class PosixFileSystem():
         self.localdir = join(abspath(dirname(__file__)), 'storage')
     
     def normaize_path(self, path):
+        path = os.path.normpath(path)
+        if path and path[0] == os.sep:
+             path = path[1:]
         return join(self.localdir, path)
         
     def makedirs(self, path):

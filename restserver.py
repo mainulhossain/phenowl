@@ -88,22 +88,24 @@ class TaskListAPI(Resource):
         if args['script'] or args['code']:
             machine = interpreter if args['script'] else codeGenerator
             script =  args['script'] if args['script'] else args['code']
+            duration = 0
             try:
                 machine.context.reload()
                 parser = PhenoWLParser(PythonGrammar())   
                 with Timer() as t:
                     prog = parser.parse(script)
                     machine.run(prog)
+                duration = t.secs
             except:
                 machine.context.err.append("Error in parse and interpretation")
-            return { 'out': machine.context.out, 'err': machine.context.err}, 201
+            return { 'out': machine.context.out, 'err': machine.context.err, 'duration': "{:.4f}s".format(duration)}, 201
         elif args['library']:
             try:
                 file = args['library']#.files['file']
                 filename = file.filename#secure_filename(file.filename)
                 this_path = os.path.dirname(os.path.abspath(__file__))
-                rel_path = 'libraries/users/mainulhossain'.replace('/', os.sep)
-                this_path = os.path.join(this_path, rel_path)
+                rel_path = 'libraries/users/mainulhossain'
+                this_path = os.path.join(this_path, os.path.normpath(rel_path))
                 if not os.path.isdir(this_path):
                     os.makedirs(this_path)
                 path = os.path.join(this_path, filename)

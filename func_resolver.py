@@ -1,6 +1,6 @@
 from importlib import import_module
 from fileop import IOHelper
-#from imgproc.imagefuncs import ImageProcessor
+from imgproc.imagefuncs import ImageProcessor
 import os
 from os import path, getcwd
 from subprocess import Popen, PIPE, STDOUT, run
@@ -93,22 +93,22 @@ class Library():
             libraries = d["functions"]
             libraries = sorted(libraries, key = lambda k : k['package'].lower())
             for f in libraries:
-                name = f["name"] if f.get("name") else f["internal"].lower()
-                internal = f["internal"] if f.get("internal") else f["name"].lower()
+                name = f["name"] if f.get("name") else f["internal"]
+                internal = f["internal"] if f.get("internal") else f["name"]
                 module = f["module"] if f.get("module") else None
                 package = f["package"] if f.get("package") else None
                 example = f["example"] if f.get("example") else None
                 desc = f["desc"] if f.get("desc") else None
                 runmode = f["runmode"] if f.get("runmode") else None
                 params = []
-                if (f.get("params")):
+                if f.get("params"):
                     for param in f["params"]:
                         params.append(param)
                 func = Function(name, internal, package, module, params, example, desc, runmode)
-                if name in funcs:
-                    funcs[name].extend([func])
+                if name.lower() in funcs:
+                    funcs[name.lower()].extend([func])
                 else:
-                    funcs[name] = [func]
+                    funcs[name.lower()] = [func]
                     
         return funcs
     
@@ -119,11 +119,11 @@ class Library():
             
     def get_function(self, name, package = None):
         if package is not None:
-            for func in self.funcs[name]:
+            for func in self.funcs[name.lower()]:
                 if func.package == package:
                     return [func]
         else:
-            return self.funcs[name]
+            return self.funcs[name.lower()]
     
     def check_function(self, name, package = None):
         functions = self.get_function(name, package)
@@ -156,19 +156,19 @@ class Library():
                 if len(arguments) < 2:
                     raise "Write must have two arguments."
                 return IOHelper.write(arguments[0], arguments[1])
-            elif function.lower() == "get_files":
+            elif function.lower() == "getfiles":
                 return IOHelper.get_files(arguments[0])
-            elif function.lower() == "get_folders":
+            elif function.lower() == "getfolders":
                 return IOHelper.get_folders(arguments[0])
             elif function.lower() == "remove":
                 return IOHelper.remove(arguments[0])
             elif function.lower() == "makedirs":
                 return IOHelper.makedirs(arguments[0])
-            elif function.lower() == "reduce_noise":
+            elif function.lower() == "reducenoise":
                 return ImageProcessor.reduce_noise(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]))
-            elif function.lower() == "convert_color":
+            elif function.lower() == "convertcolor":
                 return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
-            elif function.lower() == "register_image":
+            elif function.lower() == "registerimage":
                 return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
             elif function.lower() == "getcwd":
                 return getcwd()
@@ -239,19 +239,19 @@ class Library():
                 return "IOHelper.read({0})".format(args)
             elif function.lower() == "write":
                 return "IOHelper.write({0})".format(args)
-            elif function.lower() == "get_files":
+            elif function.lower() == "getfiles":
                 return "IOHelper.getfiles({0})".format(args)
-            elif function.lower() == "get_folders":
+            elif function.lower() == "getfolders":
                 return "IOHelper.getfolders({0})".format(args)
             elif function.lower() == "remove":
                 return "IOHelper.remove({0})".format(args)
             elif function.lower() == "makedirs":
                 return "IOHelper.makedirs({0})".format(args)
-            elif function.lower() == "reduce_noise":
+            elif function.lower() == "reducenoise":
                 return "ImageProcessor.reduce_noise(path.join(localdir, {0}), path.join(localdir, {1}))".format(arguments[0], arguments[1])
-            elif function.lower() == "convert_color":
+            elif function.lower() == "convertcolor":
                 return "ImageProcessor.convert_color(path.join(localdir, {0}), path.join(localdir, {1}), {2})".format(arguments[0], arguments[1], arguments[2])
-            elif function.lower() == "register_image":
+            elif function.lower() == "registerimage":
                 return "ImageProcessor.register_image(path.join(localdir, {0}), path.join(localdir, {1}), path.join(localdir, {2}))".format(arguments[0], arguments[1], arguments[2])
             elif function.lower() == "getcwd":
                 return "getcwd()"

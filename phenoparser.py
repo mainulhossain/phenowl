@@ -360,7 +360,7 @@ class PhenoWLCodeGenerator:
         Execute func expression.
         :param expr:
         '''
-        function = expr[0].lower() if len(expr) < 3 else expr[1].lower()
+        function = expr[0] if len(expr) < 3 else expr[1]
         package = expr[0][:-1] if len(expr) > 2 else None
         
         params = expr[1] if len(expr) < 3 else expr[2]
@@ -644,7 +644,7 @@ class PhenoWLInterpreter:
         Execute func expression.
         :param expr:
         '''
-        function = expr[0].lower() if len(expr) < 3 else expr[1].lower()
+        function = expr[0] if len(expr) < 3 else expr[1]
         package = expr[0][:-1] if len(expr) > 2 else None
         
         params = expr[1] if len(expr) < 3 else expr[2]
