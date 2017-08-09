@@ -2,7 +2,7 @@
     "functions": [
        {
            "org": "SRLAB",
-           "package": "Image Processing",
+           "package": "imgproc",
            "module": "libraries.imgproc.imagefuncs",
            "name":"ReduceNoise",
            "internal":"reduce_noise",
@@ -21,7 +21,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "Image Processing",
+           "package": "imgproc",
            "module": "libraries.imgproc.imagefuncs",
            "name":"ConvertColor",
            "internal":"convert_color",
@@ -44,7 +44,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "Image Processing",
+           "package": "imgproc",
            "module": "libraries.imgproc.imagefuncs",
            "name":"RegisterImage",
            "internal":"register_image",
