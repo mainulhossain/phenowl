@@ -100,9 +100,9 @@ background-color: White;
         </div>
     </div>
 
-    <div id="add" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true" style="width: 600px; height: 720px; background: #fff">
+    <div id="add" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true" style="width: 480px; height: 600px; background: #fff">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã—</button>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h3 id="addDialogLabel">Add Library</h3>
         </div>
         <div class="modal-body">
@@ -128,7 +128,7 @@ background-color: White;
                 <div class="control-group">
                     <label class="control-label" for="mapper">Module to JSON mapper:</label>
                     <div class="controls">
-                        <textarea rows="20" style="width: 560px;" id="mapper"></textarea>
+                        <textarea rows="12" style="width: 560px;" id="mapper"></textarea>
                     </div>
                 </div>
             </form>
@@ -515,7 +515,7 @@ background-color: White;
                 position: 'absolute',
                 id: 'aceeditor',
                 width: mapperArea.width(),
-                height: 320,//mapperArea.height(),
+                height: 200,//mapperArea.height(),
                 'class': mapperArea.attr('class'),
                 'css': 'border:2px solid black'
             }).insertBefore(mapperArea);
