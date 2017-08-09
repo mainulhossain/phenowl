@@ -1,6 +1,5 @@
 from importlib import import_module
 from fileop import IOHelper
-from imgproc.imagefuncs import ImageProcessor
 import os
 from os import path, getcwd
 from subprocess import Popen, PIPE, STDOUT, run
@@ -164,12 +163,6 @@ class Library():
                 return IOHelper.remove(arguments[0])
             elif function.lower() == "makedirs":
                 return IOHelper.makedirs(arguments[0])
-            elif function.lower() == "reducenoise":
-                return ImageProcessor.reduce_noise(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]))
-            elif function.lower() == "convertcolor":
-                return ImageProcessor.convert_color(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), arguments[2])
-            elif function.lower() == "registerimage":
-                return ImageProcessor.register_image(path.join(localdir, arguments[0]), path.join(localdir, arguments[1]), path.join(localdir, arguments[2]))
             elif function.lower() == "getcwd":
                 return getcwd()
             elif function.lower() == "len":
