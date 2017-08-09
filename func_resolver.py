@@ -210,7 +210,7 @@ class Library():
         func = self.get_function(function, package)
         module_obj = load_module(func[0].module)
         function = getattr(module_obj, func[0].internal)
-        if context.dci and context.dci[-1]:
+        if context.dci and context.dci[-1] and func.runmode == 'distibuted':
             arguments = context.dci[-1] + arguments
         return function(*arguments)
 
@@ -240,12 +240,6 @@ class Library():
                 return "IOHelper.remove({0})".format(args)
             elif function.lower() == "makedirs":
                 return "IOHelper.makedirs({0})".format(args)
-            elif function.lower() == "reducenoise":
-                return "ImageProcessor.reduce_noise(path.join(localdir, {0}), path.join(localdir, {1}))".format(arguments[0], arguments[1])
-            elif function.lower() == "convertcolor":
-                return "ImageProcessor.convert_color(path.join(localdir, {0}), path.join(localdir, {1}), {2})".format(arguments[0], arguments[1], arguments[2])
-            elif function.lower() == "registerimage":
-                return "ImageProcessor.register_image(path.join(localdir, {0}), path.join(localdir, {1}), path.join(localdir, {2}))".format(arguments[0], arguments[1], arguments[2])
             elif function.lower() == "getcwd":
                 return "getcwd()"
             elif function.lower() == "len":
@@ -287,7 +281,7 @@ class Library():
         func = self.get_function(function, package)
         code = "module_obj = load_module({0})\n".format(func[0].module)
         code += "function = getattr(module_obj, {0})\n".format(func[0].internal)
-        if context.dci and context.dci[-1]:
+        if context.dci and context.dci[-1] and func.runmode == 'distibuted':
             args = [context.dci[-1]] + args
         code += "function({0})".format(args)
         return code
