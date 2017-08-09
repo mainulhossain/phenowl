@@ -76,7 +76,7 @@ class Library():
             funcs = Library.load_funcs_recursive(os.path.join(library_def_file, f))
             for k,v in funcs.items():
                 if k in all_funcs:
-                    all_funcs[k].extend([v])
+                    all_funcs[k].extend(v)
                 else:
                     all_funcs[k] = v if isinstance(v, list) else [v]
         return all_funcs
@@ -105,7 +105,7 @@ class Library():
                         params.append(param)
                 func = Function(name, internal, package, module, params, example, desc, runmode)
                 if name.lower() in funcs:
-                    funcs[name.lower()].extend([func])
+                    funcs[name.lower()].extend(func)
                 else:
                     funcs[name.lower()] = [func]
                     
