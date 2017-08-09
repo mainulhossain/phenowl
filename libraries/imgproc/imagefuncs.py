@@ -1,15 +1,16 @@
 import numpy as np
 import cv2
+from fileop import IOHelper
 
 def reduce_noise(srcfile, dstfile):
-    img = cv2.imread(srcfile)
+    img = cv2.imread(IOHelper.normaize_path(srcfile))
     result = cv2.fastNlMeansDenoisingColored(img, None, 10, 10, 7, 21)
-    cv2.imwrite(dstfile, result)
+    cv2.imwrite(IOHelper.normaize_path(dstfile), result)
     
 def convert_color(srcfile, dstfile, code):
-    img = cv2.imread(srcfile)
+    img = cv2.imread(IOHelper.normaize_path(srcfile))
     result = cv2.cvtColor(img, code)
-    cv2.imwrite(dstfile, result)
+    cv2.imwrite(IOHelper.normaize_path(dstfile), result)
         
 def get_gradient(im) :
     # Calculate the x and y gradients using Sobel operator
@@ -22,8 +23,8 @@ def get_gradient(im) :
     
 def register_image(srcfile1, srcfile2, destfile):
     # Read the images to be aligned
-    im1 =  cv2.imread(srcfile1);
-    im2 =  cv2.imread(srcfile1);
+    im1 =  cv2.imread(IOHelper.normaize_path(srcfile1))
+    im2 =  cv2.imread(IOHelper.normaize_path(srcfile1))
      
     # Convert images to grayscale
     im1_gray = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
@@ -61,4 +62,4 @@ def register_image(srcfile1, srcfile2, destfile):
         # Use warpAffine for Translation, Euclidean and Affine
         im2_aligned = cv2.warpAffine(im2, warp_matrix, (sz[1],sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP);
     
-    cv2.imwrite(destfile, im2_aligned)
+    cv2.imwrite(IOHelper.normaize_path(destfile), im2_aligned)
