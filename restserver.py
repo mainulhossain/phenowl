@@ -186,19 +186,40 @@ class TaskAPI(Resource):
         tasks.remove(task[0])
         return {'result': True}
 
-def load_samples(sample_def_file):
-    with open(sample_def_file, 'r') as json_data:
-        d = json.load(json_data)
-        return d["samples"]
-    
-samples = []
-for s in load_samples('samples.json'):
-    samples.append({"name": s["name"], "desc": s["desc"], "sample": '\n'.join(s["sample"])}) 
-
+class Samples():
+    @staticmethod
+    def load_samples_recursive(library_def_file):
+        if os.path.isfile(library_def_file):
+            return Samples.load_samples(library_def_file)
+        
+        all_samples = []
+        for f in os.listdir(library_def_file):
+            samples = Samples.load_samples_recursive(os.path.join(library_def_file, f))
+            all_samples.extend(samples)
+            #all_samples = {**all_samples, **samples}
+        return all_samples
+       
+    @staticmethod
+    def load_samples(sample_def_file):
+        samples = []
+        try:
+            with open(sample_def_file, 'r') as json_data:
+                d = json.load(json_data)
+                samples = d["samples"]
+        finally:
+            return samples
+        
+    @staticmethod
+    def get_samples_as_list():
+        samples = []
+        for s in Samples.load_samples_recursive('samples'):
+            samples.append({"name": s["name"], "desc": s["desc"], "sample": '\n'.join(s["sample"])})
+        return samples
+        
 sample_fields = {
     'name': fields.String,
     'desc': fields.String,
-    'sample': fields.String,
+    'sample': fields.String
 }
 
 class SamplesAPI(Resource):
@@ -206,16 +227,47 @@ class SamplesAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('sample', required=False, location='json')
+        #self.reqparse.add_argument('name', location='form', required=False)
+        #self.reqparse.add_argument('desc', location='form', required=False)
         super(SamplesAPI, self).__init__()
 
     #@cors.crossdomain(origin='*')
     def get(self):
-        return {'samples': [marshal(sample, sample_fields) for sample in samples]}
+        return {'samples': [marshal(sample, sample_fields) for sample in Samples.get_samples_as_list()]}
 
+    def unique_filename(self, path, prefix, ext):
+        make_fn = lambda i: os.path.join(path, '{0}({1}).{2}'.format(prefix, i, ext))
+
+        for i in range(1, sys.maxsize):
+            uni_fn = make_fn(i)
+            if not os.path.exists(uni_fn):
+                return uni_fn
+            
     #@cors.crossdomain(origin='*')
     def post(self):
+        this_path = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(this_path) #set dir of this file to current directory
         args = self.reqparse.parse_args()
-        return { 'out': '', 'err': ''}, 201
+        if args['sample']:
+            try:
+                sample = {}
+                sample['sample'] = args['sample']
+                sample['name'] = args['name']
+                sample['desc'] = args['desc']
+                
+                samples = {}
+                samples["samples"] = [sample]
+                
+                rel_path = 'samples/users/mainulhossain'
+                this_path = os.path.join(this_path, os.path.normpath(rel_path))
+                if not os.path.isdir(this_path):
+                    os.makedirs(this_path)
+                path = self.unique_filename(this_path, 'sample', 'json')
+                with open(path, 'w') as fp:
+                    json.dump(samples, fp, indent=4, separators=(',', ': '))
+            finally:
+                return { 'out': '', 'err': ''}, 201
 
 api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<string:id>', endpoint='task')

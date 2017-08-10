@@ -54,8 +54,9 @@ background-color: White;
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runBioWL">Run</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Generate Python Code</button>
-		        <div>Duration: <span id="duration"></span>
+		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddSample">Add Sample</button>
+		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Python Code</button>
+		        <div>Time: <span id="duration"></span>
 		        </div>
 		        <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
 		        <br><br>
@@ -128,13 +129,45 @@ background-color: White;
                 <div class="control-group">
                     <label class="control-label" for="mapper">Module to JSON mapper:</label>
                     <div class="controls">
-                        <textarea rows="12" style="width: 560px;" id="mapper"></textarea>
+                        <textarea rows="12" style="width: 460px;" id="mapper"></textarea>
                     </div>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button data-bind="click: addLibrary" class="btn btn-primary">Add Library</button>
+            <button data-bind="click: addLibrary" class="btn btn-primary">Add</button>
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        </div>
+    </div>
+    <div id="addSample" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addSampleDialogLabel" aria-hidden="true" style="width: 480px; height: 550px; background: #fff">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3 id="addSampleDialogLabel">Add Sample</h3>
+        </div>
+        <div class="modal-body">
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="sampleName">Name</label>
+                    <div class="controls">
+                        <input data-bind="value: name" type="text" id="sampleName" placeholder="Name" style="width: 300px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="sampleDesc">Description</label>
+                    <div class="controls">
+                        <input data-bind="value: desc" type="text" id="sampleDesc" placeholder="Description" style="width: 400px;">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="sample">Sample:</label>
+                    <div class="controls">
+                        <textarea rows="12" style="width: 460px;" id="sample"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-bind="click: addSample" class="btn btn-primary">Add</button>
             <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
         </div>
     </div>
@@ -355,6 +388,12 @@ background-color: White;
             	self.centerDialog($('#add'));
                 $('#add').modal('show');
             }
+            
+            self.beginAddSample = function() {
+                self.centerDialog($('#addSample'));
+                $('#addSample').modal('show');
+            }
+            
             self.runBioWL = function(task) {
             	$('#refresh').show();
                 self.ajax(self.tasksURI, 'POST', {'script': editor.getSession().getValue()}).done(function(data) {
@@ -456,25 +495,54 @@ background-color: White;
             //self.beginLogin();
         }
         
-        function SamplesViewModel() {
+        function SampleViewModel() {
             var self = this;
             self.samplesURI = 'todo/api/v1.0/samples';
-            self.username = "";
-            self.password = "";
-            self.samples = ko.observableArray();
+            
+            self.name = ko.observable();
+            self.desc = ko.observable();
+ 
+            // configure ace.js for code editor
+            var mapperArea = $("#sample");
+            
+            var mapperDiv = $('<div>', {
+                position: 'absolute',
+                id: 'aceeditor',
+                width: mapperArea.width(),
+                height: 200,//mapperArea.height(),
+                'class': mapperArea.attr('class'),
+                'css': 'border:2px solid black'
+            }).insertBefore(mapperArea);
+                
+            mapperArea.css('visibility', 'hidden');
+            var offset = mapperDiv.offset();
+            mapperArea.attr('rows', 1);
+            
+            var mapperEditor = ace.edit(mapperDiv[0]);
+            mapperEditor.renderer.setShowGutter(false);
+            mapperEditor.getSession().setValue(mapperArea.val());
+            mapperEditor.getSession().setMode("ace/mode/python");
+            mapperEditor.setOptions({highlightSelectedWord: true, enableBasicAutocompletion: true});
+            mapperEditor.renderer.setOptions({showGutter: true, displayIndentGuides: true});
+            //editor.setKeyboardHandler("ace/keyboard/vim");
+            //editor.setTheme("ace/theme/idle_fingers");
+            //editor.setTheme("ace/theme/twilight");
+            mapperEditor.setTheme("ace/theme/iplastic");
+//             editor.setOptions({       
+//                 fontSize: "12pt"
+//               });
 
             self.ajax = function(uri, method, data) {
                 var request = {
                     url: uri,
                     type: method,
-                    contentType: "application/json",
-                    accepts: "application/json",
+                    contentType: false,
+                    processData: false,
                     cache: false,
-                    dataType: 'json',
-                    data: JSON.stringify(data),
+                    data: data,
                     beforeSend: function (xhr) {
                         xhr.setRequestHeader("Authorization", 
-                            "Basic " + btoa(self.username + ":" + self.password));
+                            "Basic " + btoa('mainulhossain@gmail.com' + ":" + 'mainul'));
                     },
                     error: function(jqXHR) {
                         console.log("ajax error " + jqXHR.status);
@@ -483,20 +551,21 @@ background-color: White;
                 return $.ajax(request);
             }
             
-            self.loadSamples = function(username, password) {
-                self.username = username;
-                self.password = password;
-                self.ajax(self.samplesURI, 'GET').done(function(data) {
-                    for (var i = 0; i < data.samples.length; i++) {
-                        self.samples.push({
-                            name: ko.observable(data.samples[i].name),
-                            sample: ko.observable(data.samples[i].sample),
-                            desc: ko.observable(data.samples[i].desc)
-                        });
-                    }
-                }).fail(function(jqXHR) {
-                    if (jqXHR.status == 403)
-                        setTimeout(self.beginLogin, 500);
+            self.addSample = function(task) {
+                $('#addSample').modal('hide');
+                
+                var formdata = new FormData();
+                formdata.append('sample', mapperEditor.getSession().getValue());//you can append it to formdata with a proper parameter name
+                
+                if (self.name() === undefined)
+                	return;
+                formdata.append('name', self.name());
+                
+                if (self.desc() !== undefined)
+                	formdata.append('desc', self.desc());
+
+                self.ajax(self.samplesURI, 'POST', formdata).done(function(data) {
+                	
                 });
             }
         }
@@ -628,14 +697,17 @@ background-color: White;
         
         var tasksViewModel = new TasksViewModel();
         var addLibraryViewModel = new AddLibraryViewModel();
+        var sampleViewModel = new SampleViewModel();
         var editTaskViewModel = new EditTaskViewModel();
         var loginViewModel = new LoginViewModel();
 //        var samplesViewModel = new SamplesViewModel();
 //        samplesViewModel.loadSamples('mainulhossain@gmail.com', 'mainul')
         ko.applyBindings(tasksViewModel, $('#main')[0]);
         ko.applyBindings(addLibraryViewModel, $('#add')[0]);
+        ko.applyBindings(sampleViewModel, $('#addSample')[0]);
         ko.applyBindings(editTaskViewModel, $('#edit')[0]);
         ko.applyBindings(loginViewModel, $('#login')[0]);
+        
 //        ko.applyBindings(samplesViewModel, $('#samples')[0]);
     </script>
 </body>
