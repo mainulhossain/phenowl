@@ -44,7 +44,7 @@ def load_interpreter():
 
     codeGenerator.context.load_library("libraries")
 
-load_interpreter();
+load_interpreter()
 
 @auth.get_password
 def get_password(username):
@@ -84,6 +84,7 @@ class TaskListAPI(Resource):
 
     #@cors.crossdomain(origin='*')
     def get(self):
+        load_interpreter()
         return {'tasks': [marshal(task, task_fields) for task in tasks]}
 
     #@cors.crossdomain(origin='*')
@@ -202,6 +203,8 @@ class Samples():
     @staticmethod
     def load_samples(sample_def_file):
         samples = []
+        if not os.path.isfile(sample_def_file) or not sample_def_file.endswith(".json"):
+            return samples
         try:
             with open(sample_def_file, 'r') as json_data:
                 d = json.load(json_data)
