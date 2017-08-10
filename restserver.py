@@ -230,9 +230,9 @@ class SamplesAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('sample', required=False, location='json')
-        #self.reqparse.add_argument('name', location='form', required=False)
-        #self.reqparse.add_argument('desc', location='form', required=False)
+        self.reqparse.add_argument('sample', required=False, location='form')
+        self.reqparse.add_argument('name', location='form', required=False)
+        self.reqparse.add_argument('desc', location='form', required=False)
         super(SamplesAPI, self).__init__()
 
     #@cors.crossdomain(origin='*')
