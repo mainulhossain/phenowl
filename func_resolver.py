@@ -4,7 +4,6 @@ import os
 from os import path, getcwd
 from subprocess import Popen, PIPE, STDOUT, run
 import json
-from shippi import runner
 from itertools import chain
 
 #from phenoparser import Context
@@ -84,32 +83,33 @@ class Library():
     @staticmethod
     def load_funcs(library_def_file):
         funcs = {}
-        if not os.path.isfile(library_def_file) or not library_def_file.endswith(".json"):
+        try:
+            if not os.path.isfile(library_def_file) or not library_def_file.endswith(".json"):
+                return funcs
+            
+            with open(library_def_file, 'r') as json_data:
+                d = json.load(json_data)
+                libraries = d["functions"]
+                libraries = sorted(libraries, key = lambda k : k['package'].lower())
+                for f in libraries:
+                    name = f["name"] if f.get("name") else f["internal"]
+                    internal = f["internal"] if f.get("internal") else f["name"]
+                    module = f["module"] if f.get("module") else None
+                    package = f["package"] if f.get("package") else None
+                    example = f["example"] if f.get("example") else None
+                    desc = f["desc"] if f.get("desc") else None
+                    runmode = f["runmode"] if f.get("runmode") else None
+                    params = []
+                    if f.get("params"):
+                        for param in f["params"]:
+                            params.append(param)
+                    func = Function(name, internal, package, module, params, example, desc, runmode)
+                    if name.lower() in funcs:
+                        funcs[name.lower()].extend(func)
+                    else:
+                        funcs[name.lower()] = [func]
+        finally:
             return funcs
-        
-        with open(library_def_file, 'r') as json_data:
-            d = json.load(json_data)
-            libraries = d["functions"]
-            libraries = sorted(libraries, key = lambda k : k['package'].lower())
-            for f in libraries:
-                name = f["name"] if f.get("name") else f["internal"]
-                internal = f["internal"] if f.get("internal") else f["name"]
-                module = f["module"] if f.get("module") else None
-                package = f["package"] if f.get("package") else None
-                example = f["example"] if f.get("example") else None
-                desc = f["desc"] if f.get("desc") else None
-                runmode = f["runmode"] if f.get("runmode") else None
-                params = []
-                if f.get("params"):
-                    for param in f["params"]:
-                        params.append(param)
-                func = Function(name, internal, package, module, params, example, desc, runmode)
-                if name.lower() in funcs:
-                    funcs[name.lower()].extend(func)
-                else:
-                    funcs[name.lower()] = [func]
-                    
-        return funcs
     
     def func_to_internal_name(self, funcname):
         for f in self.funcs:
@@ -176,37 +176,6 @@ class Library():
     #             possibles.update(locals())
     #             function = possibles.get(function)
     #             return function(*arguments)
-        if package == 'shippi':
-            if function == 'registerimage':
-#                     p = IOHelper.getServerPath(arguments[0])
-#                     server = p[0] if p[0] else '127.0.0.1'
-#                     src = p[1]
-#                     dest = arguments[1]
-#                     uname = arguments[2]
-#                     password = arguments[3]
-                if len(arguments) < 5:
-                    raise "Wrong number of arguments for image registration."
-                
-                arguments = list(arguments)
-                arguments.insert(0, function)
-                if len(arguments) < 7:
-                    arguments.append("*")
-                if len(arguments) < 8:
-                    arguments.append(4)
-                if len(arguments) < 9:
-                    arguments.append(0.75)
-                if len(arguments) < 10:
-                    arguments.append(0)
-                if len(arguments) < 11:
-                    arguments.append(0)
-                dci = None
-                if context.dci:
-                    dci = context.get_activedci()
-                if dci and dci[0]:
-                    runner.run_shippi(*arguments) 
-                else:
-                    runner.run_hippi(*arguments)                     
-
         func = self.get_function(function, package)
         module_obj = load_module(func[0].module)
         function = getattr(module_obj, func[0].internal)
@@ -246,37 +215,6 @@ class Library():
                 return "len({0})".format(arguments[0])
             elif function.lower() == "exec":
                 return "func_exec_run({0}, {1})".format(arguments[0], arguments[1])
-
-        if package == 'shippi':
-            if function == 'registerimage':
-#                     p = IOHelper.getServerPath(arguments[0])
-#                     server = p[0] if p[0] else '127.0.0.1'
-#                     src = p[1]
-#                     dest = arguments[1]
-#                     uname = arguments[2]
-#                     password = arguments[3]
-                if len(arguments) < 5:
-                    raise "Wrong number of arguments for image registration."
-                
-                arguments = list(arguments)
-                arguments.insert(0, function)
-                if len(arguments) < 7:
-                    arguments.append("*")
-                if len(arguments) < 8:
-                    arguments.append(4)
-                if len(arguments) < 9:
-                    arguments.append(0.75)
-                if len(arguments) < 10:
-                    arguments.append(0)
-                if len(arguments) < 11:
-                    arguments.append(0)
-                dci = None
-                if context.dci:
-                    dci = context.get_activedci()
-                if dci and dci[0]:
-                    runner.run_shippi(*arguments) 
-                else:
-                    runner.run_hippi(*arguments)                     
 
         func = self.get_function(function, package)
         code = "module_obj = load_module({0})\n".format(func[0].module)

@@ -27,19 +27,24 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 
-interpreter = PhenoWLInterpreter()
-interpreter.context.load_library("libraries")
-    
 tasks = []
-funcs = []
-for f in interpreter.context.library.funcs.values():
-    funcs.extend(f)
-funcs = sorted(funcs, key=lambda k : k.package)
-for f in funcs:
-    tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
-
+interpreter = PhenoWLInterpreter()
 codeGenerator = PhenoWLCodeGenerator()
-codeGenerator.context.load_library("libraries")
+
+def load_interpreter():
+    tasks.clear()
+
+    interpreter.context.load_library("libraries")
+    funcs = []
+    for f in interpreter.context.library.funcs.values():
+        funcs.extend(f)
+    funcs = sorted(funcs, key=lambda k : k.package)
+    for f in funcs:
+        tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
+
+    codeGenerator.context.load_library("libraries")
+
+load_interpreter();
 
 @auth.get_password
 def get_password(username):
@@ -137,7 +142,7 @@ class TaskListAPI(Resource):
                     os.remove(base)
                     with open(base, 'w') as f:
                         json.dump(data, f, indent=4)
-                        
+                    load_interpreter();
             except:
                 interpreter.context.err.append("Error in parse and interpretation")
             return { 'out': interpreter.context.out, 'err': interpreter.context.err}, 201

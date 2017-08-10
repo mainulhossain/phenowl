@@ -232,32 +232,6 @@
             ],
             "returns": "string",
            "example": "exec('cat', 'texts/test.txt')"
-       },
-       {
-           "org": "SRLAB",
-           "package": "shippi",
-           "name":"RegisterImage",
-           "internal":"RegisterImage",
-           "desc": "Image registration (alignment). https://www.learnopencv.com/image-alignment-ecc-in-opencv-c-python/",
-           "params":[  
-            {  
-               "name":"source",
-               "type":"string"
-            },
-            {  
-               "name":"destination",
-               "type":"string"
-            },
-            {  
-               "name":"type",
-               "type":"string"
-            },
-            {  
-               "name":"no_of_match",
-               "type":"string"
-            }           
-            ],           
-           "example": "RegisterImage('images/test_image1.jpg', 'images/test_image2.jpg', 'output/test_image.jpg')"
        }
 	]
 }
