@@ -44,13 +44,18 @@ background-color: White;
     <div class="container">
         <div id="main" class="row">
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <h2>Bioinformatics Workflow Language</h2>
-                    <span>Write script to create a pipeline.</span><br>
-                    <span>Drag functions/samples from the right.</span>
-                </div>
-		        
-		        <textarea rows="16" style="min-width: 100%" id="script"></textarea><br>
+                <div class="panel panel-primary">
+                    <div class="panel-heading ">
+	                    <h2>Bioinformatics Workflow Language</h2>
+	                    <span class="bg-info text-info">Write script to create a pipeline.</span><br>
+	                    <span class="bg-info text-info">Drag functions/samples from the right.</span>
+                    </div>
+                    <div class="panel-body">
+        		        <textarea rows="16" style="min-width: 100%" id="script"></textarea><br>
+		            </div>
+		        </div>
+		        <div class="panel panel-primary">
+		        <div class="panel-body">
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runBioWL">Run</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
 		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
@@ -59,21 +64,34 @@ background-color: White;
 		        <div>Time: <span id="duration"></span>
 		        </div>
 		        <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
-		        <br><br>
-		        <label>Output:</label>
-		        <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
-		        <label>Error:</label>
+		        </div>
+		        </div>
+		        <div class="panel panel-success">
+		        <div class="panel-heading">
+		          <label>Output:</label>
+		         </div>
+		         <div class="panel-body">
+		          <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
+		        </div>
+		        </div>
+		       <div class="panel panel-danger">
+                <div class="panel-heading">
+                  <label>Error:</label>
+                 </div>
+                 <div class="panel-body">
 		        <textarea rows="3" style="min-width: 100%" id="error"></textarea>
+		        </div>
+		        </div>
             </div>
             <div class="col-sm-4" id="functions">
-	            <div   class="panel panel-default">
-	                <div class="panel-heading">
+	            <div   class="panel panel-primary">
+	                <div class="panel-heading ">
 	                   <div class="row">
 	                       <div class="col-sm-4"><h5 class="">Functions</h5></div>
 	                       <div class="col-sm-4"><h5 class="">Package</h5></div>
 	                   </div>
 	                </div>
-	                <div class="panel-body draggable-functions">
+	                <div class="panel-body draggable-functions" style="max-height: 500px; overflow-y: scroll;">
 	                        <!-- ko foreach: tasks -->
 	                        <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
 	                           <div class="col-sm-4 draggable-func" data-bind="text: name"></div>
@@ -83,16 +101,16 @@ background-color: White;
 	                        <!-- /ko -->
 	                </div>
 	            </div>
-                    <div class="panel panel-default">
+                    <div class="panel panel-primary">
                     <div class="panel-heading">
                        <div class="row">
                            <div class="col-sm-4"><h5 class="">Samples</h5></div>
                        </div>
                     </div>
-                    <div class="panel-body draggable-samples">
+                    <div class="panel-body draggable-samples" style="max-height: 200px; overflow-y: scroll;">
                             <!-- ko foreach: samples -->
                             <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
-                               <div class="draggable-sample" data-bind="text: name"></div>
+                               <div class="draggable-sample" style="margin-left: 10px" data-bind="text: name"></div>
                             </div>
                             <!-- /ko -->
                     </div>
