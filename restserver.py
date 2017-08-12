@@ -196,7 +196,7 @@ class Samples():
         all_samples = []
         for f in os.listdir(library_def_file):
             samples = Samples.load_samples_recursive(os.path.join(library_def_file, f))
-            all_samples.extend(samples)
+            all_samples.extend(samples if isinstance(samples, list) else [samples])
             #all_samples = {**all_samples, **samples}
         return all_samples
        
@@ -208,7 +208,7 @@ class Samples():
         try:
             with open(sample_def_file, 'r') as json_data:
                 d = json.load(json_data)
-                samples = d["samples"]
+                samples = d["samples"] if d.get("samples") else d 
         finally:
             return samples
         
@@ -254,21 +254,33 @@ class SamplesAPI(Resource):
         args = self.reqparse.parse_args()
         if args['sample']:
             try:
-                sample = {}
-                sample['sample'] = args['sample']
-                sample['name'] = args['name']
-                sample['desc'] = args['desc']
-                
-                samples = {}
-                samples["samples"] = [sample]
+#                 sample = {}
+#                 sample['sample'] = args['sample']
+#                 sample['name'] = args['name']
+#                 sample['desc'] = args['desc']
+#                 
+#                 samples = {}
+#                 samples["samples"] = [sample]
                 
                 rel_path = 'samples/users/mainulhossain'
                 this_path = os.path.join(this_path, os.path.normpath(rel_path))
                 if not os.path.isdir(this_path):
                     os.makedirs(this_path)
                 path = self.unique_filename(this_path, 'sample', 'json')
+                
+                sample = args['sample']
                 with open(path, 'w') as fp:
-                    json.dump(samples, fp, indent=4, separators=(',', ': '))
+                    fp.write("{\n")
+                    fp.write('{0}"name":"{1}",\n'.format(" " * 4, args['name']));
+                    fp.write('{0}"desc":"{1}",\n'.format(" " * 4, args['desc']));
+                    fp.write('{0}"sample":[\n'.format(" " * 4))
+                    sample = sample.replace("\\n", "\n").replace("\r\n", "\n")
+                    lines = sample.split("\n")
+                    for line in lines[0:-1]:
+                        fp.write('{0}"{1}",\n'.format(" " * 8, line))
+                    fp.write('{0}"{1}"\n'.format(" " * 8, lines[-1]))
+                    fp.write("{0}]\n}}".format(" " * 4))
+#                json.dump(samples, fp, indent=4, separators=(',', ': '))
             finally:
                 return { 'out': '', 'err': ''}, 201
 
