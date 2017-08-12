@@ -50,8 +50,8 @@ background-color: White;
 	                    <span class="bg-info text-info">Write script to create a pipeline.</span><br>
 	                    <span class="bg-info text-info">Drag functions/samples from the right.</span>
                     </div>
-                    <div class="panel-body">
-        		        <textarea rows="16" style="min-width: 100%" id="script"></textarea><br>
+                    <div class="panel-body" style="padding=1px; margin=0px;">
+        		        <textarea rows="16" style="width: 100%; height=100%" id="script"></textarea><br>
 		            </div>
 		        </div>
 		        <div class="panel panel-primary">
@@ -169,14 +169,10 @@ background-color: White;
                     <div class="controls">
                         <input data-bind="value: name" type="text" id="sampleName" placeholder="Name" style="width: 300px;">
                     </div>
-                </div>
-                <div class="control-group">
                     <label class="control-label" for="sampleDesc">Description</label>
                     <div class="controls">
                         <input data-bind="value: desc" type="text" id="sampleDesc" placeholder="Description" style="width: 400px;">
                     </div>
-                </div>
-                <div class="control-group">
                     <label class="control-label" for="sample">Sample:</label>
                     <div class="controls">
                         <textarea rows="12" style="width: 460px;" id="sample"></textarea>
@@ -403,11 +399,19 @@ background-color: White;
             }
 
             self.beginAddLibrary = function() {
+            	var obj = { "functions": [{ "name": "", "internal": "", "example": ""} ] };
+
+            	addLibraryViewModel.getCodeEditor().setValue(JSON.stringify(obj, null, 4), 1);
             	self.centerDialog($('#add'));
                 $('#add').modal('show');
             }
             
             self.beginAddSample = function() {
+            	script = editor.getSession().getValue();
+            	if (script.length > 0)
+            	{
+            		sampleViewModel.getCodeEditor().setValue(script, 1);
+            	}
                 self.centerDialog($('#addSample'));
                 $('#addSample').modal('show');
             }
@@ -586,6 +590,8 @@ background-color: White;
                 	
                 });
             }
+            
+            self.getCodeEditor = function() { return mapperEditor; }
         }
         
         function AddLibraryViewModel() {
@@ -673,6 +679,8 @@ background-color: White;
                     $("#error").val(text);
                 });
             }
+            
+            self.getCodeEditor = function() { return mapperEditor; }
         }
         function EditTaskViewModel() {
             var self = this;
