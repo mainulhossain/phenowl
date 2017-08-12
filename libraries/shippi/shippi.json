@@ -1,30 +1,4 @@
 {
     "functions": [
-       {
-           "org": "SRLAB",
-           "package": "shippi",
-           "name":"RegisterImage",
-           "internal":"RegisterImage",
-           "desc": "Image registration",
-           "params":[  
-            {  
-               "name":"source",
-               "type":"string"
-            },
-            {  
-               "name":"destination",
-               "type":"string"
-            },
-            {  
-               "name":"type",
-               "type":"string"
-            },
-            {  
-               "name":"no_of_match",
-               "type":"string"
-            }           
-            ],           
-           "example": "shippi.RegisterImage('images/test_image1.jpg', 'images/test_image2.jpg', 'output/test_image.jpg')"
-       }
    ]
 }
