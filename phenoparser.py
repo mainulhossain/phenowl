@@ -12,6 +12,7 @@ import threading
 import _thread
 from timer import Timer
 import logging
+import code
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -335,7 +336,7 @@ class PhenoWLCodeGenerator:
     def __init__(self):
         self.context = Context()
         self.code = ''
-        self.imports = ''
+        self.imports = set()
         self.indent = 0
 
     def get_params(self, expr):
@@ -360,7 +361,7 @@ class PhenoWLCodeGenerator:
         
         # call task if exists
         if package is None and function in self.context.library.tasks:
-            return self.context.library.run_task(function, v, self.dotaskstmt)
+            return self.context.library.code_run_task(function, v, self.dotaskstmt)
 
         if not self.context.library.check_function(function, package):
             raise Exception(r"'{0}' doesn't exist.".format(function))
@@ -403,9 +404,11 @@ class PhenoWLCodeGenerator:
         return "{0} and {1}".format(str(left), str(right))
     
     def dopar(self, expr):
-        for stmt in expr:
-            taskManager.submit_func(self.dopar_stmt, stmt)
-            
+        code = 'taskManager = TaskManager()\n'
+#         for stmt in expr:
+#             code += 'taskManager.submit_func(lambda: ' + self.eval(stmt) + ')\n'
+        return code
+    
     def dopar_stmt(self, expr):
         '''
         Execute a parallel expression.
@@ -525,11 +528,8 @@ class PhenoWLCodeGenerator:
             v = self.get_params(expr[1])
             return self.dotaskstmt(expr, v)
         else:
-            params = ','.join(self.eval(expr[1]))
-            code = "def {0}({1}):\n{2}".format(expr[0], params, self.eval(expr[2]))
-            return code
-
-            #self.context.library.add_task(expr[0], expr)
+            self.context.library.add_task(expr[0], expr)
+            return ''
     
     def dotaskstmt(self, expr, args):
         server = args[0] if len(args) > 0 else None
@@ -543,12 +543,12 @@ class PhenoWLCodeGenerator:
         if not password:
             password = self.eval(expr[1][2]) if len(expr[1]) > 2 else None
         
-        self.context.append_dci(server, user, password)
         try:
-            return self.eval(expr[2])
+            self.context.append_dci(server, user, password)
+            return 'if True:\n' + self.eval(expr[2])
         finally:
             self.context.pop_dci()
-            
+                    
     def eval(self, expr):        
         '''
         Evaluate an expression
@@ -581,7 +581,9 @@ class PhenoWLCodeGenerator:
         elif expr[0] == "LIST":
             return self.dolist(expr[1])
         elif expr[0] == "FUNCCALL":
-            return self.dofunc(expr[1])
+            code, imports = self.dofunc(expr[1])
+            self.imports.update(imports)
+            return code
         elif expr[0] == "LISTIDX":
             return self.dolistidx(expr[1])
         elif expr[0] == "PAR":
@@ -593,8 +595,8 @@ class PhenoWLCodeGenerator:
         elif expr[0] == "TASK":
             return self.dotaskdefstmt(expr[1:])
         elif expr[0] == "MULTISTMT":
-            self.indent = int(expr[1].pop()) - 1
             try:
+                self.indent = int(expr[1].pop()) - 1
                 return self.eval(expr[2:])
             finally:
                 self.indent = int(expr[1].pop()) - 1
@@ -613,7 +615,11 @@ class PhenoWLCodeGenerator:
         try:
             self.context.reload()
             stmt = prog.asList()
-            self.context.out = self.eval(stmt)
+            code = self.eval(stmt)
+            imports = ''
+            for i in self.imports:
+                imports = i + '\n';
+            self.context.out = imports + '\n' + code 
         except Exception as err:
             self.context.err.append("Error at line {0}: {1}".format(self.line, err))
 
@@ -1092,7 +1098,9 @@ if __name__ == "__main__":
             tokens = p.parse_file(sys.argv[1])
         else:
             test_program_example = """
-#shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phenowl/storage/images', '/home/phenodoop/phenowl/storage/output')           
+#shippi.RegisterImage('127.0.0.1', 'phenodoop', 'sr-hadoop', '/home/phenodoop/phenowl/storage/images', '/home/phenodoop/phenowl/storage/output')
+# GetFolders('/')
+# CreateFolder('/images/img')           
 # x = 10
 # y = 10
 # z = 30
@@ -1109,11 +1117,20 @@ if __name__ == "__main__":
 # if p < q:
 #     print(p + 5)
 
-task sparktest(s, u, p):
-    print(q)
-    print(p + 5)
-sparktest('server', 'user', 'password')
+# task sparktest(s, u, p):
+#     print(q)
+#     print(p)
+# sparktest('server', 'user', 'password')
 
+parallel:
+    x = 10
+    q = x
+    print(q)
+with:
+    y = 20
+    p = y
+    print(p)
+    
 # task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
 #     ws = GetHistoryIDs()
 #     print(len(ws))
@@ -1133,12 +1150,11 @@ sparktest('server', 'user', 'password')
             
         tokens.pprint()
         #print(tokens.asXML())
-        #integrator = PhenoWLInterpreter()
-        integrator = PhenoWLCodeGenerator()
+        integrator = PhenoWLInterpreter()
+       # integrator = PhenoWLCodeGenerator()
         
         integrator.context.load_library("libraries")
         integrator.run(tokens)
-    print(integrator.context.symtab)
     print(integrator.context.library)
     print(integrator.context.out)
     print(integrator.context.err)

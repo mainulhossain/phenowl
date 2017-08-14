@@ -1,26 +1,27 @@
 from importlib import import_module
-from fileop import IOHelper
-import os
-from os import path, getcwd
-from subprocess import Popen, PIPE, STDOUT, run
-import json
 from itertools import chain
+import json
+from os import path, getcwd
+import os
+import subprocess
+
+from fileop import IOHelper
+
 
 #from phenoparser import Context
-
 def func_exec(app, *args):
 
     cmd = app
     if args:
         cmd += ' ' + ' '.join(args)
-    p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=False)
+    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=False)
     return p.stdout.read()
 
 def func_exec_run(app, *args):
     cmd = app
     if args:
         cmd += ' ' + ' '.join(args)
-    p = run(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     return p.stdout.decode('utf-8')
 
 def load_module(modulename):
@@ -58,7 +59,11 @@ class Library():
     def run_task(self, name, args, dotaskstmt):
         if name in self.tasks:
             return dotaskstmt(self.tasks[name], args)
-    
+
+    def code_run_task(self, name, args, dotaskstmt):
+        if name in self.tasks:
+            return dotaskstmt(self.tasks[name], args), set()
+            
     @staticmethod
     def load(library_def_file):
         library = Library()
@@ -159,6 +164,8 @@ class Library():
                 return IOHelper.get_files(arguments[0])
             elif function.lower() == "getfolders":
                 return IOHelper.get_folders(arguments[0])
+            elif function.lower() == "createfolder":
+                return IOHelper.create_folder(arguments[0])
             elif function.lower() == "remove":
                 return IOHelper.remove(arguments[0])
             elif function.lower() == "makedirs":
@@ -191,38 +198,52 @@ class Library():
         :param function: Name of the function
         :param arguments: The arguments for the function
         '''
+        imports = set()
         args = ','.join(arguments)
+        code = ''
         if not package or package == "None":
             if function.lower() == "print":
-                return "print({0})".format(args)
+                code = "print({0})".format(args)
             elif function.lower() == "range":
-                return "range({0})".format(args)
+                code = "range({0})".format(args)
             elif function.lower() == "read":
-                return "IOHelper.read({0})".format(args)
+                imports.add("from fileop import IOHelper")
+                code = "IOHelper.read({0})".format(args)
             elif function.lower() == "write":
-                return "IOHelper.write({0})".format(args)
+                imports.add("from fileop import IOHelper")
+                code = "IOHelper.write({0})".format(args)
             elif function.lower() == "getfiles":
-                return "IOHelper.getfiles({0})".format(args)
+                imports.add("from fileop import IOHelper")
+                code = "IOHelper.getfiles({0})".format(args)
             elif function.lower() == "getfolders":
-                return "IOHelper.getfolders({0})".format(args)
+                imports.add("from fileop import IOHelper")
+                code = "IOHelper.getfolders({0})".format(args)
             elif function.lower() == "remove":
-                return "IOHelper.remove({0})".format(args)
-            elif function.lower() == "makedirs":
-                return "IOHelper.makedirs({0})".format(args)
+                imports.add("from fileop import IOHelper")
+                code = "IOHelper.remove({0})".format(args)
+            elif function.lower() == "createfolder":
+                imports.add("from fileop import IOHelper")
+                code = "IOHelper.makedirs({0})".format(args)
             elif function.lower() == "getcwd":
-                return "getcwd()"
+                imports.add("import os")
+                code = "os.getcwd()"
             elif function.lower() == "len":
-                return "len({0})".format(arguments[0])
+                code = "len({0})".format(arguments[0])
             elif function.lower() == "exec":
-                return "func_exec_run({0}, {1})".format(arguments[0], arguments[1])
+                imports.add("import subprocess")
+                code =  "func_exec_run({0}, {1})".format(arguments[0], arguments[1])
 
+        if code:
+            return code, imports
+        
+        imports.add("from importlib import import_module")
         func = self.get_function(function, package)
         code = "module_obj = load_module({0})\n".format(func[0].module)
         code += "function = getattr(module_obj, {0})\n".format(func[0].internal)
         if context.dci and context.dci[-1] and func.runmode == 'distibuted':
             args = [context.dci[-1]] + args
         code += "function({0})".format(args)
-        return code
+        return code, imports
             
     def __repr__(self):
         return "Library: " + repr(self.funcs)
