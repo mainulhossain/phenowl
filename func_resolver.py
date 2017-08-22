@@ -186,7 +186,7 @@ class Library():
         func = self.get_function(function, package)
         module_obj = load_module(func[0].module)
         function = getattr(module_obj, func[0].internal)
-        if context.dci and context.dci[-1] and func.runmode == 'distibuted':
+        if context.dci and context.dci[-1] and func[0].runmode == 'distibuted':
             arguments = context.dci[-1] + arguments
         return function(*arguments)
 
