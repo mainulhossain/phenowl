@@ -98,6 +98,28 @@
            "returns": "string[]",
            "example":"RunWorkflow(workflow_id)",
            "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"GetTools()",
+           "internal":"get_tools_names",
+           "desc": "Get names of the tools.",
+           "returns": "string[]",
+           "example":"GetTools()",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"GetToolIDs()",
+           "internal":"tool_name_to_ids",
+           "desc": "Get ids from the name of tool. Multiple ids will be returned for multiple tools of same name.",
+           "returns": "string[]",
+           "example":"GetToolsIDs()",
+           "runmode": "distributed"
        }
    ]
 }

@@ -78,6 +78,14 @@ def get_tools_ids(*args):
         #yield j.name
         wf_ids.append(j['id'])
     return wf_ids
+
+def get_tools_names(*args):
+    wf = get_tools_json(args)
+    wf_ids = []
+    for j in wf:
+        #yield j.name
+        wf_ids.append(j['name'])
+    return wf_ids
     
 def get_tool(*args):
     wf = get_tools_json(args)
@@ -85,11 +93,13 @@ def get_tool(*args):
         if j['id'] == args[2]:
             return j
 
-def get_tool_by_name(*args):
+def get_tools_by_name(*args):
     wf = get_tools_json(args)
+    named = []
     for j in wf:
         if j['name'] == args[2]:
-            return j
+            named.append(j)
+    return named
 
 def tool_id_to_name(*args):
     wf = get_tools_json(args)
@@ -97,11 +107,11 @@ def tool_id_to_name(*args):
         if j['id'] == args[2]:
             return j['name']
 
-def tool_name_to_id(*args):
+def tool_name_to_ids(*args):
     wf = get_tools_json(args)
-    for j in wf:
-        if j['name'] == args[2]:
-            return j['id']
+    ids = []
+    ids.append(j['id'] for j in wf if j['name'] == args[2])
+    return ids 
 
 def get_tool_params(*args):
     tools = get_tools_json(args)               
