@@ -110,7 +110,9 @@ def tool_id_to_name(*args):
 def tool_name_to_ids(*args):
     wf = get_tools_json(*args)
     ids = []
-    ids.append(j['id'] for j in wf if j['name'] == args[3])
+    for j in wf:
+        if j['name'] == args[3]:
+            ids.append(j['id'])
     return ids 
 
 def get_tool_params(*args):
