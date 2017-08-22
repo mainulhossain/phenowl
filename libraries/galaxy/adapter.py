@@ -63,7 +63,7 @@ def get_history_ids(*args):
 def get_history(*args):
     wf = get_histories_json(*args)
     for j in wf:
-        if j['id'] == args[2]:
+        if j['id'] == args[3]:
             return j
 
 def get_tools_json(*args):
@@ -90,36 +90,36 @@ def get_tools_names(*args):
 def get_tool(*args):
     wf = get_tools_json(*args)
     for j in wf:
-        if j['id'] == args[2]:
+        if j['id'] == args[3]:
             return j
 
 def get_tools_by_name(*args):
     wf = get_tools_json(*args)
     named = []
     for j in wf:
-        if j['name'] == args[2]:
+        if j['name'] == args[3]:
             named.append(j)
     return named
 
 def tool_id_to_name(*args):
     wf = get_tools_json(*args)
     for j in wf:
-        if j['id'] == args[2]:
+        if j['id'] == args[3]:
             return j['name']
 
 def tool_name_to_ids(*args):
     wf = get_tools_json(*args)
     ids = []
-    ids.append(j['id'] for j in wf if j['name'] == args[2])
+    ids.append(j['id'] for j in wf if j['name'] == args[3])
     return ids 
 
 def get_tool_params(*args):
     tools = get_tools_json(*args)               
     for t in tools:
-        if t['name'] == args[2]:
+        if t['name'] == args[3]:
             ts = toolClient.show_tool(tool_id = t['id'], io_details=True)
-            if len(args) > 3:
-                return ts[args[3]]
+            if len(args) > 4:
+                return ts[args[4]]
             else:
                 return ts
                             
