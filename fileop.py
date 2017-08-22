@@ -1,16 +1,18 @@
 from __future__ import print_function
+
+from os import listdir
 from os import makedirs
+import os
+from os.path import isfile, join, isdir, abspath, dirname
+import shutil
+import sys
+import tempfile
+from urllib.parse import urlparse, urlunparse
+
 
 __author__ = "Mainul Hossain"
 __date__ = "$Dec 10, 2016 2:23:14 PM$"
 
-import os
-import sys
-import shutil
-import tempfile
-from urllib.parse import urlparse, urlunparse
-from os import listdir
-from os.path import isfile, join, isdir, abspath, dirname
 
 try:
     from hdfs import InsecureClient
@@ -28,7 +30,7 @@ class PosixFileSystem():
              path = path[1:]
         return join(self.localdir, path)
         
-    def makedirs(self, path):
+    def create_folder(self, path):
         path = self.normaize_path(path)
         if not os.path.exists(path):
             os.makedirs(path) 
@@ -40,11 +42,7 @@ class PosixFileSystem():
             shutil.rmtree(path)
         elif os.path.isfile(path):
             os.remove(path)
-            
-    def addfolder(self, path):
-        path = self.normaize_path(path)
-        return self.makedirs(path)
-    
+               
     def rename(self, oldpath, newpath):
         path = self.normaize_path(path)
         os.rename(oldpath, newpath)
@@ -66,7 +64,18 @@ class PosixFileSystem():
         path = self.normaize_path(path)
         with open(path, 'w') as writer:
             return writer.write(content)
-            
+        
+    def unique_filename(self, path, prefix, ext):
+        make_fn = lambda i: os.path.join(path, '{0}({1}).{2}'.format(prefix, i, ext))
+
+        for i in range(1, sys.maxsize):
+            uni_fn = make_fn(i)
+            if not os.path.exists(uni_fn):
+                return uni_fn
+    
+    def isfile(self, path):
+        return os.path.isfile(path)
+                       
 class HadoopFileSystem():
     def __init__(self, addr, user):
         self.client = InsecureClient(addr, user=user)
@@ -75,7 +84,7 @@ class HadoopFileSystem():
         u = urlparse(path)
         return u.path
         
-    def makedirs(self, path):
+    def create_folder(self, path):
         try:
             path = self.normaize_path(path)
             self.client.makedirs(path)
@@ -89,11 +98,7 @@ class HadoopFileSystem():
             if self.client.status(path, False) is not None:
                 self.client.delete(path, True)
         except Exception as e: print(e)
-        
-    def addfolder(self, path):
-        path = self.normaize_path(path)
-        return self.makedirs(path)
-    
+           
     def rename(self, oldpath, newpath):
         try:
             oldpath = self.normaize_path(oldpath)
@@ -110,6 +115,14 @@ class HadoopFileSystem():
             if status['type'] != "DIRECTORY":
                 files.append(f)
         return files
+    
+    def isfile(self, path):
+        filename = os.path.basename(path) 
+        files = self.get_files(os.path.dirname(path))
+        for file in files:
+            if file == filename:
+                return True
+        return False
     
     def get_folders(self, path):
         path = self.normaize_path(path)
@@ -157,9 +170,9 @@ class IOHelper():
         filesystem.remove(path)
         
     @staticmethod
-    def makedirs(path):
+    def create_folder(path):
         filesystem = IOHelper.getFileSystem(path)
-        filesystem.makedirs(path)
+        return filesystem.create_folder(path)
         
     @staticmethod
     def read(path):
@@ -175,6 +188,17 @@ class IOHelper():
     def write(path, content):
         filesystem = IOHelper.getFileSystem(path)
         return filesystem.write(path, content)
+    
+    @staticmethod
+    def unique_filename(path, prefix, ext):
+        filesystem = IOHelper.getFileSystem(path)
         
+        make_fn = lambda i: os.path.join(path, '{0}({1}).{2}'.format(prefix, i, ext))
+
+        for i in range(1, sys.maxsize):
+            uni_fn = make_fn(i)
+            if not filesystem.isfile(uni_fn):
+                return uni_fn
+                
 if __name__ == "__main__":
     print("Hello World")
