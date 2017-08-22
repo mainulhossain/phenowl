@@ -114,11 +114,11 @@
            "org": "srlab",
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
-           "name":"GetToolIDs()",
+           "name":"GetToolIDs",
            "internal":"tool_name_to_ids",
            "desc": "Get ids from the name of tool. Multiple ids will be returned for multiple tools of same name.",
            "returns": "string[]",
-           "example":"GetToolsIDs",
+           "example":"GetToolsIDs()",
            "runmode": "distributed"
        }
    ]

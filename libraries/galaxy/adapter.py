@@ -72,7 +72,7 @@ def get_tools_json(*args):
     return tc.get_tools()
 
 def get_tools_ids(*args):
-    wf = get_tools_json(args)
+    wf = get_tools_json(*args)
     wf_ids = []
     for j in wf:
         #yield j.name
@@ -80,7 +80,7 @@ def get_tools_ids(*args):
     return wf_ids
 
 def get_tools_names(*args):
-    wf = get_tools_json(args)
+    wf = get_tools_json(*args)
     wf_ids = []
     for j in wf:
         #yield j.name
@@ -88,13 +88,13 @@ def get_tools_names(*args):
     return wf_ids
     
 def get_tool(*args):
-    wf = get_tools_json(args)
+    wf = get_tools_json(*args)
     for j in wf:
         if j['id'] == args[2]:
             return j
 
 def get_tools_by_name(*args):
-    wf = get_tools_json(args)
+    wf = get_tools_json(*args)
     named = []
     for j in wf:
         if j['name'] == args[2]:
@@ -102,19 +102,19 @@ def get_tools_by_name(*args):
     return named
 
 def tool_id_to_name(*args):
-    wf = get_tools_json(args)
+    wf = get_tools_json(*args)
     for j in wf:
         if j['id'] == args[2]:
             return j['name']
 
 def tool_name_to_ids(*args):
-    wf = get_tools_json(args)
+    wf = get_tools_json(*args)
     ids = []
     ids.append(j['id'] for j in wf if j['name'] == args[2])
     return ids 
 
 def get_tool_params(*args):
-    tools = get_tools_json(args)               
+    tools = get_tools_json(*args)               
     for t in tools:
         if t['name'] == args[2]:
             ts = toolClient.show_tool(tool_id = t['id'], io_details=True)
