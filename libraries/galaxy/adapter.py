@@ -66,6 +66,33 @@ def get_history(*args):
         if j['id'] == args[3]:
             return j
 
+def get_most_recent_history(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    hc = HistoryClient(gi)
+    hi = hc.get_most_recently_used_history()
+    return hi['id']
+        
+def create_history(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    hc = HistoryClient(gi)
+    historyName = args[3] if len(args) > 3 else str(uuid.uuid4())
+    h = hc.create_history(historyName)
+    return h["id"]
+
+def history_id_to_name(*args):
+    wf = get_histories_json(*args)
+    for j in wf:
+        if j['id'] == args[3]:
+            return j['name']
+
+def history_name_to_ids(*args):
+    wf = get_histories_json(*args)
+    ids = []
+    for j in wf:
+        if j['name'] == args[3]:
+            ids.append(j['id'])
+    return ids
+        
 def get_tools_json(*args):
     gi = GalaxyInstance(args[0], args[1])
     tc = ToolClient(gi)
@@ -161,23 +188,15 @@ def upload_to_library_from_url(*args):
     d = hc.upload_file_from_url(libraryid, args[3])
     return d["id"]
 
-def create_history(*args):
-    gi = GalaxyInstance(args[0], args[1])
-    hc = HistoryClient(gi)
-    historyName = args[2] if len(args) > 2 else str(uuid.uuid4())
-    h = hc.create_history(historyName)
-    return h["id"]
-
 def upload_to_history(*args):
     gi = GalaxyInstance(args[0], args[1])
-    historyid = args[2]
     path = IOHelper.normaize_path(args[3])
+    historyid = args[4] if len(args) > 4 else HistoryClient(gi).get_most_recently_used_history()
     d = gi.tools.upload_file(path, historyid)
     return d["id"]
     
 def ftp_to_history(*args):
     gi = GalaxyInstance(args[0], args[1])
-    historyid = args[2]
        
     u = urlparse(args[3])
     if u.scheme:
@@ -198,10 +217,11 @@ def ftp_to_history(*args):
         
     ftp.retrbinary("RETR " + filename, open(destfile, 'wb').write)
     
+    historyid = args[4] if len(args) > 4 else HistoryClient(gi).get_most_recently_used_history()
     d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
     return d["id"]
 
 def run_tool(*args):
     gi = GalaxyInstance(args[0], args[1])
     toolClient = ToolClient(gi)
-    return toolClient.run_tool(history_id=args[2], tool_id=args[3], tool_inputs=args[4])
+    return toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=args[5])

@@ -120,6 +120,105 @@
            "returns": "string[]",
            "example":"GetToolsIDs()",
            "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"ToolIDToName",
+           "internal":"tool_id_to_name",
+           "desc": "Gets the name of a tool from id.",
+           "returns": "string",
+           "example":"ToolIDToName(tool_id)",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"CreateHistory",
+           "internal":"create_history",
+           "desc": "Create a new history.",
+           "returns": "json",
+           "example":"CreateHistory(New History)",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"HistoryIDToName",
+           "internal":"history_id_to_name",
+           "desc": "Gets the name of a history from id.",
+           "returns": "string",
+           "example":"HistoryIDToName(history_id)",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"HistoryNameToIDs",
+           "internal":"history_name_to_ids",
+           "desc": "Gets the ids of history name.",
+           "returns": "string[]",
+           "example":"HistoryNameToIDs(history_id)",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"GetToolParams",
+           "internal":"get_tool_params",
+           "desc": "Get tool parameters.",
+           "returns": "json",
+           "example":"GetToolParams([param type])",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"UploadToHistory",
+           "internal":"upload_to_history",
+           "desc": "Uploads a file to history and returns dataset id.",
+           "returns": "string",
+           "example":"UploadToHistory(path_to_file, [history id])",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"FtpToHistory",
+           "internal":"ftp_to_history",
+           "desc": "Uploads a file to history and returns dataset id.",
+           "returns": "string",
+           "example":"UploadToHistory(ftp_path_to_file, [history id])",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"RunTool",
+           "internal":"run_tool",
+           "desc": "Runs a tool on history.",
+           "returns": "string",
+           "example":"RunTool(history_id, tool_id, {params})",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"GetLastHistory",
+           "internal":"get_most_recent_history",
+           "desc": "Gets the id of the history which is last used.",
+           "returns": "string",
+           "example":"GetLastHistory()",
+           "runmode": "distributed"
        }
    ]
 }
