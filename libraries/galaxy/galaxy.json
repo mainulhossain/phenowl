@@ -136,6 +136,17 @@
            "org": "srlab",
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
+           "name":"ToolNameToID",
+           "internal":"tool_name_to_id",
+           "desc": "Gets the id of a tool from name.",
+           "returns": "string",
+           "example":"ToolNameToID(tool_name)",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
            "name":"CreateHistory",
            "internal":"create_history",
            "desc": "Create a new history.",
