@@ -137,9 +137,9 @@
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
            "name":"ToolNameToID",
-           "internal":"tool_name_to_id",
+           "internal":"tool_name_to_ids",
            "desc": "Gets the id of a tool from name.",
-           "returns": "string",
+           "returns": "string[]",
            "example":"ToolNameToID(tool_name)",
            "runmode": "distributed"
        },
