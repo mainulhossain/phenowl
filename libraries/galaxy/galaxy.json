@@ -180,6 +180,28 @@
            "org": "srlab",
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
+           "name":"GetHistoryDatasets",
+           "internal":"get_history_datasets",
+           "desc": "Gets the ids of datasets in a history.",
+           "returns": "string[]",
+           "example":"GetHistoryDatasets([history_id], [dataset_name])",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"DatasetIDToName",
+           "internal":"dataset_id_to_name",
+           "desc": "Gets the name of dataset from id.",
+           "returns": "string",
+           "example":"DatasetIDToName(dataset_id)",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
            "name":"GetToolParams",
            "internal":"get_tool_params",
            "desc": "Get tool parameters.",
@@ -193,7 +215,7 @@
            "module": "libraries.galaxy.adapter",
            "name":"UploadToHistory",
            "internal":"upload_to_history",
-           "desc": "Uploads a file to history and returns dataset id.",
+           "desc": "Uploads a file to history and returns dataset id. If history id is not give, the most recent history is taken.",
            "returns": "string",
            "example":"UploadToHistory(path_to_file, [history id])",
            "runmode": "distributed"
@@ -204,9 +226,20 @@
            "module": "libraries.galaxy.adapter",
            "name":"FtpToHistory",
            "internal":"ftp_to_history",
-           "desc": "Uploads a file to history and returns dataset id.",
+           "desc": "Uploads an ftp file to history and returns dataset id. If history id is not give, the most recent history is taken.",
            "returns": "string",
-           "example":"UploadToHistory(ftp_path_to_file, [history id])",
+           "example":"FtpToHistory(ftp_path_to_file, [history id])",
+           "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"HttpToHistory",
+           "internal":"http_to_history",
+           "desc": "Uploads an http file to history and returns dataset id. If history id is not give, the most recent history is taken.",
+           "returns": "string",
+           "example":"HttpToHistory(http_path_to_file, [history id])",
            "runmode": "distributed"
        },
        {

@@ -2,15 +2,26 @@ from bioblend.galaxy import GalaxyInstance
 from bioblend.galaxy.histories import HistoryClient
 from bioblend.galaxy.libraries import LibraryClient
 from bioblend.galaxy.tools import ToolClient
+from bioblend.galaxy.datasets import DatasetClient
 from urllib.parse import urlparse, urlunparse
+import urllib.request
+import shutil
 import json
 import uuid
 import tempfile
 from ftplib import FTP
+from collections import namedtuple
+
 from fileop import IOHelper
 
 #gi = GalaxyInstance(url='http://sr-p2irc-big8.usask.ca:8080', key='7483fa940d53add053903042c39f853a')
 #  r = toolClient.run_tool('a799d38679e985db', 'toolshed.g2.bx.psu.edu/repos/devteam/fastq_groomer/fastq_groomer/1.0.4', params)
+
+def _json_object_hook(d):
+    return namedtuple('X', d.keys())(*d.values())
+
+def json2obj(data):
+    return json.loads(data, object_hook=_json_object_hook)
 
 def get_workflows_json(*args):
     gi = GalaxyInstance(args[0], args[1])
@@ -66,11 +77,14 @@ def get_history(*args):
         if j['id'] == args[3]:
             return j
 
-def get_most_recent_history(*args):
-    gi = GalaxyInstance(args[0], args[1])
+def get_most_recent_history_id(gi):
     hc = HistoryClient(gi)
     hi = hc.get_most_recently_used_history()
     return hi['id']
+    
+def get_most_recent_history(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    return get_most_recent_history_id(gi)
         
 def create_history(*args):
     gi = GalaxyInstance(args[0], args[1])
@@ -162,11 +176,21 @@ def get_tool_params(*args):
                                         
 def get_history_datasets(*args):
     gi = GalaxyInstance(args[0], args[1])
-    #history = get_history(*args)
-    #if history is not None:
-    #return gi.histories.show_matching_datasets(args[3])
-    return gi.histories.show_history(args[3], contents=True)
-                        
+    historyid = args[3] if len(args) > 3 else get_most_recent_history_id(gi)
+    name = args[4] if len(args) > 4 else None
+
+    datasets = gi.histories.show_matching_datasets(historyid, name)
+    ids = []
+    for dataset in datasets:
+        ids.append(dataset['id'])
+    return ids
+
+def dataset_id_to_name(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    dc = DatasetClient(gi)
+    details = dc.show_dataset(args[3])
+    return details['name']
+                            
 def upload(*args):
     gi = GalaxyInstance(args[0], args[1])
     library = get_library(*args)
@@ -199,7 +223,7 @@ def upload_to_library_from_url(*args):
 def upload_to_history(*args):
     gi = GalaxyInstance(args[0], args[1])
     path = IOHelper.normaize_path(args[3])
-    historyid = args[4] if len(args) > 4 else HistoryClient(gi).get_most_recently_used_history()
+    historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
     d = gi.tools.upload_file(path, historyid)
     return d["id"]
     
@@ -225,11 +249,41 @@ def ftp_to_history(*args):
         
     ftp.retrbinary("RETR " + filename, open(destfile, 'wb').write)
     
-    historyid = args[4] if len(args) > 4 else HistoryClient(gi).get_most_recently_used_history()
+    historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
     d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
     return d["id"]
+
+def download_file(*args):
+    remote_name = args[3]
+    u = urlparse(remote_name)
+    
+    filename = os.path.basename(u.path)   
+    destfile = os.path.join(tempfile.gettempdir(), filename)
+    if os.exists(destfile):
+        os.delete(destfile)
+    
+    if u.scheme:
+        if u.scheme.lower() == 'http' or u.scheme.lower() == 'https':
+            # Download the file from `url` and save it locally under `file_name`:
+            with urllib.request.urlopen(remote_name) as response, open(destfile, 'wb') as out_file:
+                shutil.copyfileobj(response, out_file)
+        elif u.scheme.lower() == 'ftp':
+            ftp = FTP(u.netloc)
+            ftp.login()
+            ftp.cwd(os.path.dirname(u.path))
+        else:
+            raise 'No http(s) address given.'
+
+    gi = GalaxyInstance(args[0], args[1])
+    historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
+    d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
+    return d["id"]
+    
+def http_to_history(*args):
+    return download_file(*args)  
 
 def run_tool(*args):
     gi = GalaxyInstance(args[0], args[1])
     toolClient = ToolClient(gi)
-    return toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=args[5])
+    params = json2obj(args[5])
+    return toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=params)
