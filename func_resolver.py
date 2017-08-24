@@ -110,7 +110,7 @@ class Library():
                             params.append(param)
                     func = Function(name, internal, package, module, params, example, desc, runmode)
                     if name.lower() in funcs:
-                        funcs[name.lower()].extend(func)
+                        funcs[name.lower()].extend([func])
                     else:
                         funcs[name.lower()] = [func]
         finally:
