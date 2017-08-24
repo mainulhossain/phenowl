@@ -140,16 +140,26 @@ def tool_name_to_id(*args):
         if j['name'] == args[3]:
             return j['id']
 
-def get_tool_params(*args):
-    tools = get_tools_json(*args)               
+def get_tool_params_by_tool_name(*args):
+    tools = get_tools_json(*args)
+    tc = ToolClient(gi)               
     for t in tools:
         if t['name'] == args[3]:
-            ts = toolClient.show_tool(tool_id = t['id'], io_details=True)
+            ts = tc.show_tool(tool_id = t['id'], io_details=True)
             if len(args) > 4:
                 return ts[args[4]]
             else:
                 return ts
                             
+def get_tool_params(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    tc = ToolClient(gi)
+    ts = tc.show_tool(tool_id = args[3], io_details=True)
+    if len(args) > 4:
+        return ts[args[4]]
+    else:
+        return ts
+                                        
 def get_history_datasets(*args):
     gi = GalaxyInstance(args[0], args[1])
     #history = get_history(*args)
