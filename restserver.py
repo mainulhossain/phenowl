@@ -274,7 +274,7 @@ class SamplesAPI(Resource):
                     fp.write('{0}"name":"{1}",\n'.format(" " * 4, args['name']));
                     fp.write('{0}"desc":"{1}",\n'.format(" " * 4, args['desc']));
                     fp.write('{0}"sample":[\n'.format(" " * 4))
-                    sample = sample.replace("\\n", "\n").replace("\r\n", "\n")
+                    sample = sample.replace("\\n", "\n").replace("\r\n", "\n").replace("\"", "\'")
                     lines = sample.split("\n")
                     for line in lines[0:-1]:
                         fp.write('{0}"{1}",\n'.format(" " * 8, line))

@@ -570,6 +570,8 @@ class PhenoWLCodeGenerator:
             return self.doarithmetic(expr[1:])
         elif expr[0] == "MULTEXPR":
             return self.domult(expr[1:])
+        elif expr[0] == "CONCAT":
+            return self.doarithmetic(expr[1:])
         elif expr[0] == "LOGEXPR":
             return self.dolog(expr[1:])
         elif expr[0] == "ANDEXPR":
@@ -885,6 +887,8 @@ class PhenoWLInterpreter:
             return self.doarithmetic(expr[1:])
         elif expr[0] == "MULTEXPR":
             return self.domult(expr[1:])
+        elif expr[0] == "CONCAT":
+            return self.doarithmetic(expr[1:])
         elif expr[0] == "LOGEXPR":
             return self.dolog(expr[1:])
         elif expr[0] == "ANDEXPR":
@@ -958,6 +962,7 @@ class BasicGrammar():
         self.multexpr = Forward()
         self.numexpr = Forward()
         self.arguments = Forward()
+        self.stringaddexpr = Forward()
         modpref = Combine(OneOrMore(self.identifier + Literal(".")))
         self.funccall = Group((Optional(modpref) + self.identifier + FollowedBy("(")) + 
                               Group(Suppress("(") + Optional(self.arguments) + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
@@ -979,10 +984,10 @@ class BasicGrammar():
         
         self.multexpr << Group((factor + ZeroOrMore(self.multop + factor)).setParseAction(lambda t: ['MULTEXPR'] + t.asList()))
         self.numexpr << Group((self.multexpr + ZeroOrMore(self.addop + self.multexpr)).setParseAction(lambda t: ['NUMEXPR'] + t.asList()))
-        
+        self.stringaddexpr << Group((self.string + ZeroOrMore(Literal("+") + (self.identifier | self.string))).setParseAction(lambda t: ['CONCAT'] + t.asList()))
                 
         self.expr << ( 
-                      self.string | self.funccall | self.listidx | self.numexpr
+                      self.stringaddexpr | self.string | self.funccall | self.listidx | self.numexpr
                       ).setParseAction(lambda x : x.asList())
         
         self.arguments << delimitedList(Group(self.expr))
@@ -1118,18 +1123,17 @@ if __name__ == "__main__":
 #     print(p + 5)
 
 # task sparktest(s, u, p):
-#     print(q)
-#     print(p)
+#     GetTools()
 # sparktest('server', 'user', 'password')
 
-parallel:
-    x = 10
-    q = x
-    print(q)
-with:
-    y = 20
-    p = y
-    print(p)
+# parallel:
+#     x = 10
+#     q = x
+#     print(q)
+# with:
+#     y = 20
+#     p = y
+#     print(p)
     
 # task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
 #     ws = GetHistoryIDs()
@@ -1145,6 +1149,12 @@ with:
         #print(w)
         #print(w['name'])
 
+#result = SearchEntrez("Myb AND txid3702[ORGN] AND 0:6000[SLEN]", "nucleotide")
+#print(result)
+
+s = 10
+t = "15" + "16"
+print(t)
             """
             tokens = p.parse(test_program_example)
             
