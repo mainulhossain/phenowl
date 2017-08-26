@@ -3,6 +3,8 @@ from bioblend.galaxy.histories import HistoryClient
 from bioblend.galaxy.libraries import LibraryClient
 from bioblend.galaxy.tools import ToolClient
 from bioblend.galaxy.datasets import DatasetClient
+from bioblend.galaxy.jobs import JobsClient
+
 from urllib.parse import urlparse, urlunparse
 import urllib.request
 import shutil
@@ -11,6 +13,7 @@ import uuid
 import tempfile
 from ftplib import FTP
 from collections import namedtuple
+import os
 
 from fileop import IOHelper
 
@@ -244,16 +247,23 @@ def ftp_to_history(*args):
     filename = os.path.basename(u.path)
     
     destfile = os.path.join(tempfile.gettempdir(), filename)
-    if os.exists(destfile):
-        os.delete(destfile)
+    if os.path.exists(destfile):
+        os.remove(destfile)
         
     ftp.retrbinary("RETR " + filename, open(destfile, 'wb').write)
     
     historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
     d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
-    return d["id"]
+    job_id = d['jobs'][0]['id']
+    jc = JobsClient(gi)
+    state = jc.get_state(job_id)
+    while state != ok:
+        time.sleep(0.5)
+        state = jc.get_state(job_id)
+    job_info =jc.show_job(job_id)
+    return job_info['outputs'][0]['id']
 
-def download_file(*args):
+def download_and_upload_to_galaxy(*args):
     remote_name = args[3]
     u = urlparse(remote_name)
     
@@ -277,7 +287,14 @@ def download_file(*args):
     gi = GalaxyInstance(args[0], args[1])
     historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
     d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
-    return d["id"]
+    job_id = d['jobs'][0]['id']
+    jc = JobsClient(gi)
+    state = jc.get_state(job_id)
+    while state != ok:
+        time.sleep(0.5)
+        state = jc.get_state(job_id)
+    job_info =jc.show_job(job_id)
+    return job_info['outputs'][0]['id']
     
 def http_to_history(*args):
     return download_file(*args)  
