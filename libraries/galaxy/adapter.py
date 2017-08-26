@@ -14,6 +14,7 @@ import tempfile
 from ftplib import FTP
 from collections import namedtuple
 import os
+import time
 
 from fileop import IOHelper
 
@@ -232,6 +233,14 @@ def ftp_to_history(u, destfile):
 def http_to_history(remote_name, destfile):
     with urllib.request.urlopen(remote_name) as response, open(destfile, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
+
+def wait_for_job_completion(gi, job_id):
+    jc = JobsClient(gi)
+    state = jc.get_state(job_id)
+    while state != 'ok':
+        time.sleep(0.5)
+        state = jc.get_state(job_id)
+    return jc.show_job(job_id)  
         
 def download_and_upload_to_galaxy(*args):
     remote_name = args[3]
@@ -255,14 +264,15 @@ def download_and_upload_to_galaxy(*args):
     gi = GalaxyInstance(args[0], args[1])
     historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
     d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
-    job_id = d['jobs'][0]['id']
-    jc = JobsClient(gi)
-    state = jc.get_state(job_id)
-    while state != ok:
-        time.sleep(0.5)
-        state = jc.get_state(job_id)
-    job_info =jc.show_job(job_id)
-    return job_info['outputs'][0]['id']
+    job_info = wait_for_job_completion(gi, d['jobs'][0]['id'])
+    return job_info['outputs']['output0']['id']
+
+def dataset_id_to_name(*args):
+    gi = GalaxyInstance(args[0], args[1])
+    dc = DatasetClient(gi)
+    t = args[4] if len(args) > 4 else 'hda'
+    ds_info = dc.show_dataset(dataset_id = args[3], hda_ldda = t)
+    return ds_info['name']
 
 def run_tool(*args):
     gi = GalaxyInstance(args[0], args[1])
@@ -274,6 +284,8 @@ def run_tool(*args):
         params = params.split(",")
         for param in params:
             param = param.split(":")
-            inputs[str(param[0])] = param[1]
+            inputs[str(param[0]).strip()] = param[1]
             
-    return toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=inputs)
+    d = toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=inputs)
+    job_info = wait_for_job_completion(gi, d['jobs'][0]['id'])
+    return job_info['outputs']['output_file']['id']

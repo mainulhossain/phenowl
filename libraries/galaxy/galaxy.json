@@ -230,6 +230,17 @@
            "returns": "string",
            "example":"GetLastHistory()",
            "runmode": "distributed"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"DatasetIDToName",
+           "internal":"dataset_id_to_name",
+           "desc": "Gets the name of a dataset from id.",
+           "returns": "string",
+           "example":"DatasetIDToName(dataset_id, [hda_or_ldda])",
+           "runmode": "distributed"
        }
    ]
 }
