@@ -223,66 +223,34 @@ def upload_to_library_from_url(*args):
     d = hc.upload_file_from_url(libraryid, args[3])
     return d["id"]
 
-def upload_to_history(*args):
-    gi = GalaxyInstance(args[0], args[1])
-    path = IOHelper.normaize_path(args[3])
-    historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
-    d = gi.tools.upload_file(path, historyid)
-    return d["id"]
-    
-def ftp_to_history(*args):
-    gi = GalaxyInstance(args[0], args[1])
-       
-    u = urlparse(args[3])
-    if u.scheme:
-        p = urlunparse((u.scheme, u.netloc, '', '', '', ''))
-    
-    if u.scheme.lower() != 'ftp':
-        raise 'No ftp address given.'
-        
+def ftp_to_history(u, destfile):       
     ftp = FTP(u.netloc)
     ftp.login()
-    
     ftp.cwd(os.path.dirname(u.path))
-    filename = os.path.basename(u.path)
-    
-    destfile = os.path.join(tempfile.gettempdir(), filename)
-    if os.path.exists(destfile):
-        os.remove(destfile)
-        
-    ftp.retrbinary("RETR " + filename, open(destfile, 'wb').write)
-    
-    historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
-    d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
-    job_id = d['jobs'][0]['id']
-    jc = JobsClient(gi)
-    state = jc.get_state(job_id)
-    while state != ok:
-        time.sleep(0.5)
-        state = jc.get_state(job_id)
-    job_info =jc.show_job(job_id)
-    return job_info['outputs'][0]['id']
+    ftp.retrbinary("RETR " + os.path.basename(u.path), open(destfile, 'wb').write)
 
+def http_to_history(remote_name, destfile):
+    with urllib.request.urlopen(remote_name) as response, open(destfile, 'wb') as out_file:
+        shutil.copyfileobj(response, out_file)
+        
 def download_and_upload_to_galaxy(*args):
     remote_name = args[3]
     u = urlparse(remote_name)
     
     filename = os.path.basename(u.path)   
     destfile = os.path.join(tempfile.gettempdir(), filename)
-    if os.exists(destfile):
-        os.delete(destfile)
+    if os.path.exists(destfile):
+        os.remove(destfile)
     
     if u.scheme:
         if u.scheme.lower() == 'http' or u.scheme.lower() == 'https':
-            # Download the file from `url` and save it locally under `file_name`:
-            with urllib.request.urlopen(remote_name) as response, open(destfile, 'wb') as out_file:
-                shutil.copyfileobj(response, out_file)
+            http_to_history(remote_name, destfile)
         elif u.scheme.lower() == 'ftp':
-            ftp = FTP(u.netloc)
-            ftp.login()
-            ftp.cwd(os.path.dirname(u.path))
+            ftp_to_history(u, destfile)
         else:
             raise 'No http(s) address given.'
+    else:
+        destfile = IOHelper.normaize_path(remote_name)
 
     gi = GalaxyInstance(args[0], args[1])
     historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
@@ -295,9 +263,6 @@ def download_and_upload_to_galaxy(*args):
         state = jc.get_state(job_id)
     job_info =jc.show_job(job_id)
     return job_info['outputs'][0]['id']
-    
-def http_to_history(*args):
-    return download_file(*args)  
 
 def run_tool(*args):
     gi = GalaxyInstance(args[0], args[1])
