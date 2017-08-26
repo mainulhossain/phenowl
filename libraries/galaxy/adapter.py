@@ -234,7 +234,7 @@ def ftp_to_history(*args):
     if u.scheme:
         p = urlunparse((u.scheme, u.netloc, '', '', '', ''))
     
-    if u.scheme.lower() is not 'ftp':
+    if u.scheme.lower() != 'ftp':
         raise 'No ftp address given.'
         
     ftp = FTP(u.netloc)
