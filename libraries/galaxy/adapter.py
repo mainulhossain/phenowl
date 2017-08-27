@@ -278,7 +278,7 @@ def run_tool(*args):
     gi = GalaxyInstance(args[0], args[1])
     toolClient = ToolClient(gi)
     #params = json2obj(args[5])
-    inputs = json.dumps(args[5]) if len(args) > 5 else None
+    inputs = json.loads(args[5]) if len(args) > 5 else None
 #     if params:
 #         params = params.split(",")
 #         for param in params:
