@@ -278,13 +278,12 @@ def run_tool(*args):
     gi = GalaxyInstance(args[0], args[1])
     toolClient = ToolClient(gi)
     #params = json2obj(args[5])
-    params = args[5]
-    inputs = {}
-    if params:
-        params = params.split(",")
-        for param in params:
-            param = param.split(":")
-            inputs[str(param[0]).strip()] = param[1]
+    inputs = json.dumps(args[5]) if len(args) > 5 else None
+#     if params:
+#         params = params.split(",")
+#         for param in params:
+#             param = param.split(":")
+#             inputs[str(param[0]).strip()] = param[1]
             
     d = toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=inputs)
     job_info = wait_for_job_completion(gi, d['jobs'][0]['id'])
