@@ -180,17 +180,6 @@
            "org": "srlab",
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
-           "name":"DatasetIDToName",
-           "internal":"dataset_id_to_name",
-           "desc": "Gets the name of dataset from id.",
-           "returns": "string",
-           "example":"DatasetIDToName(dataset_id)",
-           "runmode": "distributed"
-       },
-       {
-           "org": "srlab",
-           "package": "galaxy",
-           "module": "libraries.galaxy.adapter",
            "name":"GetToolParams",
            "internal":"get_tool_params",
            "desc": "Get tool parameters.",

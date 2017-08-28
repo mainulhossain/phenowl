@@ -188,13 +188,7 @@ def get_history_datasets(*args):
     for dataset in datasets:
         ids.append(dataset['id'])
     return ids
-
-def dataset_id_to_name(*args):
-    gi = GalaxyInstance(args[0], args[1])
-    dc = DatasetClient(gi)
-    details = dc.show_dataset(args[3])
-    return details['name']
-                            
+                          
 def upload(*args):
     gi = GalaxyInstance(args[0], args[1])
     library = get_library(*args)
@@ -287,4 +281,4 @@ def run_tool(*args):
             
     d = toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=inputs)
     job_info = wait_for_job_completion(gi, d['jobs'][0]['id'])
-    return job_info['outputs']['output_file']['id']
+    return job_info#['outputs']['output_file']['id']
