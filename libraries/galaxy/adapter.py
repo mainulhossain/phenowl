@@ -27,8 +27,14 @@ def _json_object_hook(d):
 def json2obj(data):
     return json.loads(data, object_hook=_json_object_hook)
 
+def create_galaxy_instance(*args):
+    if len(args) < 1:
+        raise "No address to the galaxy server given."
+    key = args[1] if len(args) > 1 and args[1] is not None else '7483fa940d53add053903042c39f853a'
+    return GalaxyInstance(args[0], key)
+    
 def get_workflows_json(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     return gi.workflows.get_workflows()
     
 def get_workflow_ids(*args):
@@ -46,7 +52,7 @@ def get_workflow(*args):
             return j
         
 def get_libraries_json(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     return gi.libraries.get_libraries()
     
 def get_library_ids(*args):
@@ -64,7 +70,7 @@ def get_library(*args):
             return j
         
 def get_histories_json(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     return gi.histories.get_histories()
     
 def get_history_ids(*args):
@@ -87,11 +93,11 @@ def get_most_recent_history_id(gi):
     return hi['id']
     
 def get_most_recent_history(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     return get_most_recent_history_id(gi)
         
 def create_history(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     hc = HistoryClient(gi)
     historyName = args[3] if len(args) > 3 else str(uuid.uuid4())
     h = hc.create_history(historyName)
@@ -105,14 +111,15 @@ def history_id_to_name(*args):
 
 def history_name_to_ids(*args):
     wf = get_histories_json(*args)
+    history_name = args[3].lower()
     ids = []
     for j in wf:
-        if j['name'] == args[3]:
+        if j['name'].lower() == history_name:
             ids.append(j['id'])
     return ids
         
 def get_tools_json(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     tc = ToolClient(gi)
     return tc.get_tools()
 
@@ -140,9 +147,10 @@ def get_tool(*args):
 
 def get_tools_by_name(*args):
     wf = get_tools_json(*args)
+    tool_name = args[3].lower()
     named = []
     for j in wf:
-        if j['name'] == args[3]:
+        if j['name'].lower() == tool_name:
             named.append(j)
     return named
 
@@ -154,15 +162,17 @@ def tool_id_to_name(*args):
 
 def tool_name_to_id(*args):
     wf = get_tools_json(*args)
+    tool_name = args[3].lower()
     for j in wf:
-        if j['name'] == args[3]:
+        if j['name'].lower() == tool_name:
             return j['id']
 
 def get_tool_params_by_tool_name(*args):
     tools = get_tools_json(*args)
-    tc = ToolClient(gi)               
+    tc = ToolClient(gi)
+    tool_name = args[3].lower()     
     for t in tools:
-        if t['name'] == args[3]:
+        if t['name'].lower() == tool_name:
             ts = tc.show_tool(tool_id = t['id'], io_details=True)
             if len(args) > 4:
                 return ts[args[4]]
@@ -170,7 +180,7 @@ def get_tool_params_by_tool_name(*args):
                 return ts
                             
 def get_tool_params(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     tc = ToolClient(gi)
     ts = tc.show_tool(tool_id = args[3], io_details=True)
     if len(args) > 4:
@@ -179,7 +189,7 @@ def get_tool_params(*args):
         return ts
                                         
 def get_history_datasets(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     historyid = args[3] if len(args) > 3 else get_most_recent_history_id(gi)
     name = args[4] if len(args) > 4 else None
 
@@ -190,7 +200,7 @@ def get_history_datasets(*args):
     return ids
                           
 def upload(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     library = get_library(*args)
     if library is not None:
         return gi.libraries.upload_file_from_local_path(library['id'], args[4])
@@ -198,21 +208,21 @@ def upload(*args):
         r = gi.tools.upload_file(args[4], args[3])
     
 def run_workflow(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     workflow_id = args[3]
     datamap = dict()
     datamap['252'] = { 'src':'hda', 'id':str(args[4]) }
     return gi.workflows.run_workflow(args[3], datamap, history_name='New Workflow Execution History')
 
 def create_library(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     hc = LibraryClient(gi)
     historyName = args[2] if len(args) > 2 else str(uuid.uuid4())
     h = hc.create_library(historyName)
     return h["id"]
 
 def upload_to_library_from_url(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     hc = LibraryClient(gi)
     libraryid = args[2]
     d = hc.upload_file_from_url(libraryid, args[3])
@@ -255,21 +265,21 @@ def download_and_upload_to_galaxy(*args):
     else:
         destfile = IOHelper.normaize_path(remote_name)
 
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     historyid = args[4] if len(args) > 4 else get_most_recent_history_id(gi)
     d = gi.tools.upload_file(destfile, historyid) #hid: a799d38679e985db 03501d7626bd192f
     job_info = wait_for_job_completion(gi, d['jobs'][0]['id'])
     return job_info['outputs']['output0']['id']
 
 def dataset_id_to_name(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     dc = DatasetClient(gi)
     t = args[4] if len(args) > 4 else 'hda'
     ds_info = dc.show_dataset(dataset_id = args[3], hda_ldda = t)
     return ds_info['name']
 
 def run_tool(*args):
-    gi = GalaxyInstance(args[0], args[1])
+    gi = create_galaxy_instance(*args)
     toolClient = ToolClient(gi)
     #params = json2obj(args[5])
     inputs = json.loads(args[5]) if len(args) > 5 else None
