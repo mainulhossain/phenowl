@@ -774,12 +774,33 @@ class PhenoWLInterpreter:
             self.eval(expr[1])
         pass
         
-    def doassign(self, expr):
+    def doassign(self, left, right):
         '''
         Evaluates an assignment expression.
         :param expr:
         '''
-        self.context.add_var(expr[0], self.eval(expr[1]))
+        if len(left) == 1:
+            self.context.add_var(left[0], self.eval(right))
+        elif left[0] == 'LISTIDX':
+            left = left[1]
+            idx = self.eval(left[1])
+            if self.context.var_exists(left[0]):
+                v = self.context.get_var(left[0])
+                if isinstance(v, list):
+                    while len(v) <= idx:
+                        v.append(None)
+                    v[int(idx)] = self.eval(right)
+                elif isinstance(v, dict):
+                    v[idx] = self.eval(right)
+                else:
+                    raise "Not a list or dictionary"
+            else:
+                v = []
+                while len(v) <= idx:
+                    v.append(None)
+                v[int(idx)] = self.eval(right)
+                self.context.add_var(left[0], v)
+        
         
     def dofor(self, expr):
         '''
@@ -831,6 +852,24 @@ class PhenoWLInterpreter:
             v.append(self.eval(e))
         return v
     
+    def remove_single_item_list(self, expr):
+        if not isinstance(expr, list):
+            return expr
+        if len(expr) == 1:
+            return self.remove_single_item_list(expr[0])
+        return expr
+        
+    def dodict(self, expr):
+        '''
+        Executes a list operation.
+        :param expr:
+        '''
+        v = {}
+        for e in expr:
+            #e = self.remove_single_item_list(e)
+            v[self.eval(e[0])] = self.eval(e[1])
+        return v
+    
     def dolistidx(self, expr):
         val = self.context.get_var(expr[0])
         return val[self.eval(expr[1])]
@@ -876,11 +915,16 @@ class PhenoWLInterpreter:
         if not expr:
             return
         if len(expr) == 1:
-            return self.eval(expr[0])
+            if expr[0] == "LISTEXPR":
+                return list()
+            elif expr[0] == "DICTEXPR":
+                return dict()
+            else:
+                return self.eval(expr[0])
         if expr[0] == "FOR":
             return self.dofor(expr[1])
         elif expr[0] == "ASSIGN":
-            return self.doassign(expr[1:])
+            return self.doassign(expr[1], expr[2])
         elif expr[0] == "CONST":
             return self.eval_value(expr[1])
         elif expr[0] == "NUMEXPR":
@@ -897,8 +941,10 @@ class PhenoWLInterpreter:
             return self.dorelexpr(expr[1:])
         elif expr[0] == "IF":
             return self.doif(expr[1])
-        elif expr[0] == "LIST":
-            return self.dolist(expr[1])
+        elif expr[0] == "LISTEXPR":
+            return self.dolist(expr[1:])
+        elif expr[0] == "DICTEXPR":
+            return self.dodict(expr[1:])
         elif expr[0] == "FUNCCALL":
             return self.dofunc(expr[1])
         elif expr[0] == "LISTIDX":
@@ -966,7 +1012,7 @@ class BasicGrammar():
         modpref = Combine(OneOrMore(self.identifier + Literal(".")))
         self.funccall = Group((Optional(modpref) + self.identifier + FollowedBy("(")) + 
                               Group(Suppress("(") + Optional(self.arguments) + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
-        self.listidx = Group(self.identifier("name") + Suppress("[") + self.expr("idx") + Suppress("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
+        self.listidx = Group(self.identifier + Suppress("[") + self.expr + Suppress("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
         
         
         pi = CaselessKeyword( "PI" )
@@ -975,7 +1021,8 @@ class BasicGrammar():
         self.lpar, self.rpar = map(Suppress, "()")
         expop = Literal( "**" )
         
-        atom = (( pi | e | fnumber | self.string | self.identifier + self.lpar + self.expr + self.rpar | self.identifier ) | Group( self.lpar + self.expr + self.rpar ))
+        parexpr = self.lpar + self.expr + self.rpar
+        atom = (( pi | e | fnumber | self.string | self.identifier + parexpr | self.identifier) | Group(parexpr))
         
         # by defining exponentiation as "atom [ ^ factor ]..." instead of "atom [ ^ atom ]...", we get right-to-left exponents, instead of left-to-righ
         # that is, 2^3^2 = 2^(3^2), not (2^3)^2.
@@ -986,9 +1033,7 @@ class BasicGrammar():
         self.numexpr << Group((self.multexpr + ZeroOrMore(self.addop + self.multexpr)).setParseAction(lambda t: ['NUMEXPR'] + t.asList()))
         self.stringaddexpr << Group((self.string + ZeroOrMore(Literal("+") + (self.identifier | self.string))).setParseAction(lambda t: ['CONCAT'] + t.asList()))
                 
-        self.expr << ( 
-                      self.stringaddexpr | self.string | self.funccall | self.listidx | self.numexpr
-                      ).setParseAction(lambda x : x.asList())
+        self.expr << (self.stringaddexpr | self.string | self.funccall | self.listidx | self.numexpr).setParseAction(lambda x : x.asList())
         
         self.arguments << delimitedList(Group(self.expr))
         
@@ -1005,8 +1050,11 @@ class BasicGrammar():
         self.stmtlist = Forward()
         self.retstmt = (Keyword("return") + self.expr("exp"))
 #       
-        self.listdecl = Group(Suppress("[") + Optional(delimitedList(self.expr("exp"))) + Suppress("]")).setParseAction(lambda t: ["LIST"] + t.asList())                           
-        self.assignstmt = (self.identifier("var") + Literal("=") + Group(self.expr("exp") + Optional(self.listidx)) | self.listdecl).setParseAction(lambda t: ['ASSIGN'] + [t[0], t[2]])
+        self.listdecl = (Suppress("[") + Optional(delimitedList(self.expr)) + Suppress("]")).setParseAction(lambda t: ["LISTEXPR"] + t.asList())
+        self.dictdecl = Forward()
+        self.dictdecl << (Suppress("{") + Optional(delimitedList(Group(self.expr + Suppress(Literal(":")) + Group(self.dictdecl | self.expr)))) + Suppress("}")).setParseAction(lambda t: ["DICTEXPR"] + t.asList())
+
+        self.assignstmt = (Group(self.listidx | self.identifier) + Suppress(Literal("=")) + Group(self.expr | self.listidx | self.listdecl | self.dictdecl)).setParseAction(lambda t: ['ASSIGN'] + t.asList())
         
         self.funccallstmt = self.funccall
         
@@ -1152,11 +1200,35 @@ if __name__ == "__main__":
 #result = SearchEntrez("Myb AND txid3702[ORGN] AND 0:6000[SLEN]", "nucleotide")
 #print(result)
 
-s = 10
-t = "15" + "16"
-print(t)
+# s = 10
+# t = "15" + "16"
+# print(t)
+
+# task ('http://sr-p2irc-big8.usask.ca:8080', '7483fa940d53add053903042c39f853a'):
+#     history_id = CreateHistory('Galaxy Pipeline')
+#     dataset_id = FtpToHistory('ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR034/SRR034608/SRR034608.fastq.gz', history_id)
+#     tool_id = ToolNameToID('FASTQ Groomer')
+#     ref_dataset_id = HttpToHistory('http://rice.plantbiology.msu.edu/pub/data/Eukaryotic_Projects/o_sativa/annotation_dbs/pseudomolecules/version_6.1/all.dir/all.cDNA.gz', history_id)
+#     params = "name:" + ref_dataset_id
+#     r = RunTool(history_id, tool_id, params)
+#     
+#     output = r['name']
+#     print(output)
+
+
+
+#x[0] = 5*4
+#z = x[0] 
+#y = 50 + z
+# a = {3: {'t':'ss'}, 4:11}
+# y = a[3]
+x = []
+x[0] = 20
+y = 5 + (x[0])
+print(y)    
             """
-            tokens = p.parse(test_program_example)
+        tokens = p.parse(test_program_example)
+        #tokens = p.grammar.assignstmt.ignore(pythonStyleComment).parseString(test_program_example)
             
         tokens.pprint()
         #print(tokens.asXML())
