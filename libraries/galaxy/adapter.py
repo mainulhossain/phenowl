@@ -282,7 +282,7 @@ def run_tool(*args):
     gi = create_galaxy_instance(*args)
     toolClient = ToolClient(gi)
     #params = json2obj(args[5])
-    inputs = json.loads(args[5]) if len(args) > 5 else None
+    inputs = args[5] #json.loads(args[5]) if len(args) > 5 else None
 #     if params:
 #         params = params.split(",")
 #         for param in params:
