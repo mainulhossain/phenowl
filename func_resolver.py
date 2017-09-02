@@ -6,23 +6,9 @@ import os
 import subprocess
 
 from fileop import IOHelper
-
+from exechelper import func_exec_run
 
 #from phenoparser import Context
-def func_exec(app, *args):
-
-    cmd = app
-    if args:
-        cmd += ' ' + ' '.join(args)
-    p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=False)
-    return p.stdout.read()
-
-def func_exec_run(app, *args):
-    cmd = app
-    if args:
-        cmd += ' ' + ' '.join(args)
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    return p.stdout.decode('utf-8')
 
 def load_module(modulename):
     '''

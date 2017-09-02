@@ -1,16 +1,9 @@
-import subprocess
 import os
 from os import path
+from exechelper import func_exec_run
 
 localdir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'storage')
 fastqc = path.join(path.abspath(path.dirname(__file__)), path.join('lib', 'fastqc'))
-
-def func_exec_run(app, *args):
-    cmd = app
-    if args:
-        cmd += ' ' + ' '.join(args)
-    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    return p.stdout.decode('utf-8')
 
 def run_fastqc(*args):
     input = path.join(localdir, args[0])
