@@ -1222,10 +1222,13 @@ if __name__ == "__main__":
 #y = 50 + z
 # a = {3: {'t':'ss'}, 4:11}
 # y = a[3]
-x = []
-x[0] = 20
-y = 5 + (x[0])
-print(y)    
+# x = []
+# x[0] = 20
+# y = 5 + (x[0])
+# print(y)
+
+f = FastQC('fastq\SRR034608.fastq.gz')
+print(f)   
             """
         tokens = p.parse(test_program_example)
         #tokens = p.grammar.assignstmt.ignore(pythonStyleComment).parseString(test_program_example)
