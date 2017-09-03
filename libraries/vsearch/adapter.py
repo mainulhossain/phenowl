@@ -7,7 +7,7 @@ vsearch = 'vsearch' # vsearch must be in the path
 
 def run_usearch(*args):
     cmdargs = ["-" + args[0]]
-    cmdargs = [path.join(localdir, args[1])]
+    cmdargs.append(path.join(localdir, args[1]))
     
     output_file = ''
     if len(args) > 2:

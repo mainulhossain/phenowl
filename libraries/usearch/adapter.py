@@ -7,7 +7,7 @@ usearch = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'usea
 
 def run_usearch(*args):
     cmdargs = ["-" + args[0]]
-    cmdargs = [path.join(localdir, args[1])]
+    cmdargs.append(path.join(localdir, args[1]))
     
     output_file = ''
     if len(args) > 2:
