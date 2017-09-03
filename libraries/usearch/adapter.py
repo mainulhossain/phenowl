@@ -12,7 +12,7 @@ def run_usearch(*args):
     output_file = ''
     if len(args) > 2:
         out_opt = args[2]
-        cmdargs.append(out_opt)
+        cmdargs.append('-' + out_opt)
         output_file = path.join(localpath, args[3])
         cmdargs.append(output_file)
 
