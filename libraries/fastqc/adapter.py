@@ -12,8 +12,13 @@ def run_fastqc(*args):
     if len(args) > 1:
         outdir = path.join(localpath, args[1]) 
         cmdargs.append("--outdir={0}".format(outdir))
+    
+    for arg in args[2:]:
+        cmdargs.append(arg)
+    
     func_exec_run(fastqc, *cmdargs)
     outname = path.basename(input)
     outname = outname.split(os.extsep)[0] + "_fastqc.html"
+    
     return path.join(outdir, outname)
     

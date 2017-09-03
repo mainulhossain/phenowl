@@ -9,7 +9,36 @@
            "runmode": "local",
            "desc": "Merge mates from fragments that are shorter than twice the read length.",
            "returns": "string",
-           "example":"Flash(input_path, output_path, max_overlap)",
+           "example":"Flash(input1, input2, output_path, max_overlap)",
+           "params":[  
+            {  
+               "name":"input1",
+               "type":"string"
+            },
+            {  
+               "name":"input2",
+               "type":"string"
+            },
+            {  
+               "name":"output_path",
+               "type":"string"
+            },
+            {
+                "name": "max_overlap",
+                "type": "int"
+            }            
+            ]
+       },
+       {
+           "org": "srlab",
+           "package": "flash",
+           "module": "libraries.flash.adapter",
+           "name":"Flash_Recursive",
+           "internal":"run_flash_recursive",
+           "runmode": "local",
+           "desc": "Merge mates from fragments that are shorter than twice the read length.",
+           "returns": "string",
+           "example":"Flash_Recursive(input_path, output_path, [max_overlap])",
            "params":[  
             {  
                "name":"input_path",
