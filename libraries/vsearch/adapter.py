@@ -17,7 +17,7 @@ def run_usearch(*args):
         cmdargs.append(output_file)
 
     for arg in args[4:]:
-        cmdargs.append(arg)
+        cmdargs.append('-' + arg)
     
     func_exec_run(vsearch, *cmdargs)
     
