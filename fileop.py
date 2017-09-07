@@ -75,7 +75,30 @@ class PosixFileSystem():
     
     def isfile(self, path):
         return os.path.isfile(path)
-                       
+    
+    def make_json(self, path):
+        path = self.normaize_path(path)
+        data_json = { 'path': path, 'text': os.path.basename(path) }
+        data_json['folder'] = os.path.isdir(path)
+        
+        if os.path.isdir(path):
+           data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in os.listdir(path)]
+        return data_json
+    
+    def rename(self, oldpath, newpath):
+        os.rename(oldpath, newpath)
+        
+    def saveUpload(self, file, path):
+        if os.path.isfile(path):
+            path = os.path.dirname(path)
+        file.save(os.path.join(path, file.filename))
+    
+    def download(self, fullpath):
+        if os.path.isfile(fullpath):
+            return fullpath
+        else:
+            return None
+                           
 class HadoopFileSystem():
     def __init__(self, addr, user):
         self.client = InsecureClient(addr, user=user)
@@ -141,7 +164,37 @@ class HadoopFileSystem():
     def write(self, path, content):
         path = self.normaize_path(path)
         self.client.write(path, content)
-            
+    
+    def make_json(self, path):
+        path = self.normaize_path(path)
+        data_json = { 'path': path, 'text': os.path.basename(path) }
+        status = self.client.status(path, False)
+
+        if status is not None:
+            data_json['folder'] = status['type'] == "DIRECTORY"
+            if status['type'] == "DIRECTORY":
+                data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in self.client.list(path)]
+        #print(json.dumps(data_json))
+        return data_json
+     
+    def saveUpload(self, file, fullpath):
+        localpath = os.path.join(tempfile.gettempdir(), os.path.basename(fullpath))
+        if os.path.isfile(localpath):
+            os.remove(localpath)
+        try:
+            file.save(localpath)
+            self.client.upload(os.path.dirname(fullpath), localpath, True)
+        except:
+            pass
+        
+    def download(self, fullpath):
+        status = self.client.status(fullpath, False)
+        if status is not None and status['type'] == "FILE":
+            localpath = os.path.join(tempfile.gettempdir(), os.path.basename(fullpath))
+            return self.client.download(fullpath, localpath, True)
+        else:
+            return None
+               
 class IOHelper():
     @staticmethod
     def getFileSystem(url):

@@ -4,13 +4,17 @@
 <title>BioWL Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.css">
+
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 <!-- <script src="http://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script> -->
 <script src="ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="ace-builds/src-min-noconflict/ext-language_tools.js"></script>
+<script src="https://cdn.rawgit.com/mgalante/jquery.redirect/master/jquery.redirect.js"></script>
 <style>
 
 .odd-row {
@@ -42,48 +46,48 @@ background-color: White;
     </div>
 </div>
     <div class="container">
+        <div></div>
         <div id="main" class="row">
-            <div class="col-md-6">
+            <div class="col-md-6" style="padding:2px">
                 <div class="panel panel-primary">
-                    <div class="panel-heading ">
+                    <div class="panel-heading">
 	                    <h2>Bioinformatics Workflow Language</h2>
 	                    <span class="bg-info text-info">Write script to create a pipeline.</span><br>
 	                    <span class="bg-info text-info">Drag functions/samples from the right.</span>
                     </div>
-                    <div class="panel-body" style="padding=1px; margin=0px;">
-        		        <textarea rows="16" style="width: 100%; height=100%" id="script"></textarea><br>
+                    <div class="panel-body" style="padding=0; margin=0px;">
+        		        <textarea rows="16" style="width: 100%; height=100%; padding=0; margin=0px;" id="script"></textarea><br>
 		            </div>
 		        </div>
-		        <div class="panel panel-primary">
-		        <div class="panel-body">
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runBioWL">Run</button>
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddSample">Add Sample</button>
-		        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Python Code</button>
-		        <div>Time: <span id="duration"></span>
+		        <div class="panel panel-primary" style="padding:2px">
+			        <div class="panel-body" style="padding:0">
+				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runBioWL">Run</button>
+				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
+				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
+				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddSample">Save</button>
+				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Python Code</button>
+				        <div>Time: <span id="duration"></span></div>
+			            <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
+			        </div>
 		        </div>
-		        <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
+		        <div class="panel panel-success" style="padding:2px">
+			         <div class="panel-heading">
+			          <label>Output:</label>
+			         </div>
+			         <div class="panel-body" style="padding:0">
+			          <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
+			        </div>
 		        </div>
-		        </div>
-		        <div class="panel panel-success">
-		        <div class="panel-heading">
-		          <label>Output:</label>
-		         </div>
-		         <div class="panel-body">
-		          <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
-		        </div>
-		        </div>
-		       <div class="panel panel-danger">
+		       <div class="panel panel-danger" style="padding:2px">
                 <div class="panel-heading">
                   <label>Error:</label>
                  </div>
-                 <div class="panel-body">
+                 <div class="panel-body" style="padding:0">
 		        <textarea rows="3" style="min-width: 100%" id="error"></textarea>
 		        </div>
 		        </div>
             </div>
-            <div class="col-sm-4" id="functions">
+            <div class="col-sm-4" id="functions" style="padding:2px">
 	            <div   class="panel panel-primary">
 	                <div class="panel-heading ">
 	                   <div class="row">
@@ -91,7 +95,7 @@ background-color: White;
 	                       <div class="col-sm-4"><h5 class="">Package</h5></div>
 	                   </div>
 	                </div>
-	                <div class="panel-body draggable-functions" style="max-height: 500px; overflow-y: scroll;">
+	                <div class="panel-body draggable-functions" style="max-height: 500px; overflow-y: scroll; padding:3px">
 	                        <!-- ko foreach: tasks -->
 	                        <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
 	                           <div class="col-sm-4 draggable-func" data-bind="text: name"></div>
@@ -101,23 +105,43 @@ background-color: White;
 	                        <!-- /ko -->
 	                </div>
 	            </div>
-                    <div class="panel panel-primary">
-                    <div class="panel-heading">
-                       <div class="row">
-                           <div class="col-sm-4"><h5 class="">Samples</h5></div>
-                       </div>
+                    <div class="panel panel-primary" style="padding:2px">
+	                    <div class="panel-heading">
+	                       <div class="row">
+	                           <div class="col-sm-4"><h5 class="">Workflows</h5></div>
+	                       </div>
+	                    </div>
+	                    <div class="panel-body draggable-samples" style="max-height: 200px; overflow-y: scroll;">
+	                            <!-- ko foreach: samples -->
+	                            <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
+	                               <div class="draggable-sample" style="margin-left: 10px" data-bind="text: name"></div>
+	                            </div>
+	                            <!-- /ko -->
+	                    </div>
                     </div>
-                    <div class="panel-body draggable-samples" style="max-height: 200px; overflow-y: scroll;">
-                            <!-- ko foreach: samples -->
-                            <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
-                               <div class="draggable-sample" style="margin-left: 10px" data-bind="text: name"></div>
-                            </div>
-                            <!-- /ko -->
+                    <div id="dataSourcesPanel" class="panel panel-primary">
+                        <div class="panel-heading">
+                           <div class="row">
+                               <div class="col-sm-4"><h5 class="">Data Sources</h5></div>
+                           </div>
+                           <div class="btn-group">
+			                    <div class="btn-group-sm">
+			                        <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Reload" data-bind="click: load"><i class="glyphicon glyphicon-refresh"></i></button>
+			                        <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Download" data-bind="click: download"><i class="glyphicon glyphicon-download"></i></button>
+			                        <button class="btn btn-primary pull-right" data-toggle="modal" data-placement="top" title="Upload" data-bind="click: beginFileUpload"><i class="glyphicon glyphicon-upload"></i></button>
+			                        <button class="btn btn-primary pull-right" data-toggle="modal" data-placement="top" title="Rename" data-target="#rename-filefolder-dialog" ><i class="glyphicon glyphicon-edit"></i></button>
+			                        <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Delete" onclick="remove();"><i class="glyphicon glyphicon-minus"></i></button>
+			                        <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Add" onclick="addFolder();" ><i class="glyphicon glyphicon-plus"></i></button>
+			                    </div>
+		                    </div>
+                        </div>
+                        <div class="panel-body draggable-datasources" style="max-height: 200px; overflow-y: scroll; padding:0">
+                            <div id="tree" data-bind="treeView: dataSources"></div>
+                        </div>
                     </div>
-                </div>
-            </div>
         </div>
     </div>
+   </div>
 
     <div id="add" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="addDialogLabel" aria-hidden="true" style="width: 480px; height: 600px; background: #fff">
         <div class="modal-header">
@@ -185,6 +209,41 @@ background-color: White;
             <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
         </div>
     </div>
+    
+	<div class="modal fade" id="file-upload-dialog" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <!-- Modal Header -->
+	            <div class="modal-header">
+	                <button type="button" class="close" data-dismiss="modal">
+	                       <span aria-hidden="true">&times;</span>
+	                       <span class="sr-only">Close</span>
+	                </button>
+	                <h4 class="modal-title" id="uploadModalLabel">
+	                    File Upload
+	                </h4>
+	            </div>
+	            
+	            <!-- Modal Body -->
+	            <div class="modal-body">
+	                <form id="upload-file" class="form-horizontal" role="form" method=POST enctype=multipart/form-data>
+	                  <div class="form-group">
+	                    <div class="col-sm-offset-2 col-sm-10">
+	                        <input type="file" name="file" id="upload" multiple>
+	                    </div>
+	                  </div>
+	                  
+	                  <div class="form-group">
+	                    <div class="col-sm-offset-2 col-sm-10">
+	                      <button data-bind="click: upload" type="button" class="btn btn-default" id="upload-file-btn" data-dismiss="modal">Upload</button>
+	                    </div>
+	                  </div>
+	                </form>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
     <div id="edit" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true" style="background: #fff">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã—</button>
@@ -287,9 +346,113 @@ background-color: White;
                 });
             });
         });
-                 
+        
+        centerDialog = function(dlg) {
+            var windowHeight = $(window).height();
+            var windowWidth = $(window).width();
+            var boxHeight = dlg.height();
+            var boxWidth = dlg.width();
+            dlg.css({'margin-left' : ((windowWidth - boxWidth )/2), 'margin-top' : ((windowHeight - boxHeight )/2)});
+        }
     });
-       
+
+    // Create the View Model.
+    var DataSourceViewModel = function() {
+      var self = this;
+      self.dataSourcesURI = 'todo/api/v1.0/datasources';
+      self.dataSources = [];
+      
+      self.ajax = function(uri, method, data) {
+          var request = {
+                  url: uri,
+                  type: method,
+                  contentType: false,
+                  processData: false,
+                  cache: false,
+                  data: data,
+                  beforeSend: function (xhr) {
+                      xhr.setRequestHeader("Authorization", 
+                          "Basic " + btoa(self.username + ":" + self.password));
+                  },
+                  error: function(jqXHR) {
+                      console.log("ajax error " + jqXHR.status);
+                  }
+              };
+              return $.ajax(request);
+      }
+      
+      self.refresh = function(path) {
+
+          self.ajax(self.samplesURI, 'POST', {'path': path}).done(function(data) {
+              
+          });
+      }
+      
+      self.beginFileUpload = function() {
+          centerDialog($('#file-upload-dialog'));
+          $('#file-upload-dialog').modal('show');
+      }
+      
+      self.load = function(username, password) {
+          self.username = username;
+          self.password = password;
+          self.ajax(self.dataSourcesURI, 'GET').done(function(data) {
+              self.dataSources = data.datasources;
+              //$('#tree').treeview({data: self.dataSources});
+              ko.applyBindings(dataSourceModel, $("#dataSourcesPanel")[0]);
+          }).fail(function(jqXHR) {
+              if (jqXHR.status == 403)
+                  setTimeout(self.beginLogin, 500);
+          });
+      }
+      
+      self.upload = function() {
+
+     	  $('#file-upload-dialog').modal('hide');
+          
+          var files = $("#upload").get(0).files;
+          var formdata = new FormData();
+          formdata.append('upload', files[0]); //use get('files')[0]
+          nodes = $('#tree').treeview('getSelected')
+          if (nodes === undefined || nodes.lenght === 0)
+        	  return;
+          node = nodes[0];
+          formdata.append('path', node.path);//you can append it to formdata with a proper parameter name
+          
+
+          self.ajax(self.dataSourcesURI, 'POST', formdata).done(function(data) {
+        	 var x = 20; 
+          });
+       }
+      
+      self.download = function() {
+    	  
+    	  nodes = $('#tree').treeview('getSelected')
+          if (nodes === undefined || nodes.lenght === 0)
+              return;
+          node = nodes[0];
+          $.redirect(self.dataSourcesURI, { 'download': node.path });
+      }
+    }
+   
+    ko.bindingHandlers.treeView = {
+        init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            $(element).treeview({data: valueAccessor()}).on('nodeSelected', function(event, data) {
+                var x = 10
+            });
+        },
+        update: function(element, valueAccessor, allBindings) {
+            var x = 10;
+        }
+    };
+
+    // Create the View Model and initialise with initial data 
+    var dataSourceModel = new DataSourceViewModel();
+    dataSourceModel.load('mainulhossain@gmail.com', 'mainul');
+    ko.applyBindings(dataSourceModel, $("#dataSourcesPanel")[0]);
+    ko.applyBindings(dataSourceModel, $("#file-upload-dialog")[0]);
+    
+
     // configure ace.js for code editor
     var textarea = $("#script");
     
@@ -390,19 +553,13 @@ background-color: White;
                 self.tasks()[i].desc(newTask.runmode);
             }
             
-            self.centerDialog = function(dlg) {
-            	var windowHeight = $(window).height();
-            	var windowWidth = $(window).width();
-                var boxHeight = dlg.height();
-                var boxWidth = dlg.width();
-                dlg.css({'margin-left' : ((windowWidth - boxWidth )/2), 'margin-top' : ((windowHeight - boxHeight )/2)});
-            }
+            
 
             self.beginAddLibrary = function() {
             	var obj = { "functions": [{ "name": "", "internal": "", "example": ""} ] };
 
             	addLibraryViewModel.getCodeEditor().setValue(JSON.stringify(obj, null, 4), 1);
-            	self.centerDialog($('#add'));
+            	centerDialog($('#add'));
                 $('#add').modal('show');
             }
             
@@ -412,7 +569,7 @@ background-color: White;
             	{
             		sampleViewModel.getCodeEditor().setValue(script, 1);
             	}
-                self.centerDialog($('#addSample'));
+                centerDialog($('#addSample'));
                 $('#addSample').modal('show');
             }
             

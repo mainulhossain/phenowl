@@ -7,13 +7,18 @@ from flask import Flask, jsonify, abort, make_response
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask_restful.utils import cors
 from flask.ext.httpauth import HTTPBasicAuth
+from flask import send_from_directory
 from werkzeug.datastructures import MultiDict, FileStorage
-from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar, PhenoWLCodeGenerator
-from func_resolver import Library, Function
 import os
 import sys
 import json
 from timer import Timer
+import mimetypes
+
+from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar, PhenoWLCodeGenerator
+from func_resolver import Library, Function
+from fileop import IOHelper, PosixFileSystem, HadoopFileSystem
+from os import path
 
 app = Flask(__name__, static_url_path="")
 api = Api(app)
@@ -284,9 +289,121 @@ class SamplesAPI(Resource):
             finally:
                 return { 'out': '', 'err': ''}, 201
 
+class DataSource():
+    
+    @staticmethod
+    def load_data_sources():
+        datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
+        datasource_tree = []
+        try:
+            hdfs = HadoopFileSystem(datasources[0]['path'], 'hdfs')
+            datasources[0]['nodes'].append(fs.make_json('/'))
+            datasource_tree.append(datasources[0])
+        except:
+            pass
+        
+        fs = PosixFileSystem()
+        datasources[1]['nodes'] = fs.make_json(datasources[1]['path'])['nodes']
+        datasource_tree.append(datasources[1])
+            
+        return datasource_tree
+    
+    def load_data_sources_json():
+        return json.dumps(load_data_sources())
+    
+    @staticmethod
+    def upload(file, fullpath):
+        datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
+        for i in range(0, len(datasources)):
+            if fullpath.startswith(datasources[i]['path']):
+                if i == 0:
+                    hdfs = HadoopFileSystem(datasources[i]['path'], 'hdfs')
+                    hdfs.saveUpload(file, fullpath)
+                else:
+                    fs = PosixFileSystem()
+                    fs.saveUpload(file, fullpath)
+    
+    @staticmethod
+    def download(fullpath):
+        datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
+        for i in range(0, len(datasources)):
+            if fullpath.startswith(datasources[i]['path']):
+                if i == 0:
+                    hdfs = HadoopFileSystem(datasources[i]['path'], 'hdfs')
+                    return hdfs.download(fullpath)
+                else:
+                    fs = PosixFileSystem()
+                    return fs.download(fullpath)
+        
+folder_fields = {}
+file_fields = {
+    'text': fields.String,
+    'path': fields.String,
+    'folder': fields.Boolean
+}
+
+folder_fields = {
+    'text': fields.String,
+    'path': fields.String,
+    'folder': fields.Boolean,
+    'nodes': fields.Nested(file_fields, default = [])
+}
+
+class DataSourcesAPI(Resource):
+    #decorators = [auth.login_required]
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('path', location='form', required=False)
+        self.reqparse.add_argument('upload', location='files', required=False, type=FileStorage)
+        self.reqparse.add_argument('download', required=False)
+        super(DataSourcesAPI, self).__init__()
+
+    def get(self):
+        return {'datasources': json.dumps(DataSource.load_data_sources())}
+    
+    @staticmethod
+    def guess_mimetype(resource_path):
+        """
+        Guesses the mimetype of a given resource.
+        Args:
+            resource_path: the path to a given resource.
+        Returns:
+            The mimetype string.
+        """
+    
+        mime = mimetypes.guess_type(resource_path)[0]
+    
+        if mime is None:
+            return "application/octet-stream"
+    
+        return mime
+
+    #@cors.crossdomain(origin='*')
+    def post(self):
+        this_path = os.path.dirname(os.path.abspath(__file__))
+        args = self.reqparse.parse_args()
+        if args['upload']:
+            try:
+                file = args['upload']
+                DataSource.upload(file, args['path'])
+            finally:
+                return { 'out': '', 'err': ''}, 201
+        elif args['download']:
+            try:
+                fullpath = DataSource.download(args['download'])
+                mime = DataSourcesAPI.guess_mimetype(fullpath)
+                if mime == 'text/html':
+                    return send_from_directory(os.path.dirname(fullpath), os.path.basename(fullpath), mimetype=None, as_attachment=False, attachment_filename=None)
+                else:
+                    return send_from_directory(os.path.dirname(fullpath), os.path.basename(fullpath), mimetype=mime)
+            except Exception as inst:
+                return { 'out': '', 'err': str(inst)}, 201
+    
 api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<string:id>', endpoint='task')
 api.add_resource(SamplesAPI, '/todo/api/v1.0/samples', endpoint='samples')
+api.add_resource(DataSourcesAPI, '/todo/api/v1.0/datasources', endpoint='datasources')
 
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
