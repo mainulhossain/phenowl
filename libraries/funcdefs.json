@@ -101,7 +101,7 @@
             ],
            "desc": "Count number of individual words in a collection of documents.",
            "example": "CountWords('/user/phenodoop/documents', '/user/phenodoop/output')",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "SRLAB",
@@ -125,7 +125,7 @@
             ],
            "desc": "Searches a regular expression inside a directory of documents.",
            "example": "SearchWord('/user/phenodoop/documents', '/user/phenodoop/output', '[a-z]+')",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "SRLAB",
@@ -140,7 +140,7 @@
             }            
             ],           
            "returns": "byte[]",
-           "example": "Read('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents/4300-0.txt')"
+           "example": "Read('/texts/test.txt')"
        },
        {
            "org": "SRLAB",
@@ -158,7 +158,7 @@
                "type":"any"
             }              
             ],           
-           "example": "Write('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/temp.txt', 'Text to write')"
+           "example": "Write('/texts/test.txt', 'Text to write')"
        },
        {
            "org": "SRLAB",
@@ -173,7 +173,7 @@
             }            
             ],           
            "returns": "string[]",
-           "example": "GetFiles('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents')"
+           "example": "GetFiles('/texts')"
        },
        {
            "org": "SRLAB",
@@ -188,7 +188,7 @@
             }            
             ],           
            "returns": "string[]",
-           "example": "GetFolders('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/documents')"
+           "example": "GetFolders('/')"
        },
        {
            "org": "SRLAB",
@@ -202,7 +202,7 @@
                "type":"string"
             }            
             ],           
-           "example": "Remove('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/output1')"
+           "example": "Remove('/texts/test.txt')"
        },
        {
            "org": "SRLAB",
@@ -216,7 +216,7 @@
                "type":"string"
             }            
             ],           
-           "example": "CreateFolder('http://sr-p2irc-big1.usask.ca:50070/user/phenodoop/output/output1')"
+           "example": "CreateFolder('/testfolder')"
        },
        {
            "org": "SRLAB",

@@ -9,7 +9,7 @@
            "desc": "Gets the names of all workflows.",
            "returns": "string[]",
            "example":"GetWorkflows()",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -20,7 +20,7 @@
            "desc": "Gets the properties of a workflow.",
            "returns": "string[]",
            "example":"GetWorkflow(workflow_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -31,7 +31,7 @@
            "desc": "Gets the ids of all libraries.",
            "returns": "string[]",
            "example":"GetLibraryIDs()",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -42,7 +42,7 @@
            "desc": "Gets the properties of a workflow.",
            "returns": "string[]",
            "example":"GetLibrary(library_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -53,7 +53,7 @@
            "desc": "Gets the ids of all histories.",
            "returns": "string[]",
            "example":"GetHistoryIDs()",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -64,7 +64,7 @@
            "desc": "Gets the properties of a history.",
            "returns": "string[]",
            "example":"GetHistory(history_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -75,7 +75,7 @@
            "desc": "Uploads a file to history or data library.",
            "returns": "string[]",
            "example":"Upload(history_id/library_id, path_to_file)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -86,7 +86,7 @@
            "desc": "Runs a named workflow.",
            "returns": "string[]",
            "example":"RunWorkflow(workflow_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -97,7 +97,7 @@
            "desc": "Get names of the tools.",
            "returns": "string[]",
            "example":"GetToolsNames()",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -108,7 +108,7 @@
            "desc": "Get ids from the name of tool. Multiple ids will be returned for multiple tools of same name.",
            "returns": "string[]",
            "example":"GetToolsIDs()",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -119,7 +119,7 @@
            "desc": "Gets the name of a tool from id.",
            "returns": "string",
            "example":"ToolIDToName(tool_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -130,7 +130,7 @@
            "desc": "Gets the id of a tool from name.",
            "returns": "string[]",
            "example":"ToolNameToID(tool_name)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -141,7 +141,7 @@
            "desc": "Create a new history.",
            "returns": "json",
            "example":"CreateHistory(New History)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -152,7 +152,7 @@
            "desc": "Gets the name of a history from id.",
            "returns": "string",
            "example":"HistoryIDToName(history_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -163,7 +163,7 @@
            "desc": "Gets the ids of history name.",
            "returns": "string[]",
            "example":"HistoryNameToIDs(history_id)",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -174,7 +174,7 @@
            "desc": "Gets the ids of datasets in a history.",
            "returns": "string[]",
            "example":"GetHistoryDatasets([history_id], [dataset_name])",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -185,7 +185,7 @@
            "desc": "Get tool parameters.",
            "returns": "json",
            "example":"GetToolParams([param type])",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -196,7 +196,7 @@
            "desc": "Uploads a file to history and returns dataset id. If history id is not give, the most recent history is taken.",
            "returns": "string",
            "example":"UploadToHistory(ftp_or_http_or_path_to_file, [history id])",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -207,7 +207,7 @@
            "desc": "Runs a tool on history.",
            "returns": "string",
            "example":"RunTool(history_id, tool_id, {params})",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -218,7 +218,7 @@
            "desc": "Gets the id of the history which is last used.",
            "returns": "string",
            "example":"GetLastHistory()",
-           "runmode": "distributed"
+           "runmode": "dist"
        },
        {
            "org": "srlab",
@@ -229,7 +229,7 @@
            "desc": "Gets the name of a dataset from id.",
            "returns": "string",
            "example":"DatasetIDToName(dataset_id, [hda_or_ldda])",
-           "runmode": "distributed"
+           "runmode": "dist"
        }
    ]
 }
