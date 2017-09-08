@@ -289,11 +289,11 @@ class SamplesAPI(Resource):
             finally:
                 return { 'out': '', 'err': ''}, 201
 
+datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
 class DataSource():
     
     @staticmethod
     def load_data_sources():
-        datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
         datasource_tree = []
         try:
             hdfs = HadoopFileSystem(datasources[0]['path'], 'hdfs')
@@ -313,7 +313,7 @@ class DataSource():
     
     @staticmethod
     def upload(file, fullpath):
-        datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
+        
         for i in range(0, len(datasources)):
             if fullpath.startswith(datasources[i]['path']):
                 if i == 0:
@@ -325,7 +325,6 @@ class DataSource():
     
     @staticmethod
     def download(fullpath):
-        datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
         for i in range(0, len(datasources)):
             if fullpath.startswith(datasources[i]['path']):
                 if i == 0:
