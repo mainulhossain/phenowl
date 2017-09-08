@@ -77,12 +77,12 @@ class PosixFileSystem():
         return os.path.isfile(path)
     
     def make_json(self, path):
-        path = self.normaize_path(path)
-        data_json = { 'path': path, 'text': os.path.basename(path) }
-        data_json['folder'] = os.path.isdir(path)
+        normalized_path = self.normaize_path(path)
+        data_json = { 'path': normalized_path, 'text': os.path.basename(path) }
+        data_json['folder'] = os.path.isdir(normalized_path)
         
-        if os.path.isdir(path):
-           data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in os.listdir(path)]
+        if os.path.isdir(normalized_path):
+           data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in os.listdir(normalized_path)]
         return data_json
     
     def rename(self, oldpath, newpath):
