@@ -308,8 +308,9 @@ class DataSource():
             
         return datasource_tree
     
+    @staticmethod
     def load_data_sources_json():
-        return json.dumps(load_data_sources())
+        return json.dumps(DataSource.load_data_sources())
     
     @staticmethod
     def upload(file, fullpath):
