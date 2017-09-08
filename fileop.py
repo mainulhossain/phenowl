@@ -166,14 +166,14 @@ class HadoopFileSystem():
         self.client.write(path, content)
     
     def make_json(self, path):
-        path = self.normaize_path(path)
-        data_json = { 'path': path, 'text': os.path.basename(path) }
-        status = self.client.status(path, False)
+        normalized_path = self.normaize_path(path)
+        data_json = { 'path': normalized_path, 'text': os.path.basename(path) }
+        status = self.client.status(normalized_path, False)
 
         if status is not None:
             data_json['folder'] = status['type'] == "DIRECTORY"
             if status['type'] == "DIRECTORY":
-                data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in self.client.list(path)]
+                data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in self.client.list(normalized_path)]
         #print(json.dumps(data_json))
         return data_json
      
