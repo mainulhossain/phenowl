@@ -297,13 +297,13 @@ class DataSource():
         datasource_tree = []
         try:
             hdfs = HadoopFileSystem(datasources[0]['path'], 'hdfs')
-            datasources[0]['nodes'].append(fs.make_json('/'))
+            datasources[0]['nodes'].append(hdfs.make_json('/'))
             datasource_tree.append(datasources[0])
         except:
             pass
         
         fs = PosixFileSystem()
-        datasources[1]['nodes'] = fs.make_json(datasources[1]['path'])['nodes']
+        datasources[1]['nodes'] = fs.make_json('/')['nodes']
         datasource_tree.append(datasources[1])
             
         return datasource_tree
@@ -334,20 +334,6 @@ class DataSource():
                     fs = PosixFileSystem()
                     return fs.download(fullpath)
         
-folder_fields = {}
-file_fields = {
-    'text': fields.String,
-    'path': fields.String,
-    'folder': fields.Boolean
-}
-
-folder_fields = {
-    'text': fields.String,
-    'path': fields.String,
-    'folder': fields.Boolean,
-    'nodes': fields.Nested(file_fields, default = [])
-}
-
 class DataSourcesAPI(Resource):
     #decorators = [auth.login_required]
 
@@ -359,7 +345,7 @@ class DataSourcesAPI(Resource):
         super(DataSourcesAPI, self).__init__()
 
     def get(self):
-        return {'datasources': json.dumps(DataSource.load_data_sources())}
+        return {'datasources': DataSource.load_data_sources_json() }
     
     @staticmethod
     def guess_mimetype(resource_path):
