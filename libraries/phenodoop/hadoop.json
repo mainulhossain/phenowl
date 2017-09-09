@@ -2,7 +2,7 @@
     "functions": [
        {
            "org": "SRLAB",
-           "package": "Phenoproc",
+           "package": "Hadoop",
            "module": "libraries.hadoop.adaptor",
            "name":"CountWords",
            "internal":"count_words",
@@ -22,7 +22,7 @@
        },
        {
            "org": "SRLAB",
-           "package": "Phenoproc",
+           "package": "Hadoop",
            "module": "libraries.hadoop.adaptor",
            "name":"SearchWord",
            "internal":"search_word",
