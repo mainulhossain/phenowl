@@ -343,6 +343,10 @@ class DataSourcesAPI(Resource):
         self.reqparse.add_argument('path', location='form', required=False)
         self.reqparse.add_argument('upload', location='files', required=False, type=FileStorage)
         self.reqparse.add_argument('download', required=False)
+        self.reqparse.add_argument('addfolder', required=False, location='json')
+        self.reqparse.add_argument('delete', required=False)
+        self.reqparse.add_argument('rename', required=False)
+        self.reqparse.add_argument('oldpath', required=False)
         super(DataSourcesAPI, self).__init__()
 
     def get(self):
@@ -385,6 +389,19 @@ class DataSourcesAPI(Resource):
                     return send_from_directory(os.path.dirname(fullpath), os.path.basename(fullpath), mimetype=mime)
             except Exception as inst:
                 return { 'out': '', 'err': str(inst)}, 201
+        elif args['addfolder']:
+            fileSystem = IOHelper.getFileSystem(args['addfolder'])
+            parent = args['addfolder'] if fileSystem.isdir(args['addfolder']) else os.path.dirname(args['addfolder'])
+            unique_filename = IOHelper.unique_fs_name(fileSystem, parent, 'newfolder', '')
+            return {'path' : fileSystem.create_folder(unique_filename) }
+        elif args['delete']:
+            fileSystem = IOHelper.getFileSystem(args['delete'])
+            return {'path' : fileSystem.remove(fileSystem.strip_root(args['delete'])) }
+        elif args['rename']:
+            fileSystem = IOHelper.getFileSystem(args['delete'])
+            oldpath = fileSystem.strip_root(args['oldpath'])
+            newpath = os.path.join(os.path.dirname(oldpath), args['rename'])
+            return {'path' : fileSystem.rename(oldpath, newpath) }
     
 api.add_resource(TaskListAPI, '/todo/api/v1.0/tasks', endpoint='tasks')
 api.add_resource(TaskAPI, '/todo/api/v1.0/tasks/<string:id>', endpoint='task')

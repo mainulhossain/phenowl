@@ -7,8 +7,7 @@ from os.path import isfile, join, isdir, abspath, dirname
 import shutil
 import sys
 import tempfile
-from urllib.parse import urlparse, urlunparse
-
+from urllib.parse import urlparse, urlunparse, urlsplit
 
 __author__ = "Mainul Hossain"
 __date__ = "$Dec 10, 2016 2:23:14 PM$"
@@ -29,7 +28,12 @@ class PosixFileSystem():
         if path and path[0] == os.sep:
              path = path[1:]
         return join(self.localdir, path)
-        
+    
+    def strip_root(self, path):
+        if not path.startswith(self.localdir):
+            return path
+        return path[len(self.localdir):]
+            
     def create_folder(self, path):
         path = self.normaize_path(path)
         if not os.path.exists(path):
@@ -44,12 +48,13 @@ class PosixFileSystem():
             os.remove(path)
                
     def rename(self, oldpath, newpath):
-        path = self.normaize_path(path)
+        oldpath = self.normaize_path(oldpath)
+        newpath = self.normaize_path(newpath)
         os.rename(oldpath, newpath)
     
     def get_files(self, path):
         path = self.normaize_path(path)
-        return [f for f in listdir(path) if isfile(join(path, f))]
+        return [f for f in listdir(path) if os.path.isfile(join(path, f))]
     
     def get_folders(self, path):
         path = self.normaize_path(path)
@@ -73,6 +78,9 @@ class PosixFileSystem():
             if not os.path.exists(uni_fn):
                 return uni_fn
     
+    def isdir(self, path):
+        return os.path.isdir(path)
+    
     def isfile(self, path):
         return os.path.isfile(path)
     
@@ -84,14 +92,11 @@ class PosixFileSystem():
         if os.path.isdir(normaize_path):
            data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in os.listdir(normaize_path)]
         return data_json
-    
-    def rename(self, oldpath, newpath):
-        os.rename(oldpath, newpath)
-        
-    def saveUpload(self, file, path):
-        if os.path.isfile(path):
-            path = os.path.dirname(path)
-        file.save(os.path.join(path, file.filename))
+
+    def saveUpload(self, file, fullpath):
+        if os.path.isfile(fullpath):
+            path = os.path.dirname(fullpath)
+        file.save(os.path.join(fullpath, file.filename))
     
     def download(self, fullpath):
         if os.path.isfile(fullpath):
@@ -106,6 +111,9 @@ class HadoopFileSystem():
     def normaize_path(self, path):
         u = urlparse(path)
         return u.path
+    
+    def strip_root(self, path):
+        return path
         
     def create_folder(self, path):
         try:
@@ -138,6 +146,14 @@ class HadoopFileSystem():
             if status['type'] != "DIRECTORY":
                 files.append(f)
         return files
+    
+    def isdir(self, path):
+        filename = os.path.basename(path) 
+        files = self.get_folders(os.path.dirname(path))
+        for file in files:
+            if file == filename:
+                return True
+        return False
     
     def isfile(self, path):
         filename = os.path.basename(path) 
@@ -199,8 +215,8 @@ class IOHelper():
     @staticmethod
     def getFileSystem(url):
         try:
-            u = urlparse(url)
-            if u.scheme:
+            u = urlsplit(url)
+            if u.scheme == 'http' or u.scheme == 'https':
                 p = urlunparse((u.scheme, u.netloc, '', '', '', ''))
                 return HadoopFileSystem(p, 'hdfs')
         except:
@@ -226,6 +242,16 @@ class IOHelper():
     def create_folder(path):
         filesystem = IOHelper.getFileSystem(path)
         return filesystem.create_folder(path)
+    
+    @staticmethod
+    def remove(path):
+        filesystem = IOHelper.getFileSystem(path)
+        filesystem.remove(path)
+    
+    @staticmethod
+    def rename(oldpath, newpath):
+        filesystem = IOHelper.getFileSystem(oldpath)
+        filesystem.rename(oldpath, newpath)
         
     @staticmethod
     def read(path):
@@ -243,15 +269,19 @@ class IOHelper():
         return filesystem.write(path, content)
     
     @staticmethod
-    def unique_filename(path, prefix, ext):
-        filesystem = IOHelper.getFileSystem(path)
-        
+    def unique_fs_name(filesystem, path, prefix, ext):
+
         make_fn = lambda i: os.path.join(path, '{0}({1}).{2}'.format(prefix, i, ext))
 
         for i in range(1, sys.maxsize):
             uni_fn = make_fn(i)
-            if not filesystem.isfile(uni_fn):
+            if not filesystem.isfile(uni_fn) and not filesystem.isdir(uni_fn):
                 return uni_fn
-                
+
+    @staticmethod
+    def unique_filename(path, prefix, ext):
+        filesystem = IOHelper.getFileSystem(path)
+        return IOHelper.unique_fs_name(filesystem, path, prefix, ext)
+                        
 if __name__ == "__main__":
     print("Hello World")
