@@ -7,7 +7,7 @@ import sys
 import ast
 import func_resolver
 from func_resolver import Library
-from phenodoop.tasks import TaskManager
+from tasks import TaskManager
 import threading
 import _thread
 from timer import Timer
@@ -1227,8 +1227,13 @@ if __name__ == "__main__":
 # y = 5 + (x[0])
 # print(y)
 
-f = FastQC('fastq\SRR034608.fastq.gz')
-print(f)   
+# f = FastQC('fastq\SRR034608.fastq.gz')
+# print(f)
+
+parallel:
+    print(10)
+with:
+    print(11)
             """
         tokens = p.parse(test_program_example)
         #tokens = p.grammar.assignstmt.ignore(pythonStyleComment).parseString(test_program_example)

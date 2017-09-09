@@ -3,7 +3,7 @@ from __future__ import print_function
 import sys
 import os
 import uuid
-from .tasks import task_manager
+from tasks import task_manager
 
 def run_hadoop(mapper, reducer, input, output, **kwargs):
         # Usage: hadoop [--config confdir] [--loglevel loglevel] [COMMAND] [GENERIC_OPTIONS] [COMMAND_OPTIONS]
@@ -36,6 +36,13 @@ def run_hadoop_example(program, input, output, expr):
         args = 'jar {0} {1} {2} {3} {4}'.format(examplePath, program, input, output, expr)
         print(hadoopPath + " " + args, file=sys.stderr)
         task_manager.submit([hadoopPath, args])
-        
+
+def count_words(input, output):
+    cwd = os.path.abspath(os.path.dirname(__file__))
+    run_hadoop(os.path.join(cwd, 'wordcount/mapper.py'), os.path.join(cwd, 'wordcount/reducer.py'), input, output)
+            
+def search_word(input, output, expr):
+    run_hadoop_example('grep', input, output, expr)
+    
 if __name__ == "__main__":
     run_hadoop(sys.argv[1], sys.argv[2])
