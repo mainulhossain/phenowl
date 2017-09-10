@@ -106,14 +106,26 @@ class PosixFileSystem():
                            
 class HadoopFileSystem():
     def __init__(self, addr, user):
-        self.client = InsecureClient(addr, user=user)
+        u = urlsplit(url)
+        if u.scheme != 'http' and u.scheme != 'https':
+            raise "Invalid name node address"
+        
+        self.url = urlunparse((u.scheme, u.netloc, '', '', '', ''))
+        self.client = InsecureClient(self.url, user=user)
+        self.localdir = u.path
     
     def normaize_path(self, path):
-        u = urlparse(path)
-        return u.path
+        return os.path.join(self.localdir, self.strip_root(path))
     
     def strip_root(self, path):
-        return path
+        if path.startswith(self.url):
+            path = path[len(self.url):]
+            if not path.startswith(self.localdir):
+                raise 'Invalid hdfs path. It must start with the root directory'
+        
+        if not path.startswith(self.localdir):
+            return path
+        return path[len(self.localdir):]
         
     def create_folder(self, path):
         try:
@@ -217,8 +229,7 @@ class IOHelper():
         try:
             u = urlsplit(url)
             if u.scheme == 'http' or u.scheme == 'https':
-                p = urlunparse((u.scheme, u.netloc, '', '', '', ''))
-                return HadoopFileSystem(p, 'hdfs')
+                return HadoopFileSystem(url, 'hdfs')
         except:
             pass
         return PosixFileSystem()
