@@ -297,7 +297,7 @@ class DataSource():
         datasource_tree = []
         try:
             hdfs = HadoopFileSystem(datasources[0]['path'], 'hdfs')
-            datasources[0]['nodes'].append(hdfs.make_json(datasources[0]['path']))
+            datasources[0]['nodes'] = hdfs.make_json('/')['nodes']
             datasource_tree.append(datasources[0])
         except:
             pass
