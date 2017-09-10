@@ -115,7 +115,11 @@ class HadoopFileSystem():
         self.localdir = u.path
     
     def normaize_path(self, path):
-        return os.path.join(self.localdir, self.strip_root(path))
+        path = self.strip_root(path)
+        path = os.path.normpath(path)
+        if path and path[0] == os.sep:
+             path = path[1:]
+        return os.path.join(self.localdir, path)
     
     def strip_root(self, path):
         if path.startswith(self.url):
