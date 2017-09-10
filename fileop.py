@@ -105,7 +105,7 @@ class PosixFileSystem():
             return None
                            
 class HadoopFileSystem():
-    def __init__(self, addr, user):
+    def __init__(self, url, user):
         u = urlsplit(url)
         if u.scheme != 'http' and u.scheme != 'https':
             raise "Invalid name node address"
