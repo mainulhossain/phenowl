@@ -195,7 +195,7 @@ class HadoopFileSystem():
     
     def make_json(self, path):
         normalized_path = self.normaize_path(path)
-        data_json = { 'path': normalized_path, 'text': os.path.basename(path) }
+        data_json = { 'path': os.path.join(self.url, normalized_path), 'text': os.path.basename(path) }
         status = self.client.status(normalized_path, False)
 
         if status is not None:
