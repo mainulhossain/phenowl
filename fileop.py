@@ -23,7 +23,7 @@ class PosixFileSystem():
     def __init__(self):
         self.localdir = join(abspath(dirname(__file__)), 'storage')
     
-    def normaize_path(self, path):
+    def normalize_path(self, path):
         path = os.path.normpath(path)
         if path and path[0] == os.sep:
              path = path[1:]
@@ -35,38 +35,38 @@ class PosixFileSystem():
         return path[len(self.localdir):]
             
     def create_folder(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         if not os.path.exists(path):
             os.makedirs(path) 
         return path
     
     def remove(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         if os.path.isdir(path):
             shutil.rmtree(path)
         elif os.path.isfile(path):
             os.remove(path)
                
     def rename(self, oldpath, newpath):
-        oldpath = self.normaize_path(oldpath)
-        newpath = self.normaize_path(newpath)
+        oldpath = self.normalize_path(oldpath)
+        newpath = self.normalize_path(newpath)
         os.rename(oldpath, newpath)
     
     def get_files(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         return [f for f in listdir(path) if os.path.isfile(join(path, f))]
     
     def get_folders(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         return [f for f in listdir(path) if isdir(join(path, f))]
     
     def read(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         with open(path) as reader:
             return reader.read().decode('utf-8')
         
     def write(self, path, content):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         with open(path, 'w') as writer:
             return writer.write(content)
         
@@ -79,21 +79,21 @@ class PosixFileSystem():
                 return uni_fn
     
     def exists(self, path):
-        os.path.exists(self.normaize_path(path))
+        os.path.exists(self.normalize_path(path))
         
     def isdir(self, path):
-        return os.path.isdir(self.normaize_path(path))
+        return os.path.isdir(self.normalize_path(path))
     
     def isfile(self, path):
-        return os.path.isfile(self.normaize_path(path))
+        return os.path.isfile(self.normalize_path(path))
     
     def make_json(self, path):
-        normaize_path = self.normaize_path(path)
-        data_json = { 'path': normaize_path, 'text': os.path.basename(path) }
-        data_json['folder'] = os.path.isdir(normaize_path)
+        normalize_path = self.normalize_path(path)
+        data_json = { 'path': normalize_path, 'text': os.path.basename(path) }
+        data_json['folder'] = os.path.isdir(normalize_path)
         
-        if os.path.isdir(normaize_path):
-           data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in os.listdir(normaize_path)]
+        if os.path.isdir(normalize_path):
+           data_json['nodes'] = [self.make_json(os.path.join(path, fn)) for fn in os.listdir(normalize_path)]
         return data_json
 
     def saveUpload(self, file, fullpath):
@@ -117,7 +117,7 @@ class HadoopFileSystem():
         self.client = InsecureClient(self.url, user=user)
         self.localdir = u.path
     
-    def normaize_path(self, path):
+    def normalize_path(self, path):
         path = self.strip_root(path)
         path = os.path.normpath(path)
         if path and path[0] == os.sep:
@@ -136,7 +136,7 @@ class HadoopFileSystem():
         
     def create_folder(self, path):
         try:
-            path = self.normaize_path(path)
+            path = self.normalize_path(path)
             self.client.makedirs(path)
         except:
             return None
@@ -144,21 +144,21 @@ class HadoopFileSystem():
     
     def remove(self, path):
         try: 
-            path = self.normaize_path(path)
+            path = self.normalize_path(path)
             if self.client.status(path, False) is not None:
                 self.client.delete(path, True)
         except Exception as e: print(e)
            
     def rename(self, oldpath, newpath):
         try:
-            oldpath = self.normaize_path(oldpath)
-            newpath = self.normaize_path(newpath)
+            oldpath = self.normalize_path(oldpath)
+            newpath = self.normalize_path(newpath)
             self.client.rename(oldpath, newpath)
         except Exception as e:
             print(e)
     
     def get_files(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         files = []
         for f in self.client.list(path):
             status = self.client.status(join(path, f), False)
@@ -167,7 +167,7 @@ class HadoopFileSystem():
         return files
     
     def get_folders(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         folders = []
         for f in self.client.list(path):
             status = self.client.status(join(path, f), False)
@@ -176,31 +176,31 @@ class HadoopFileSystem():
         return folders
     
     def exists(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         status = self.client.status(path, False)
         return not (status is None)
         
     def isdir(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         status = self.client.status(path, False)
         return status['type'] == "DIRECTORY"
     
     def isfile(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         status = self.client.status(path, False)
         return status['type'] == "FILE"
         
     def read(self, path):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         with self.client.read(path) as reader:
             return reader.read().decode('utf-8')
     
     def write(self, path, content):
-        path = self.normaize_path(path)
+        path = self.normalize_path(path)
         self.client.write(path, content)
     
     def make_json(self, path):
-        normalized_path = self.normaize_path(path)
+        normalized_path = self.normalize_path(path)
         data_json = { 'path': urljoin(self.url, normalized_path), 'text': os.path.basename(path) }
         status = self.client.status(normalized_path, False)
 
@@ -219,7 +219,7 @@ class HadoopFileSystem():
             file.save(localpath)
             if isfile(fullpath):
                 fullpath = os.path.dirname(fullpath)
-            self.client.upload(fullpath, localpath, True)
+            self.client.upload(self.normalize_path(fullpath), localpath, True)
         except:
             pass
         
@@ -227,7 +227,7 @@ class HadoopFileSystem():
         status = self.client.status(fullpath, False)
         if status is not None and status['type'] == "FILE":
             localpath = os.path.join(tempfile.gettempdir(), os.path.basename(fullpath))
-            return self.client.download(fullpath, localpath, True)
+            return self.client.download(self.normalize_path(fullpath), localpath, True)
         else:
             return None
                
@@ -278,9 +278,9 @@ class IOHelper():
         return filesystem.read(path)
     
     @staticmethod
-    def normaize_path(path):
+    def normalize_path(path):
         filesystem = IOHelper.getFileSystem(path)
-        return filesystem.normaize_path(path)
+        return filesystem.normalize_path(path)
     
     @staticmethod
     def write(path, content):
