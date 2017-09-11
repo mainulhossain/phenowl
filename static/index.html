@@ -486,9 +486,8 @@ background-color: White;
           if (node === undefined)
         	  return;
           formdata.append('path', node.path);//you can append it to formdata with a proper parameter name
-          
 
-          self.ajax(self.dataSourcesURI, 'POST', formdata).done(function(data) {
+          self.formajax(self.dataSourcesURI, 'POST', formdata).done(function(data) {
         	  self.load();
           });
        }
