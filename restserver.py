@@ -320,26 +320,13 @@ class DataSource():
     
     @staticmethod
     def upload(file, fullpath):
-        
-        for i in range(0, len(datasources)):
-            if fullpath.startswith(datasources[i]['path']):
-                if i == 0:
-                    hdfs = HadoopFileSystem(datasources[i]['path'], 'hdfs')
-                    hdfs.saveUpload(file, fullpath)
-                else:
-                    fs = PosixFileSystem()
-                    fs.saveUpload(file, fullpath)
+        fs = DataSource.get_filesystem(fullpath)
+        return fs.saveUpload(file, fullpath)
     
     @staticmethod
     def download(fullpath):
-        for i in range(0, len(datasources)):
-            if fullpath.startswith(datasources[i]['path']):
-                if i == 0:
-                    hdfs = HadoopFileSystem(datasources[i]['path'], 'hdfs')
-                    return hdfs.download(fullpath)
-                else:
-                    fs = PosixFileSystem()
-                    return fs.download(fullpath)
+        fs = DataSource.get_filesystem(fullpath)
+        return fs.download(fullpath)
         
 class DataSourcesAPI(Resource):
     #decorators = [auth.login_required]
@@ -396,15 +383,15 @@ class DataSourcesAPI(Resource):
             except Exception as inst:
                 return { 'out': '', 'err': str(inst)}, 201
         elif args['addfolder']:
-            fileSystem = DataSource.getFileSystem(args['addfolder'])
+            fileSystem = DataSource.get_filesystem(args['addfolder'])
             parent = args['addfolder'] if fileSystem.isdir(args['addfolder']) else os.path.dirname(args['addfolder'])
             unique_filename = IOHelper.unique_fs_name(fileSystem, parent, 'newfolder', '')
             return {'path' : fileSystem.create_folder(unique_filename) }
         elif args['delete']:
-            fileSystem = DataSource.getFileSystem(args['delete'])
+            fileSystem = DataSource.get_filesystem(args['delete'])
             return {'path' : fileSystem.remove(fileSystem.strip_root(args['delete'])) }
         elif args['rename']:
-            fileSystem = DataSource.getFileSystem(args['oldpath'])
+            fileSystem = DataSource.get_filesystem(args['oldpath'])
             oldpath = fileSystem.strip_root(args['oldpath'])
             newpath = os.path.join(os.path.dirname(oldpath), args['rename'])
             return {'path' : fileSystem.rename(oldpath, newpath) }
