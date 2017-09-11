@@ -10,7 +10,7 @@ def run_hadoop(mapper, reducer, input, output, **kwargs):
         # COMMAND: --jar path
         # GENERIC_OPTIONS -files -libjars -D
         # COMMAND_OPTIONS -mapper -reducer -input -output
-        hadoopPath = '/usr/bin/hadoop'
+        hadoopPath = ' echo sr-hadoop | sudo -u hdfs --stdin /usr/bin/hadoop'
         #streamPath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-streaming-2.7.3.2.5.0.0-1245.jar'
         streamPath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-streaming.jar'
         jobid = str(uuid.uuid4())
@@ -31,7 +31,7 @@ def run_hadoop(mapper, reducer, input, output, **kwargs):
         task_manager.submit([hadoopPath, args])
 
 def run_hadoop_example(program, input, output, expr):
-        hadoopPath = '/usr/bin/hadoop'
+        hadoopPath = ' echo sr-hadoop | sudo -u hdfs --stdin /usr/bin/hadoop'
         examplePath = '/usr/hdp/2.5.0.0-1245/hadoop-mapreduce/hadoop-mapreduce-examples.jar'
         args = 'jar {0} {1} {2} {3} {4}'.format(examplePath, program, input, output, expr)
         print(hadoopPath + " " + args, file=sys.stderr)
