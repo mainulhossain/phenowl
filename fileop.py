@@ -290,7 +290,7 @@ class IOHelper():
     @staticmethod
     def unique_fs_name(filesystem, path, prefix, ext):
 
-        make_fn = lambda i: os.path.join(path, '{0}({1}).{2}'.format(prefix, i, ext))
+        make_fn = lambda i: os.path.join(path, '{0}({1}){2}'.format(prefix, i, ext))
 
         for i in range(1, sys.maxsize):
             uni_fn = make_fn(i)
