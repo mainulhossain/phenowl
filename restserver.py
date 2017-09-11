@@ -309,6 +309,12 @@ class DataSource():
         return datasource_tree
     
     @staticmethod
+    def get_filesystem(path):
+        for ds in datasources:
+            if path.startswith(ds['path']):
+                return IOHelper.getFileSystem(ds['path'])
+    
+    @staticmethod
     def load_data_sources_json():
         return json.dumps(DataSource.load_data_sources())
     
@@ -390,15 +396,15 @@ class DataSourcesAPI(Resource):
             except Exception as inst:
                 return { 'out': '', 'err': str(inst)}, 201
         elif args['addfolder']:
-            fileSystem = IOHelper.getFileSystem(args['addfolder'])
+            fileSystem = DataSource.getFileSystem(args['addfolder'])
             parent = args['addfolder'] if fileSystem.isdir(args['addfolder']) else os.path.dirname(args['addfolder'])
             unique_filename = IOHelper.unique_fs_name(fileSystem, parent, 'newfolder', '')
             return {'path' : fileSystem.create_folder(unique_filename) }
         elif args['delete']:
-            fileSystem = IOHelper.getFileSystem(args['delete'])
+            fileSystem = DataSource.getFileSystem(args['delete'])
             return {'path' : fileSystem.remove(fileSystem.strip_root(args['delete'])) }
         elif args['rename']:
-            fileSystem = IOHelper.getFileSystem(args['delete'])
+            fileSystem = DataSource.getFileSystem(args['oldpath'])
             oldpath = fileSystem.strip_root(args['oldpath'])
             newpath = os.path.join(os.path.dirname(oldpath), args['rename'])
             return {'path' : fileSystem.rename(oldpath, newpath) }
