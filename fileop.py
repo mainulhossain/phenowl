@@ -7,7 +7,7 @@ from os.path import isfile, join, isdir, abspath, dirname
 import shutil
 import sys
 import tempfile
-from urllib.parse import urlparse, urlunparse, urlsplit
+from urllib.parse import urlparse, urlunparse, urlsplit, urljoin
 
 __author__ = "Mainul Hossain"
 __date__ = "$Dec 10, 2016 2:23:14 PM$"
@@ -94,7 +94,7 @@ class PosixFileSystem():
         return data_json
 
     def saveUpload(self, file, fullpath):
-        if os.path.isfile(fullpath):
+        if self.isfile(fullpath):
             path = os.path.dirname(fullpath)
         file.save(os.path.join(fullpath, file.filename))
     
@@ -199,7 +199,7 @@ class HadoopFileSystem():
     
     def make_json(self, path):
         normalized_path = self.normaize_path(path)
-        data_json = { 'path': os.path.join(self.url, normalized_path), 'text': os.path.basename(path) }
+        data_json = { 'path': urljoin(self.url, normalized_path), 'text': os.path.basename(path) }
         status = self.client.status(normalized_path, False)
 
         if status is not None:
@@ -215,7 +215,9 @@ class HadoopFileSystem():
             os.remove(localpath)
         try:
             file.save(localpath)
-            self.client.upload(os.path.dirname(fullpath), localpath, True)
+            if isfile(fullpath):
+                fullpath = os.path.dirname(fullpath)
+            self.client.upload(fullpath, localpath, True)
         except:
             pass
         
