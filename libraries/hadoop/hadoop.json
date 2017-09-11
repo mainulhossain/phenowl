@@ -3,7 +3,7 @@
        {
            "org": "SRLAB",
            "package": "Hadoop",
-           "module": "libraries.hadoop.adaptor",
+           "module": "libraries.hadoop.adapter",
            "name":"CountWords",
            "internal":"count_words",
            "params":[  
@@ -23,7 +23,7 @@
        {
            "org": "SRLAB",
            "package": "Hadoop",
-           "module": "libraries.hadoop.adaptor",
+           "module": "libraries.hadoop.adapter",
            "name":"SearchWord",
            "internal":"search_word",
            "params":[
