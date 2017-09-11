@@ -375,11 +375,8 @@ class DataSourcesAPI(Resource):
         elif args['download']:
             try:
                 fullpath = DataSource.download(args['download'])
-                mime = DataSourcesAPI.guess_mimetype(fullpath)
-                if mime == 'text/html':
-                    return send_from_directory(os.path.dirname(fullpath), os.path.basename(fullpath), mimetype=None, as_attachment=False, attachment_filename=None)
-                else:
-                    return send_from_directory(os.path.dirname(fullpath), os.path.basename(fullpath), mimetype=mime)
+                mime = mimetypes.guess_type(fullpath)[0]
+                return send_from_directory(os.path.dirname(fullpath), os.path.basename(fullpath), mimetype=mime, as_attachment = mime is None )
             except Exception as inst:
                 return { 'out': '', 'err': str(inst)}, 201
         elif args['addfolder']:
