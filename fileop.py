@@ -78,11 +78,14 @@ class PosixFileSystem():
             if not os.path.exists(uni_fn):
                 return uni_fn
     
+    def exists(self, path):
+        os.path.exists(self.normaize_path(path))
+        
     def isdir(self, path):
-        return os.path.isdir(path)
+        return os.path.isdir(self.normaize_path(path))
     
     def isfile(self, path):
-        return os.path.isfile(path)
+        return os.path.isfile(self.normaize_path(path))
     
     def make_json(self, path):
         normaize_path = self.normaize_path(path)
@@ -163,22 +166,6 @@ class HadoopFileSystem():
                 files.append(f)
         return files
     
-    def isdir(self, path):
-        filename = os.path.basename(path) 
-        files = self.get_folders(os.path.dirname(path))
-        for file in files:
-            if file == filename:
-                return True
-        return False
-    
-    def isfile(self, path):
-        filename = os.path.basename(path) 
-        files = self.get_files(os.path.dirname(path))
-        for file in files:
-            if file == filename:
-                return True
-        return False
-    
     def get_folders(self, path):
         path = self.normaize_path(path)
         folders = []
@@ -188,6 +175,21 @@ class HadoopFileSystem():
                 folders.append(f)
         return folders
     
+    def exists(self, path):
+        path = self.normaize_path(path)
+        status = self.client.status(path, False)
+        return not (status is None)
+        
+    def isdir(self, path):
+        path = self.normaize_path(path)
+        status = self.client.status(path, False)
+        return status['type'] == "DIRECTORY"
+    
+    def isfile(self, path):
+        path = self.normaize_path(path)
+        status = self.client.status(path, False)
+        return status['type'] == "FILE"
+        
     def read(self, path):
         path = self.normaize_path(path)
         with self.client.read(path) as reader:
@@ -292,7 +294,7 @@ class IOHelper():
 
         for i in range(1, sys.maxsize):
             uni_fn = make_fn(i)
-            if not filesystem.isfile(uni_fn) and not filesystem.isdir(uni_fn):
+            if not filesystem.exists(uni_fn):
                 return uni_fn
 
     @staticmethod
