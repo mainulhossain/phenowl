@@ -3,7 +3,6 @@ from os import path
 from exechelper import func_exec_stdout
 from fileop import PosixFileSystem
 
-localdir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'storage')
 flash = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'pear'))
 
 def run_flash(*args):
@@ -26,10 +25,11 @@ def run_flash(*args):
     return func_exec_stdout(flash, *cmdargs)
 
 def run_flash_recursive(*args):
-    #assign arguments 
-    input_path = path.join(localdir, args[0])
+    fs = PosixFileSystem()
+    input_path = fs.normalize_path(args[0])
+    
     if len(args) > 1:
-        output_path = path.jon(localdir, args[1])
+        output_path = fs.normalize_path(args[1])
         log_path = path.join(output_path, "log")
     if len(args) > 2:
         max_overlap = args[2]
@@ -67,7 +67,7 @@ def run_flash_recursive(*args):
             args.append(" -o " + R1[i][:-12])
             args.append(input_path + R1[i])
             args.append(input_path + R2[i])
-            output = func_exec_run(flash, *args)
+            output = func_exec_stdout(flash, *args)
             
             output_file = path.join(log_path, R1[i][:-12] + ".flash.log")
             

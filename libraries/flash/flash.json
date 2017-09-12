@@ -9,7 +9,7 @@
            "runmode": "local",
            "desc": "Merge mates from fragments that are shorter than twice the read length.",
            "returns": "string",
-           "example":"Flash(input1, input2, output_path, max_overlap)",
+           "example":"Flash(input1, input2, [output_path], [max_overlap])",
            "params":[  
             {  
                "name":"input1",
