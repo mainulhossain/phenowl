@@ -28,14 +28,20 @@ def seqtk_fastq_to_fasta(*args):
     return run_seqtk(*cmdargs)
 
 def seqtk_extract_sample(*args):
-    input = path.join(localdir, args[0]) + " " + str(args[2])    
-    cmdargs = [args[0], 'sample', args[1]]
-    return run_seqtk(*cmdargs)
+    input = path.join(localdir, args[0])
+    output = path.join(localdir, args[1])
+    
+    cmdargs = ['sample']
+    if len(args) > 3:
+        cmdargs.append('-s ' + str(args[3]))
+    
+    cmdargs.append(input)
+    cmdargs.append(args[2])
 
-def seqtk_extract_seed_sample(*args):
-    seedarg = '-s ' + str(args[3])
-    cmdargs = [args[0], args[1], args[2], seedarg]
-    return seqtk_extract_sample(*cmdargs)
+    outdata = func_exec_stdout(seqtk, *cmdargs)
+    with open(output, 'wb') as f:
+        f.write(outdata)
+    return output
 
 def seqtk_trim(*args):
     cmdargs = [args[0], 'trimfq', args[1]]
