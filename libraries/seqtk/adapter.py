@@ -20,3 +20,25 @@ def run_seqtk(*args):
     with open(output, 'wb') as f:
         f.write(outdata)
     return output
+
+def seqtk_extract_sample(*args):
+    cmdargs = [args[0], 'sample', args[1], args[2]]
+    return run_seqtk(*cmdargs)
+
+def seqtk_extract_seed_sample(*args):
+    seedarg = '-s ' + str(args[3])
+    cmdargs = [args[0], 'sample', args[1], args[2], seedarg]
+    return run_seqtk(*cmdargs)
+
+def seqtk_trim(*args):
+    cmdargs = [args[0], 'trimfq', args[1]]
+    if len(args) > 2:
+        cmdargs.append('-b ' + str(args[2]))
+        
+    if len(args) > 3:
+        cmdargs.append('-e ' + str(args[3]))
+    
+    for arg in args[4:]:
+        cmdargs.append(arg)
+        
+    return run_seqtk(*cmdargs)

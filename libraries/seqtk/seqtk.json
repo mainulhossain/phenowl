@@ -7,50 +7,108 @@
            "name":"Seqtk",
            "internal":"run_seqtk",
            "runmode": "local",
-           "desc": "Processing sequences in the FASTA or FASTQ format.",
+           "desc": "Processing sequences in the FASTA or FASTQ format. https://github.com/lh3/seqtk",
            "returns": "string",
            "example":"Seqtk(input, command, output)",
            "params":[  
             {  
-               "name":"input1",
+               "name":"input",
                "type":"string"
             },
             {  
-               "name":"input2",
+               "name":"command",
                "type":"string"
             },
             {  
-               "name":"output_path",
+               "name":"output",
                "type":"string"
-            },
-            {
-                "name": "max_overlap",
-                "type": "int"
             }            
             ]
        },
        {
            "org": "srlab",
-           "package": "flash",
-           "module": "libraries.flash.adapter",
-           "name":"Flash_Recursive",
-           "internal":"run_flash_recursive",
+           "package": "seqtk",
+           "module": "libraries.seqtk.adapter",
+           "name":"Seqtk",
+           "internal":"seqtk_extract_sample",
            "runmode": "local",
-           "desc": "Merge mates from fragments that are shorter than twice the read length.",
+           "desc": "Processing sequences in the FASTA or FASTQ format. https://github.com/lh3/seqtk",
            "returns": "string",
-           "example":"Flash_Recursive(input_path, output_path, [max_overlap])",
+           "example":"ExtractSample(input, output, sample)",
            "params":[  
             {  
-               "name":"input_path",
+               "name":"input",
                "type":"string"
             },
             {  
-               "name":"output_path",
+               "name":"output",
                "type":"string"
             },
-            {
-                "name": "max_overlap",
-                "type": "int"
+            {  
+               "name":"sample",
+               "type":"int"
+            }            
+            ]
+       },
+       {
+           "org": "srlab",
+           "package": "seqtk",
+           "module": "libraries.seqtk.adapter",
+           "name":"Seqtk",
+           "internal":"seqtk_extract_seed_sample",
+           "runmode": "local",
+           "desc": "Processing sequences in the FASTA or FASTQ format. https://github.com/lh3/seqtk",
+           "returns": "string",
+           "example":"ExtractSeedSample(input, output, sample, seed)",
+           "params":[  
+            {  
+               "name":"input",
+               "type":"string"
+            },
+            {  
+               "name":"output",
+               "type":"string"
+            },
+            {  
+               "name":"sample",
+               "type":"int"
+            },
+            {  
+               "name":"seed",
+               "type":"int"
+            }            
+            ]
+       },
+       {
+           "org": "srlab",
+           "package": "seqtk",
+           "module": "libraries.seqtk.adapter",
+           "name":"Seqtk",
+           "internal":"seqtk_trim",
+           "runmode": "local",
+           "desc": "Processing sequences in the FASTA or FASTQ format. https://github.com/lh3/seqtk",
+           "returns": "string",
+           "example":"TrimReads(input, output, [begin], [end], [- error_threshold])",
+           "params":[  
+            {  
+               "name":"input",
+               "type":"string"
+            },
+            {  
+               "name":"output",
+               "type":"string"
+            },
+            {  
+               "name":"begin",
+               "type":"int"
+            },
+            {  
+               "name":"end",
+               "type":"int"
+            },
+            {  
+               "name":"error_threshold",
+               "type":"float"
             }            
             ]
        }
