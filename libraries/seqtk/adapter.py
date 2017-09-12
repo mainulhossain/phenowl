@@ -1,6 +1,6 @@
 import os
 from os import path
-from exechelper import func_exec_run
+from exechelper import func_exec_stdout
 
 localdir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'storage')
 seqtk = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'seqtk'))
