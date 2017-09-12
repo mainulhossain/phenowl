@@ -1,6 +1,7 @@
 import os
 from os import path
 from exechelper import func_exec_run
+from fileop import PosixFileSystem
 
 localdir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'storage')
 fastqc = path.join(path.abspath(path.dirname(__file__)), path.join('lib', 'fastqc'))
@@ -13,9 +14,8 @@ def run_fastqc(*args):
         outdir = path.join(localdir, args[1])
         if not os.path.exists(outdir):
             os.makedirs(outdir)
-        cmdargs.append("--outdir={0}".format(outdir))
+        cmdargs.append("--outdir=" + outdir)
         
-    
     for arg in args[2:]:
         cmdargs.append(arg)
     
@@ -23,5 +23,7 @@ def run_fastqc(*args):
     outname = path.basename(input)
     outname = outname.split(os.extsep)[0] + "_fastqc.html"
     
-    return path.join(outdir, outname)
+    outpath = path.join(outdir, outname)
+    fs = PosixFileSystem()
+    return fs.strip_root(outpath)
     
