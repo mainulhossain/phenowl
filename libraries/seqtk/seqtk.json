@@ -1,0 +1,58 @@
+{
+    "functions": [
+       {
+           "org": "srlab",
+           "package": "seqtk",
+           "module": "libraries.seqtk.adapter",
+           "name":"Seqtk",
+           "internal":"run_seqtk",
+           "runmode": "local",
+           "desc": "Processing sequences in the FASTA or FASTQ format.",
+           "returns": "string",
+           "example":"Seqtk(input, command, output)",
+           "params":[  
+            {  
+               "name":"input1",
+               "type":"string"
+            },
+            {  
+               "name":"input2",
+               "type":"string"
+            },
+            {  
+               "name":"output_path",
+               "type":"string"
+            },
+            {
+                "name": "max_overlap",
+                "type": "int"
+            }            
+            ]
+       },
+       {
+           "org": "srlab",
+           "package": "flash",
+           "module": "libraries.flash.adapter",
+           "name":"Flash_Recursive",
+           "internal":"run_flash_recursive",
+           "runmode": "local",
+           "desc": "Merge mates from fragments that are shorter than twice the read length.",
+           "returns": "string",
+           "example":"Flash_Recursive(input_path, output_path, [max_overlap])",
+           "params":[  
+            {  
+               "name":"input_path",
+               "type":"string"
+            },
+            {  
+               "name":"output_path",
+               "type":"string"
+            },
+            {
+                "name": "max_overlap",
+                "type": "int"
+            }            
+            ]
+       }
+   ]
+}
