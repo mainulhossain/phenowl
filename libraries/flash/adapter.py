@@ -1,6 +1,6 @@
 import os
 from os import path
-from exechelper import func_exec_stdout
+from exechelper import func_exec_run
 from fileop import PosixFileSystem
 
 flash = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'flash'))
@@ -10,7 +10,7 @@ def run_flash(*args):
     input1 = fs.normalize_path(args[0])
     input2 = fs.normalize_path(args[1])
     cmdargs = []
-    if len(args) > 2:
+    if len(args) > 2 and args[2]:
         cmdargs.append("-d {0}".format(fs.normalize_path(args[2])))
     
     if len(args) > 3:
@@ -22,7 +22,7 @@ def run_flash(*args):
     cmdargs.append(input1)
     cmdargs.append(input2)
 
-    return func_exec_stdout(flash, *cmdargs)
+    return func_exec_run(flash, *cmdargs)
 
 def run_flash_recursive(*args):
     fs = PosixFileSystem()
@@ -67,7 +67,7 @@ def run_flash_recursive(*args):
             args.append(" -o " + R1[i][:-12])
             args.append(input_path + R1[i])
             args.append(input_path + R2[i])
-            output = func_exec_stdout(flash, *args)
+            output = func_exec_run(flash, *args)
             
             output_file = path.join(log_path, R1[i][:-12] + ".flash.log")
             
