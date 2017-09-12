@@ -36,7 +36,7 @@ def seqtk_extract_sample(*args):
         cmdargs.append('-s ' + str(args[3]))
     
     cmdargs.append(input)
-    cmdargs.append(args[2])
+    cmdargs.append(str(args[2]))
 
     outdata = func_exec_stdout(seqtk, *cmdargs)
     with open(output, 'wb') as f:
