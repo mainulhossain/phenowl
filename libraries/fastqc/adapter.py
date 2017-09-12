@@ -10,7 +10,7 @@ def run_fastqc(*args):
     cmdargs = [input]
     outdir = path.dirname(input)
     if len(args) > 1:
-        outdir = path.join(localpath, args[1]) 
+        outdir = path.join(localdir, args[1]) 
         cmdargs.append("--outdir={0}".format(outdir))
     
     for arg in args[2:]:
