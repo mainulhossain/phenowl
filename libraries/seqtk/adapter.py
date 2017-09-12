@@ -28,12 +28,12 @@ def seqtk_fastq_to_fasta(*args):
     return run_seqtk(*cmdargs)
 
 def seqtk_extract_sample(*args):
-    cmdargs = [args[0], 'sample', args[1], args[2]]
+    cmdargs = [args[0], 'sample', args[1], str(args[2])]
     return run_seqtk(*cmdargs)
 
 def seqtk_extract_seed_sample(*args):
     seedarg = '-s ' + str(args[3])
-    cmdargs = [args[0], 'sample', args[1], args[2], seedarg]
+    cmdargs = [args[0], 'sample', args[1], str(args[2]), seedarg]
     return run_seqtk(*cmdargs)
 
 def seqtk_trim(*args):
