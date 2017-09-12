@@ -3,7 +3,7 @@ from os import path
 from exechelper import func_exec_stdout
 from fileop import PosixFileSystem
 
-flash = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'pear'))
+flash = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'flash'))
 
 def run_flash(*args):
     fs = PosixFileSystem()
