@@ -21,6 +21,12 @@ def run_seqtk(*args):
         f.write(outdata)
     return output
 
+def seqtk_fastq_to_fasta(*args):
+    cmdargs = [args[0], 'seq -a', args[1]]
+    for arg in args[2:]:
+        cmdargs.append(arg)
+    return run_seqtk(*cmdargs)
+
 def seqtk_extract_sample(*args):
     cmdargs = [args[0], 'sample', args[1], args[2]]
     return run_seqtk(*cmdargs)
