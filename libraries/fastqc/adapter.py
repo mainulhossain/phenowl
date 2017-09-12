@@ -11,7 +11,7 @@ def run_fastqc(*args):
     outdir = path.dirname(input)
     if len(args) > 1:
         outdir = path.join(localdir, args[1])
-        if not exists(outdir):
+        if not os.path.exists(outdir):
             os.makedirs(outdir)
         cmdargs.append("--outdir={0}".format(outdir))
         
