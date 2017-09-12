@@ -1,16 +1,18 @@
 import os
 from os import path
-from exechelper import func_exec_run
+from exechelper import func_exec_stdout
+from fileop import PosixFileSystem
 
 localdir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'storage')
 flash = path.join(path.abspath(path.dirname(__file__)), path.join('bin', 'pear'))
 
 def run_flash(*args):
-    input1 = path.join(localdir, args[0])
-    input2 = path.join(localdir, args[1])
+    fs = PosixFileSystem()
+    input1 = fs.normalize_path(args[0])
+    input2 = fs.normalize_path(args[1])
     cmdargs = []
     if len(args) > 2:
-        cmdargs.append("-d {0}".format(path.join(localpath, args[2])))
+        cmdargs.append("-d {0}".format(fs.normalize_path(args[2])))
     
     if len(args) > 3:
          cmdargs.append(" -M " + str(args[3]))
@@ -21,7 +23,7 @@ def run_flash(*args):
     cmdargs.append(input1)
     cmdargs.append(input2)
 
-    return func_exec_run(flash, *cmdargs)
+    return func_exec_stdout(flash, *cmdargs)
 
 def run_flash_recursive(*args):
     #assign arguments 
