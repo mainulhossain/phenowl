@@ -17,6 +17,6 @@ def run_seqtk(*args):
     cmdargs.append(input)
 
     outdata = func_exec_stdout(seqtk, *cmdargs)
-    with open(output, 'w') as f:
+    with open(output, 'wb') as f:
         f.write(outdata)
     return output
