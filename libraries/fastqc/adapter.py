@@ -3,7 +3,6 @@ from os import path
 from exechelper import func_exec_run
 from fileop import PosixFileSystem
 
-localdir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'storage')
 fastqc = path.join(path.abspath(path.dirname(__file__)), path.join('lib', 'fastqc'))
 
 def run_fastqc(*args):
