@@ -115,7 +115,7 @@ class TaskListAPI(Resource):
                 file = args['library']#.files['file']
                 filename = file.filename#secure_filename(file.filename)
                 this_path = os.path.dirname(os.path.abspath(__file__))
-                rel_path = 'libraries/users/mainulhossain'
+                rel_path = os.path.normpath('libraries/users/mainulhossain')
                 this_path = os.path.join(this_path, os.path.normpath(rel_path))
                 if not os.path.isdir(this_path):
                     os.makedirs(this_path)
@@ -267,7 +267,7 @@ class SamplesAPI(Resource):
 #                 samples = {}
 #                 samples["samples"] = [sample]
                 
-                rel_path = 'samples/users/mainulhossain'
+                rel_path = os.path.normpath('samples/users/mainulhossain')
                 this_path = os.path.join(this_path, os.path.normpath(rel_path))
                 if not os.path.isdir(this_path):
                     os.makedirs(this_path)
@@ -289,29 +289,42 @@ class SamplesAPI(Resource):
             finally:
                 return { 'out': '', 'err': ''}, 201
 
-datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'Local FS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
+datasources = [{'path': 'http://sr-p2irc-big1.usask.ca:50070/user/phenodoop', 'text': 'HDFS', 'nodes': [], 'folder': True}, { 'text': 'LocalFS', 'path': path.join(path.abspath(path.dirname(__file__)), 'storage'), 'nodes': [], 'folder': True}]
 class DataSource():
     
     @staticmethod
     def load_data_sources():
         datasource_tree = []
         try:
-            hdfs = HadoopFileSystem(datasources[0]['path'], 'hdfs')
-            datasources[0]['nodes'] = hdfs.make_json('/')['nodes']
-            datasource_tree.append(datasources[0])
+            ds = datasources[0]
+            hdfs = HadoopFileSystem(ds['path'], 'hdfs')
+            ds['path'] = 'HDFS'
+            ds['nodes'] = hdfs.make_json(os.sep)['nodes']
+         #   DataSource.normalize_node_path(ds['path'], ds)
+            datasource_tree.append(ds)            
         except:
             pass
         
+        ds = datasources[1]
+        ds['path'] = 'LocalFS'
         fs = PosixFileSystem()
-        datasources[1]['nodes'] = fs.make_json('/')['nodes']
-        datasource_tree.append(datasources[1])
-            
+        ds['nodes'] = fs.make_json(os.sep)['nodes']
+        #DataSource.normalize_node_path(ds['path'], ds)
+        datasource_tree.append(ds)
+        
         return datasource_tree
+    
+    @staticmethod
+    def normalize_node_path(root, ds):
+        for n in ds['nodes']:
+            n['path'] =  root + n['path']
+            if n['folder']:
+                DataSource.normalize_node_path(root, n)
     
     @staticmethod
     def get_filesystem(path):
         for ds in datasources:
-            if path.startswith(ds['path']):
+            if path.startswith(ds['text']):
                 return IOHelper.getFileSystem(ds['path'])
     
     @staticmethod
@@ -321,12 +334,12 @@ class DataSource():
     @staticmethod
     def upload(file, fullpath):
         fs = DataSource.get_filesystem(fullpath)
-        return fs.saveUpload(file, fullpath)
+        return fs.save_upload(file, fullpath)
     
     @staticmethod
-    def download(fullpath):
-        fs = DataSource.get_filesystem(fullpath)
-        return fs.download(fullpath)
+    def download(path):
+        fs = DataSource.get_filesystem(path)
+        return fs.download(path)
         
 class DataSourcesAPI(Resource):
     #decorators = [auth.login_required]

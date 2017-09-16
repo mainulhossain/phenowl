@@ -63,7 +63,7 @@ background-color: White;
                        </div>
                    </div>
                </div>
-               <div class="panel-body drag54gable-datasources" style="height: 416px; overflow-y: scroll; padding:0">
+               <div class="panel-body draggable-datasources" style="height: 416px; overflow-y: scroll; padding:0">
                    <div id="tree" data-bind="treeView: dataSources"></div>
                </div>
            </div>
@@ -383,6 +383,17 @@ background-color: White;
             });
         });
         
+        $('#tree').find('li').each(function() {
+            // cache jquery object
+            var current = $(this);
+            current.draggable({
+                revert : 'invalid',
+                stack : '.draggable-data',
+                helper : 'clone',
+                zIndex:10000
+            });
+        });
+
         centerDialog = function(dlg) {
             var windowHeight = $(window).height();
             var windowWidth = $(window).width();
@@ -591,7 +602,7 @@ background-color: White;
         activeClass: "ui-state-default",
         hoverClass: "ui-state-hover",
         accept: ":not(.ui-sortable-helper)",
-
+        
         drop: function(event, ui) {
           var pos = editor.renderer.screenToTextCoordinates(event.clientX, event.clientY)
           var v = ko.dataFor(ui.draggable[0]);
@@ -601,8 +612,19 @@ background-color: White;
         		  example = v.example();
         	  else if (v.sample)
         		  example = v.sample();
-              else
-            	  example = v.name() + "()";
+              else {
+            	  node = $('#tree').treeview('getNode', $(ui.draggable[0]).data('nodeid'));
+            	  if (node){
+            		  example = node.path;
+//             		  path = split(node.path, ';');
+//             		  if (path.length >= 2)
+//             			  example = node[]
+            	  }
+            	  else
+            		  example = v.name() + "()";
+              }
+            	  
+            	  
           
           editor.session.insert(pos, example);
           editor.focus();
