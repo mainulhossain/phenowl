@@ -45,7 +45,6 @@ def load_interpreter():
     for f in interpreter.context.library.funcs.values():
         funcs.extend(f)
     
-    #funcs = sorted(funcs, key=lambda k : k.package)
     funcs.sort(key=lambda x: (x.package, x.name))
     for f in funcs:
         tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
