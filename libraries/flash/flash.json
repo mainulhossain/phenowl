@@ -33,7 +33,7 @@
            "org": "srlab",
            "package": "flash",
            "module": "libraries.flash.adapter",
-           "name":"Flash_Recursive",
+           "name":"FlashRecursive",
            "internal":"run_flash_recursive",
            "runmode": "local",
            "desc": "Merge mates from fragments that are shorter than twice the read length.",
