@@ -28,6 +28,7 @@ def json2obj(data):
     return json.loads(data, object_hook=_json_object_hook)
 
 def create_galaxy_instance(*args):
+    server = args[0] if len(args) > 0 and args[0] is not None else 'http://sr-p2irc-big8.usask.ca:8080'
     if len(args) < 1:
         raise "No address to the galaxy server given."
     key = args[1] if len(args) > 1 and args[1] is not None else '7483fa940d53add053903042c39f853a'
