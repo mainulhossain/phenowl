@@ -14,6 +14,7 @@ import sys
 import json
 from timer import Timer
 import mimetypes
+from functools import cmp_to_key
 
 from phenoparser import PhenoWLInterpreter, PhenoWLParser, PythonGrammar, PhenoWLCodeGenerator
 from func_resolver import Library, Function
@@ -43,7 +44,9 @@ def load_interpreter():
     funcs = []
     for f in interpreter.context.library.funcs.values():
         funcs.extend(f)
-    funcs = sorted(funcs, key=lambda k : k.package)
+    
+    #funcs = sorted(funcs, key=lambda k : k.package)
+    funcs.sort(key=lambda x: (x.package, x.name))
     for f in funcs:
         tasks.append({"package_name": f.package if f.package else "", "name": f.name, "internal": f.internal, "example": f.example if f.example else "", "desc": f.desc if f.desc else "", "runmode": f.runmode if f.runmode else ""}) 
 
