@@ -1013,7 +1013,8 @@ class BasicGrammar():
         self.funccall = Group((Optional(modpref) + self.identifier + FollowedBy("(")) + 
                               Group(Suppress("(") + Optional(self.arguments) + Suppress(")"))).setParseAction(lambda t : ['FUNCCALL'] + t.asList())
         self.listidx = Group(self.identifier + Suppress("[") + self.expr + Suppress("]")).setParseAction(lambda t : ['LISTIDX'] + t.asList())
-        
+        self.dictdecl = Forward()
+        self.listdecl = Forward() 
         
         pi = CaselessKeyword( "PI" )
         fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
@@ -1033,7 +1034,7 @@ class BasicGrammar():
         self.numexpr << Group((self.multexpr + ZeroOrMore(self.addop + self.multexpr)).setParseAction(lambda t: ['NUMEXPR'] + t.asList()))
         self.stringaddexpr << Group((self.string + ZeroOrMore(Literal("+") + (self.identifier | self.string))).setParseAction(lambda t: ['CONCAT'] + t.asList()))
                 
-        self.expr << (self.stringaddexpr | self.string | self.funccall | self.listidx | self.numexpr).setParseAction(lambda x : x.asList())
+        self.expr << (self.stringaddexpr | self.string | self.funccall | self.listidx | self.listdecl | self.dictdecl | self.numexpr).setParseAction(lambda x : x.asList())
         
         self.arguments << delimitedList(Group(self.expr))
         
@@ -1050,8 +1051,7 @@ class BasicGrammar():
         self.stmtlist = Forward()
         self.retstmt = (Keyword("return") + self.expr("exp"))
 #       
-        self.listdecl = (Suppress("[") + Optional(delimitedList(self.expr)) + Suppress("]")).setParseAction(lambda t: ["LISTEXPR"] + t.asList())
-        self.dictdecl = Forward()
+        self.listdecl << (Suppress("[") + Optional(delimitedList(Group(self.expr))) + Suppress("]")).setParseAction(lambda t: ["LISTEXPR"] + t.asList())
         self.dictdecl << (Suppress("{") + Optional(delimitedList(Group(self.expr + Suppress(Literal(":")) + Group(self.dictdecl | self.expr)))) + Suppress("}")).setParseAction(lambda t: ["DICTEXPR"] + t.asList())
 
         self.assignstmt = (Group(self.listidx | self.identifier) + Suppress(Literal("=")) + Group(self.expr | self.listidx | self.listdecl | self.dictdecl)).setParseAction(lambda t: ['ASSIGN'] + t.asList())
@@ -1230,10 +1230,18 @@ if __name__ == "__main__":
 # f = FastQC('fastq\SRR034608.fastq.gz')
 # print(f)
 
-parallel:
-    print(10)
-with:
-    print(11)
+# parallel:
+#     print(10)
+# with:
+#     print(11)
+
+ref_dataset_name = 100
+#params = [ref_dataset_name, 50]
+# { 'name': ref_dataset_name }
+params = [{ 'name': ref_dataset_name }, { 'name': [20 * 30] }] 
+#params = { 'name': ref_dataset_name }
+print(params)
+
             """
         tokens = p.parse(test_program_example)
         #tokens = p.grammar.assignstmt.ignore(pythonStyleComment).parseString(test_program_example)
