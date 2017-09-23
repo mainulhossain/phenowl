@@ -69,78 +69,87 @@ background-color: White;
            </div>
         </div>
         <div class="col" id="main">
-            <div class="col-md-6" style="padding:2px">
-                <div class="panel panel-primary" style="margin:2px">
-                    <div class="panel-heading">
-	                    <h3>Bioinformatics Workflow Language</h3>
-	                    <span class="bg-info text-info">Write script to create a pipeline.</span><br>
-	                    <span class="bg-info text-info">Drag functions/samples from the right.</span>
-                    </div>
-                    <div class="panel-body" style="padding=0; margin=0px;">
-        		        <textarea rows="16" style="width: 100%; height=100%; padding=0; margin=0px;" id="script"></textarea><br>
-		            </div>
-		        </div>
-		        <div class="panel panel-primary" style="padding:0px; border:0;margin:4px">
-			        <div class="panel-body" style="padding:0">
-				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runBioWL">Run</button>
-				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
-				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
-				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddSample">Save</button>
-				        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Python Code</button>
-				        <div>Time: <span id="duration"></span></div>
-			            <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
-			        </div>
-		        </div>
-		        <div class="panel panel-success" style="padding:2px; margin:2px">
-			         <div class="panel-heading" style="padding-top:0;padding-bottom:0">
-			          <label>Output:</label>
-			         </div>
-			         <div class="panel-body" style="padding:0">
-			          <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
-			        </div>
-		        </div>
-		       <div class="panel panel-danger" style="padding:2px; margin:2px">
-                <div class="panel-heading" style="padding-top:0;padding-bottom:0">
-                  <label>Error:</label>
-                 </div>
-                 <div class="panel-body" style="padding:0">
-		        <textarea rows="3" style="min-width: 100%" id="error"></textarea>
-		        </div>
-		        </div>
-            </div>
-            <div class="col-sm-3" id="functions" style="padding:2px;">
-	            <div   class="panel panel-primary">
-	                <div class="panel-heading">
-	                   <div class="row">
-	                       <div class="col-sm-4"><h5 class="">Functions</h5></div>
-	                       <div class="col-sm-4"><h5 class="">Package</h5></div>
-	                   </div>
-	                </div>
-	                <div class="panel-body draggable-functions" style="max-height: 500px; overflow-y: scroll; padding:3px">
-	                        <!-- ko foreach: tasks -->
-	                        <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
-	                           <div class="col-sm-6 draggable-func" data-bind="text: name"></div>
-	                           <div class="col-sm-3" data-bind="text: package_name" style="text-align:right"></div>
-	                           <div class="col-sm-3" data-bind="text: runmode" style="text-align:right"></div>
-	                        </div>
-	                        <!-- /ko -->
-	                </div>
+           <div class="col-md-6" style="padding:2px" data-bind="with: tasksViewModel">
+               <div class="panel panel-primary" style="margin:2px">
+                   <div class="panel-heading">
+                    <h3>Bioinformatics Workflow Language</h3>
+                    <span class="bg-info text-info">Write script to create a pipeline.</span><br>
+                    <span class="bg-info text-info">Drag functions/samples from the right.</span>
+                   </div>
+                   <div class="panel-body" style="padding=0; margin=0px;">
+       		        <textarea rows="16" style="width: 100%; height=100%; padding=0; margin=0px;" id="script"></textarea><br>
 	            </div>
-                <div class="panel panel-primary" style="padding:2px">
+	        </div>
+	        <div class="panel panel-primary" style="padding:0px; border:0;margin:4px">
+		        <div class="panel-body" style="padding:0">
+			        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: runBioWL">Run</button>
+			        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: clearEditor">Clear</button>
+			        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddLibrary">Add Library</button>
+<!-- 			        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: beginAddSample">Save</button> -->
+			        <button class="btn pull-left" style="margin-right: 5px;" data-bind="click: generatePythonCode">Python Code</button>
+			        <div>Time: <span id="duration"></span></div>
+		            <span class="glyphicon glyphicon-repeat normal-right-spinner pull-right" id="refresh"></span>
+		        </div>
+	        </div>
+	        <div class="panel panel-success" style="padding:2px; margin:2px">
+		         <div class="panel-heading" style="padding-top:0;padding-bottom:0">
+		          <label>Output:</label>
+		         </div>
+		         <div class="panel-body" style="padding:0">
+		          <textarea rows="5" style="min-width: 100%" id="output"></textarea><br>
+		        </div>
+	        </div>
+	       <div class="panel panel-danger" style="padding:2px; margin:2px">
+               <div class="panel-heading" style="padding-top:0;padding-bottom:0">
+                 <label>Error:</label>
+                </div>
+                <div class="panel-body" style="padding:0">
+	        <textarea rows="3" style="min-width: 100%" id="error"></textarea>
+	        </div>
+	        </div>
+           </div>
+           <div class="col-sm-3" id="functions" style="padding:2px;">
+            <div   class="panel panel-primary"  data-bind="with: tasksViewModel">
+                <div class="panel-heading">
+                   <div class="row">
+                       <div class="col-sm-4"><h5 class="">Functions</h5></div>
+                       <div class="col-sm-4"><h5 class="">Package</h5></div>
+                   </div>
+                </div>
+                <div class="panel-body draggable-functions" style="max-height: 500px; overflow-y: scroll; padding:3px">
+                        <!-- ko foreach: tasks -->
+                        <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
+                           <div class="col-sm-6 draggable-func" data-bind="text: name"></div>
+                           <div class="col-sm-3" data-bind="text: package_name" style="text-align:right"></div>
+                           <div class="col-sm-3" data-bind="text: runmode" style="text-align:right"></div>
+                        </div>
+                        <!-- /ko -->
+                </div>
+            </div>
+<!-- 	            <div data-bind="stopBinding: true"> -->
+                <div  id="samples" class="panel panel-primary" style="padding:2px" data-bind="with: samplesViewModel">
                  <div class="panel-heading">
                     <div class="row">
-                        <div class="col-sm-4"><h5 class="">Workflows</h5></div>
+                        <div class="col-sm-6"><h5 class="">Workflows</h5></div>
                     </div>
+                  <div class="btn-group">
+                       <div class="btn-group-sm">
+                           <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Reload" data-bind="click: load"><i class="glyphicon glyphicon-refresh"></i></button>
+<!--                            <button class="btn btn-primary pull-right" data-toggle="modal" data-placement="top" title="Rename" data-bind="click: beginRename" ><i class="glyphicon glyphicon-edit"></i></button> -->
+<!--                            <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Delete" data-bind="click: remove"><i class="glyphicon glyphicon-minus"></i></button> -->
+                           <button class="btn btn-primary pull-right" data-toggle="tooltip" data-placement="top" title="Add" data-bind="click: beginAdd"><i class="glyphicon glyphicon-plus"></i></button>
+                       </div>
+                   </div>
                  </div>
-                 <div class="panel-body draggable-samples" style="max-height: 200px; overflow-y: scroll;">
-                         <!-- ko foreach: samples -->
-                         <div class="row" data-bind="attr: { title: desc }, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }">
-                            <div class="draggable-sample" style="margin-left: 10px" data-bind="text: name"></div>
+                 <div class="panel-body draggable-samples" style="max-height: 200px; width: 100%; overflow-y: scroll;" data-bind="foreach: items">
+                         <div class="row" data-bind="event: {dblclick: $parent.copyToEditor}, css: { 'odd-row': $index() % 2 === 0, 'even-row': $index() % 2 === 1 }" style="width: 100%">
+                            <input type="checkbox" class="draggable-sample" style="margin-left: 10px;" data-bind="checked: selected" />
+                            <span data-bind="text: name" style="width: 100%; margin:0"></span>
                          </div>
-                         <!-- /ko -->
                  </div>
                 </div>
-                    
+<!--                 </div> -->
+                
             </div>
         </div>
    </div>
@@ -279,6 +288,40 @@ background-color: White;
 	        </div>
 	    </div>
 	</div>
+
+    <div class="modal fade" id="rename-workflow-dialog" tabindex="-1" role="dialog" aria-labelledby="renameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                           <span aria-hidden="true">&times;</span>
+                           <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="renameModalLabel">
+                        Rename Workflow
+                    </h4>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <form id="rename-filefolder" class="form-horizontal" role="form" method=POST enctype=multipart/form-data>
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <input type="text" name="rename-filefolder-text" id="rename-workflow-text" />
+                        </div>
+                      </div>
+                      
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                          <button type="button" class="btn btn-default" id="rename-workflow-btn" data-dismiss="modal" data-bind="click: rename">Rename</button>
+                        </div>
+                      </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 	
     <div id="edit" class="modal fade" tabindex="=1" role="dialog" aria-labelledby="editDialogLabel" aria-hidden="true" style="background: #fff">
         <div class="modal-header">
@@ -383,75 +426,71 @@ background-color: White;
             });
         });
         
-        $('#tree').find('li').each(function() {
-            // cache jquery object
-            var current = $(this);
-            current.draggable({
-                revert : 'invalid',
-                stack : '.draggable-data',
-                helper : 'clone',
-                zIndex:10000
-            });
-        });
-
         centerDialog = function(dlg) {
             var windowHeight = $(window).height();
             var windowWidth = $(window).width();
             var boxHeight = dlg.height();
             var boxWidth = dlg.width();
-            dlg.css({'margin-left' : ((windowWidth - boxWidth )/2), 'margin-top' : ((windowHeight - boxHeight )/2)});
+            dlg.css({'margin-left' : ((windowWidth - boxWidth )/2), 'margin-top' : ((windowHeight - boxHeight)/2)});
         }
+        
     });
 
+    var AjaxCalls = function(username, password) {
+    	var self = this;
+    	self.username = username;
+    	self.password = password;
+    	
+    	self.form = function(uri, method, data) {
+            var request = {
+                    url: uri,
+                    type: method,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: data,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", 
+                            "Basic " + btoa(self.username + ":" + self.password));
+                    },
+                    error: function(jqXHR) {
+                        console.log("ajax error " + jqXHR.status);
+                    }
+                };
+                return $.ajax(request);
+        }
+        
+        self.simple = function(uri, method, data) {
+            var request = {
+                    url: uri,
+                    type: method,
+                    contentType: "application/json",
+                    accepts: "application/json",
+                    cache: false,
+                    dataType: 'json',
+                    data: JSON.stringify(data),
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", 
+                            "Basic " + btoa(self.username + ":" + self.password));
+                    },
+                    error: function(jqXHR) {
+                        console.log("ajax error " + jqXHR.status);
+                    }
+                };
+                return $.ajax(request);
+        }
+    }
+    
+    ajaxcalls = new AjaxCalls('mainulhossain@gmail.com', 'mainul');
+    
     // Create the View Model.
     var DataSourceViewModel = function() {
       var self = this;
       self.dataSourcesURI = 'todo/api/v1.0/datasources';
       self.dataSources = ko.observableArray();
       
-      self.formajax = function(uri, method, data) {
-          var request = {
-                  url: uri,
-                  type: method,
-                  contentType: false,
-                  processData: false,
-                  cache: false,
-                  data: data,
-                  beforeSend: function (xhr) {
-                      xhr.setRequestHeader("Authorization", 
-                          "Basic " + btoa(self.username + ":" + self.password));
-                  },
-                  error: function(jqXHR) {
-                      console.log("ajax error " + jqXHR.status);
-                  }
-              };
-              return $.ajax(request);
-      }
-      
-      self.ajax = function(uri, method, data) {
-          var request = {
-                  url: uri,
-                  type: method,
-                  contentType: "application/json",
-                  accepts: "application/json",
-                  cache: false,
-                  dataType: 'json',
-                  data: JSON.stringify(data),
-                  beforeSend: function (xhr) {
-                      xhr.setRequestHeader("Authorization", 
-                          "Basic " + btoa(self.username + ":" + self.password));
-                  },
-                  error: function(jqXHR) {
-                      console.log("ajax error " + jqXHR.status);
-                  }
-              };
-              return $.ajax(request);
-      }
-      
       self.refresh = function(path) {
-
-          self.formajax(self.samplesURI, 'POST', {'path': path}).done(function(data) {
-              
+          ajaxcalls.simple(self.samplesURI, 'POST', {'path': path}).done(function(data) {
           });
       }
       
@@ -465,14 +504,24 @@ background-color: White;
           $('#rename-filefolder-dialog').modal('show');
       }
       
-      self.load = function(username, password) {
-          self.username = username;
-          self.password = password;
-          self.formajax(self.dataSourcesURI, 'GET').done(function(data) {
+      self.load = function() {
+          ajaxcalls.simple(self.dataSourcesURI, 'GET').done(function(data) {
         	  self.dataSources(data.datasources);
               ko.cleanNode($("#dataSourcesPanel")[0]);
               ko.applyBindings(self, $("#dataSourcesPanel")[0]);
               //ko.mapping.fromJS($("#dataSourcesPanel")[0], self);
+              
+              $('#tree').find('li.list-group-item').each(function() {
+                  // cache jquery object
+                  var current = $(this);
+                  current.draggable({
+                      revert : 'invalid',
+                      stack : '.draggable-data',
+                      helper : 'clone',
+                      zIndex:10000
+                  });
+              });
+              
           }).fail(function(jqXHR) {
               if (jqXHR.status == 403)
                   setTimeout(self.beginLogin, 500);
@@ -515,7 +564,7 @@ background-color: White;
     	  node = self.selectedNode();
           if (node === undefined)
               return;
-          self.ajax(self.dataSourcesURI, 'POST', { 'addfolder': node.path }).done(function(data) {
+          ajaxcalls.simple(self.dataSourcesURI, 'POST', { 'addfolder': node.path }).done(function(data) {
         	  self.load();
           });
       }
@@ -524,7 +573,7 @@ background-color: White;
     	  node = self.selectedNode();
           if (node === undefined)
               return;
-          self.ajax(self.dataSourcesURI, 'POST', { 'delete': node.path }).done(function(data) {
+          ajaxcalls.simple(self.dataSourcesURI, 'POST', { 'delete': node.path }).done(function(data) {
               self.load();
           });
       }
@@ -536,7 +585,7 @@ background-color: White;
           if (node === undefined)
               return;
           
-          self.ajax(self.dataSourcesURI, 'POST', { 'oldpath': node.path, 'rename': $('#rename-filefolder-text').val() }).done(function(data) {
+          ajaxcalls.simple(self.dataSourcesURI, 'POST', { 'oldpath': node.path, 'rename': $('#rename-filefolder-text').val() }).done(function(data) {
               self.load();
           });
       }
@@ -554,9 +603,10 @@ background-color: White;
     // Create the View Model and initialise with initial data 
     var dataSourceViewModel = new DataSourceViewModel();
     ko.applyBindings(dataSourceViewModel, $("#dataSourcesPanel")[0]);
+    
     ko.applyBindings(dataSourceViewModel, $("#file-upload-dialog")[0]);
     ko.applyBindings(dataSourceViewModel, $("#rename-filefolder-dialog")[0]);
-    dataSourceViewModel.load('mainulhossain@gmail.com', 'mainul');
+    dataSourceViewModel.load();
 
     $('#rename-filefolder-dialog').on('shown.bs.modal', function () {
     	var node = dataSourceViewModel.selectedNode();
@@ -649,25 +699,6 @@ background-color: White;
                 $("#duration").text("");
             }
 
-            self.ajax = function(uri, method, data) {
-                var request = {
-                    url: uri,
-                    type: method,
-                    contentType: "application/json",
-                    accepts: "application/json",
-                    cache: false,
-                    dataType: 'json',
-                    data: JSON.stringify(data),
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", 
-                            "Basic " + btoa(self.username + ":" + self.password));
-                    },
-                    error: function(jqXHR) {
-                        console.log("ajax error " + jqXHR.status);
-                    }
-                };
-                return $.ajax(request);
-            }
             self.updateTask = function(task, newTask) {
                 var i = self.tasks.indexOf(task);
                 self.tasks()[i].package_name(newTask.package_name);
@@ -678,8 +709,6 @@ background-color: White;
                 self.tasks()[i].desc(newTask.runmode);
             }
             
-            
-
             self.beginAddLibrary = function() {
             	var obj = { "functions": [{ "name": "", "internal": "", "example": ""} ] };
 
@@ -688,19 +717,9 @@ background-color: White;
                 $('#add').modal('show');
             }
             
-            self.beginAddSample = function() {
-            	script = editor.getSession().getValue();
-            	if (script.length > 0)
-            	{
-            		sampleViewModel.getCodeEditor().setValue(script, 1);
-            	}
-                centerDialog($('#addSample'));
-                $('#addSample').modal('show');
-            }
-            
             self.runBioWL = function(task) {
             	$('#refresh').show();
-                self.ajax(self.tasksURI, 'POST', {'script': editor.getSession().getValue()}).done(function(data) {
+              ajaxcalls.simple(self.tasksURI, 'POST', {'script': editor.getSession().getValue()}).done(function(data) {
                 	$('#refresh').hide();
                 	
                 	text = '';
@@ -720,7 +739,7 @@ background-color: White;
             }
             self.generatePythonCode = function(task) {
                 $('#refresh').show();
-                self.ajax(self.tasksURI, 'POST', {'code': editor.getSession().getValue()}).done(function(data) {
+              ajaxcalls.simple(self.tasksURI, 'POST', {'code': editor.getSession().getValue()}).done(function(data) {
                     $('#refresh').hide();
 
                     $("#output").val(data.out);
@@ -739,32 +758,30 @@ background-color: White;
                 $('#edit').modal('show');
             }
             self.edit = function(task, data) {
-                self.ajax(task.uri(), 'PUT', data).done(function(res) {
+              ajaxcalls.simple(task.uri(), 'PUT', data).done(function(res) {
                     self.updateTask(task, res.task);
                 });
             }
             self.remove = function(task) {
-                self.ajax(task.uri(), 'DELETE').done(function() {
+              ajaxcalls.simple(task.uri(), 'DELETE').done(function() {
                     self.tasks.remove(task);
                 });
             }
             self.markInProgress = function(task) {
-                self.ajax(task.uri(), 'PUT', { internal: "" }).done(function(res) {
+              ajaxcalls.simple(task.uri(), 'PUT', { internal: "" }).done(function(res) {
                     self.updateTask(task, res.task);
                 });
             }
             self.markDone = function(task) {
-                self.ajax(task.uri(), 'PUT', { internal: "" }).done(function(res) {
+              ajaxcalls.simple(task.uri(), 'PUT', { internal: "" }).done(function(res) {
                     self.updateTask(task, res.task);
                 });
             }
             self.beginLogin = function() {
                 $('#login').modal('show');
             }
-            self.login = function(username, password) {
-                self.username = username;
-                self.password = password;
-                self.ajax(self.tasksURI, 'GET').done(function(data) {
+            self.login = function() {
+              ajaxcalls.simple(self.tasksURI, 'GET').done(function(data) {
                     for (var i = 0; i < data.tasks.length; i++) {
                         self.tasks.push({
                             package_name: ko.observable(data.tasks[i].package_name),
@@ -780,25 +797,91 @@ background-color: White;
                         setTimeout(self.beginLogin, 500);
                 });
             }
-            self.loadSamples = function(username, password) {
-                self.username = username;
-                self.password = password;
-                self.ajax(self.samplesURI, 'GET').done(function(data) {
-                    for (var i = 0; i < data.samples.length; i++) {
-                        self.samples.push({
-                            name: ko.observable(data.samples[i].name),
-                            sample: ko.observable(data.samples[i].sample),
-                            desc: ko.observable(data.samples[i].desc)
-                        });
-                    }
-                }).fail(function(jqXHR) {
-                    if (jqXHR.status == 403)
-                        setTimeout(self.beginLogin, 500);
-                });
-            }
             //self.beginLogin();
         }
         
+       function SamplesViewModel(sampleViewModel) {
+           var self = this;
+           self.samplesURI = 'todo/api/v1.0/samples';
+           self.items = ko.observableArray();
+           self.sampleViewModel = sampleViewModel;
+
+           self.remove = function() {
+        	   
+        	   var item = self.firstSelectedItem();
+               if (item == null)
+                   return;
+               
+               ajaxcalls.simple(self.samplesURI, 'POST', { 'delete': item.name }).done(function(data) {
+                   self.load();
+               });
+           }
+           
+           self.beginAdd = function() {
+               script = editor.getSession().getValue();
+               if (script.length > 0)
+               {
+                   self.sampleViewModel.getCodeEditor().setValue(script, 1);
+               }
+               centerDialog($('#addSample'));
+               $('#addSample').modal('show');
+           }
+           
+           self.firstSelectedItem = function() {
+               var items = self.items();
+               for (var i = 0; i < items.length; i++) {
+                   if (items[i].selected()){
+                       return items[i];
+                   }
+               }
+               return null;
+           }
+           
+           self.beginRename = function() {
+        	   
+        	   var item = self.firstSelectedItem();
+        	   if (item !== null){
+        		   centerDialog($('#rename-workflow-dialog'));
+                   $('#rename-workflow-dialog').modal('show');
+        	   }
+           }
+           
+           self.rename = function() {
+               $('#rename-workflow-dialog').modal('hide');
+               
+               var item = self.firstSelectedItem();
+               if (item == null)
+            	   return;
+               
+               ajaxcalls.simple(self.samplesURI, 'POST', { 'oldname': item.name, 'rename': $('#rename-workflow-text').val() }).done(function(data) {
+                   self.load();
+               });
+           }
+       
+           self.copyToEditor = function(item) {
+        	   var pos = editor.selection.getCursor();        	   
+               editor.session.insert(pos, item.sample());
+               editor.focus();
+           }
+           
+           self.load = function() {
+               ajaxcalls.simple(self.samplesURI, 'GET').done(function(data) {
+            	   self.items([]);
+                   for (var i = 0; i < data.samples.length; i++) {
+                       self.items.push({
+                           name: ko.observable(data.samples[i].name),
+                           sample: ko.observable(data.samples[i].sample),
+                           desc: ko.observable(data.samples[i].desc),
+                           selected: ko.observable(false)
+                       });
+                   }
+               }).fail(function(jqXHR) {
+                   if (jqXHR.status == 403)
+                       setTimeout(self.beginLogin, 500);
+               });
+           }
+       }
+       
         function SampleViewModel() {
             var self = this;
             self.samplesURI = 'todo/api/v1.0/samples';
@@ -836,25 +919,6 @@ background-color: White;
 //                 fontSize: "12pt"
 //               });
 
-            self.ajax = function(uri, method, data) {
-                var request = {
-                    url: uri,
-                    type: method,
-                    contentType: false,
-                    processData: false,
-                    cache: false,
-                    data: data,
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", 
-                            "Basic " + btoa('mainulhossain@gmail.com' + ":" + 'mainul'));
-                    },
-                    error: function(jqXHR) {
-                        console.log("ajax error " + jqXHR.status);
-                    }
-                };
-                return $.ajax(request);
-            }
-            
             self.addSample = function(task) {
                 $('#addSample').modal('hide');
                 
@@ -868,8 +932,8 @@ background-color: White;
                 if (self.desc() !== undefined)
                 	formdata.append('desc', self.desc());
 
-                self.ajax(self.samplesURI, 'POST', formdata).done(function(data) {
-                	
+                ajaxcalls.form(self.samplesURI, 'POST', formdata).done(function(data) {
+                	mainViewModel.samplesViewModel.load();
                 });
             }
             
@@ -913,25 +977,6 @@ background-color: White;
 //                 fontSize: "12pt"
 //               });
 
-            self.ajax = function(uri, method, data) {
-                var request = {
-                    url: uri,
-                    type: method,
-                    contentType: false,
-                    processData: false,
-                    cache: false,
-                    data: data,
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", 
-                            "Basic " + btoa('mainulhossain@gmail.com' + ":" + 'mainul'));
-                    },
-                    error: function(jqXHR) {
-                        console.log("ajax error " + jqXHR.status);
-                    }
-                };
-                return $.ajax(request);
-            }
-            
             self.addLibrary = function(task) {
             	$('#add').modal('hide');
             	
@@ -945,7 +990,7 @@ background-color: White;
             	if (self.org() !== undefined)
             		   formdata.append('org', self.org());
 
-                self.ajax(self.tasksURI, 'POST', formdata).done(function(data) {
+                ajaxcalls.form(self.tasksURI, 'POST', formdata).done(function(data) {
                                    	
                     text = '';
                     $.each(data.out, function(i, t) {
@@ -964,6 +1009,7 @@ background-color: White;
             
             self.getCodeEditor = function() { return mapperEditor; }
         }
+        
         function EditTaskViewModel() {
             var self = this;
             self.package_name = ko.observable();
@@ -990,12 +1036,13 @@ background-color: White;
                 });
             }
         }
+        
         function LoginViewModel() {
             var self = this;
             self.username = ko.observable();
             self.password = ko.observable();
-            tasksViewModel.login('mainulhossain@gmail.com', 'mainul');
-            tasksViewModel.loadSamples('mainulhossain@gmail.com', 'mainul')
+//             tasksViewModel.login('mainulhossain@gmail.com', 'mainul');
+//             tasksViewModel.loadSamples()
             
             self.login = function() {
                 $('#login').modal('hide');
@@ -1003,20 +1050,39 @@ background-color: White;
             }
         }
         
-        var tasksViewModel = new TasksViewModel();
         var addLibraryViewModel = new AddLibraryViewModel();
         var sampleViewModel = new SampleViewModel();
         var editTaskViewModel = new EditTaskViewModel();
         var loginViewModel = new LoginViewModel();
-//        var samplesViewModel = new SamplesViewModel();
-//        samplesViewModel.loadSamples('mainulhossain@gmail.com', 'mainul')
-        ko.applyBindings(tasksViewModel, $('#main')[0]);
+        
+        var MainViewModel = function() {
+            var self = this;
+            self.tasksViewModel = new TasksViewModel();
+            self.tasksViewModel.login();
+            
+            self.samplesViewModel = new SamplesViewModel(sampleViewModel);
+            self.samplesViewModel.load();
+       }
+        
+        mainViewModel = new MainViewModel();
+        ko.applyBindings(mainViewModel, $('#main')[0]);
         ko.applyBindings(addLibraryViewModel, $('#add')[0]);
         ko.applyBindings(sampleViewModel, $('#addSample')[0]);
         ko.applyBindings(editTaskViewModel, $('#edit')[0]);
         ko.applyBindings(loginViewModel, $('#login')[0]);
         
-//        ko.applyBindings(samplesViewModel, $('#samples')[0]);
-    </script>
+        ko.applyBindings(mainViewModel.samplesViewModel, $("#rename-workflow-dialog")[0]);
+
+        $('#rename-workflow-dialog').on('shown.bs.modal', function () {
+            var node = dataSourceViewModel.selectedNode();
+            if (node === undefined)
+                return;
+//             var filename = ;
+//             $('#rename-workflow-text').val(filename);
+//             $('#rename-workflow-text').focus();
+        });
+
+        
+  </script>
 </body>
 </html>
