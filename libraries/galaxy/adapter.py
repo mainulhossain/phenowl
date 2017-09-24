@@ -284,7 +284,7 @@ def dataset_name_to_ids(*args):
     ds_infos = h.show_matching_datasets(historyid, args[3])
     ids = []
     for info in ds_infos:
-        ids.append(info['is'])
+        ids.append(info['id'])
     return ids
 
 def run_tool(*args):
