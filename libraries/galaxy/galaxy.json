@@ -235,6 +235,17 @@
            "org": "srlab",
            "package": "galaxy",
            "module": "libraries.galaxy.adapter",
+           "name":"DatasetNameToID",
+           "internal":"dataset_name_to_id",
+           "desc": "Gets the id of a dataset from name.",
+           "returns": "string",
+           "example":"DatasetNameToID(dataset_name, [history_id])",
+           "runmode": "dist"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
            "name":"FASTQGroomer",
            "internal":"run_fastq_groomer",
            "desc": "Run the fastq groomer tool. if history_id not given, last history is used.",
