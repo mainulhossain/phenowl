@@ -317,12 +317,14 @@ def run_fastq_groomer(*args):
     dataset_ids = dataset_name_to_ids(*args)
     if len(dataset_ids) == 0:
         raise "Dataset not found"
-    
-    dataset_id = dataset_ids[0]     
+
+    dataset_id = dataset_ids[0]
     input = {"input_file":{"values":[{"src":"hda", "id":dataset_id}]}}
-                  
-    tool_id = tool_name_to_id('FASTQ Groomer')
-    tool_args = args[:3]
-    tool_args.expand([historyid, tool_id, input])
-    
+
+    server_args = list(args[:3])
+    server_args.append('FASTQ Groomer')
+    tool_id = tool_name_to_id(*server_args)
+    tool_args = list(args[:3])
+    tool_args.extend([historyid, tool_id, input])
+
     return run_tool(*tool_args)
