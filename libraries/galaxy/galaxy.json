@@ -230,6 +230,17 @@
            "returns": "string",
            "example":"DatasetIDToName(dataset_id, [hda_or_ldda])",
            "runmode": "dist"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"FASTQGroomer",
+           "internal":"run_fastq_groomer",
+           "desc": "Run the fastq groomer tool. if history_id not given, last history is used.",
+           "returns": "string",
+           "example":"FASTQGroomer(input_file, [history_id])",
+           "runmode": "dist"
        }
    ]
 }

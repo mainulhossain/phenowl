@@ -291,3 +291,29 @@ def run_tool(*args):
     d = toolClient.run_tool(history_id=args[3], tool_id=args[4], tool_inputs=inputs)
     job_info = wait_for_job_completion(gi, d['jobs'][0]['id'])
     return job_info#['outputs']['output_file']['id']
+
+
+#===============================================================================
+# run_fastq_groomer
+# {"tool_id":"toolshed.g2.bx.psu.edu/repos/devteam/fastq_groomer/fastq_groomer/1.0.4",
+# "tool_version":"1.0.4",
+# "inputs":{"input_file":{"values":[{"src":"hda","name":"SRR034608.fastq","tags":[],"keep":false,"hid":1,"id":"c9468fdb6dc5c5f1"}],"batch":false},
+# "input_type":"sanger","options_type|options_type_selector":"basic"}}
+#===============================================================================
+def run_fastq_groomer(*args):
+    
+    historyid = args[4] if len(args) > 4 else get_most_recent_history(*args)
+    
+    input = { "input_file":
+             {"values":
+              [{"src":"hda",
+                "name": args[3]}],
+              "batch":false}
+             }
+              
+    tool_id = tool_name_to_id('FASTQ Groomer')
+    
+    tool_args = args[:3]
+    tool_args.expand([historyid, tool_id, input])
+    
+    return run_tool(*tool_args)
