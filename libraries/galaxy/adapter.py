@@ -317,8 +317,9 @@ def run_fastq_groomer(*args):
     input = { "input_file":
              {"values":
               [{"src":"hda",
-                "name": args[3]}],
-              "batch":false}
+                "name": args[3]
+               }],
+              "batch": False}
              }
               
     tool_id = tool_name_to_id('FASTQ Groomer')
