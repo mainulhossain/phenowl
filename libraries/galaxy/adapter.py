@@ -277,12 +277,15 @@ def dataset_id_to_name(*args):
     ds_info = dc.show_dataset(dataset_id = args[3], hda_ldda = t)
     return ds_info['name']
 
-def dataset_name_to_id(*args):
+def dataset_name_to_ids(*args):
     gi = create_galaxy_instance(*args)
     h = HistoryClient(gi)
     historyid = args[4] if len(args) > 4 else get_most_recent_history(*args)
-    ds_info = h.show_matching_datasets(historyid, args[3])
-    return ds_info['id']
+    ds_infos = h.show_matching_datasets(historyid, args[3])
+    ids = []
+    for info in ds_infos:
+        ids.append(info['is'])
+    return ids
 
 def run_tool(*args):
     gi = create_galaxy_instance(*args)
