@@ -313,17 +313,15 @@ def run_tool(*args):
 def run_fastq_groomer(*args):
     
     historyid = args[4] if len(args) > 4 else get_most_recent_history(*args)
+
+    dataset_ids = dataset_name_to_ids(*args)
+    if len(dataset_ids) == 0:
+        raise "Dataset not found"
     
-    input = { "input_file":
-             {"values":
-              [{"src":"hda",
-                "name": args[3]
-               }],
-              "batch": False}
-             }
-              
+    dataset_id = dataset_ids[0]     
+    input = {"input_file":{"values":[{"src":"hda", "id":dataset_id}]}}
+                  
     tool_id = tool_name_to_id('FASTQ Groomer')
-    
     tool_args = args[:3]
     tool_args.expand([historyid, tool_id, input])
     
