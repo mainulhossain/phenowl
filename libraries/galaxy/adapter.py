@@ -279,7 +279,7 @@ def dataset_id_to_name(*args):
 
 def dataset_name_to_id(*args):
     gi = create_galaxy_instance(*args)
-    h = HistoryClient()
+    h = gi.HistoryClient()
     historyid = args[4] if len(args) > 4 else get_most_recent_history(*args)
     ds_info = h.show_matching_datasets(historyid, args[3])
     return ds_info['id']
