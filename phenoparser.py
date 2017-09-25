@@ -880,6 +880,11 @@ class PhenoWLInterpreter:
             self.line = int(expr[0])
             return self.eval(expr[1:])
     
+    #===========================================================================
+    # dotaskdefstmt
+    # if task has no name, it will be called at once.
+    # if task has a name, it will be called like a function call afterwards
+    #===========================================================================
     def dotaskdefstmt(self, expr):
         if not expr[0]:
             v = self.get_params(expr[1])
@@ -1036,7 +1041,8 @@ class BasicGrammar():
                 
         self.expr << (self.stringaddexpr | self.string | self.funccall | self.listidx | self.listdecl | self.dictdecl | self.numexpr).setParseAction(lambda x : x.asList())
         
-        self.arguments << delimitedList(Group(self.expr))
+        self.namedarg = Group(self.identifier + Literal("=") + self.expr).setParseAction(lambda t: ['NAMEDARG'] + t.asList())
+        self.arguments << delimitedList(Group(self.namedarg | self.expr))
         
         # Definitions of rules for logical expressions (these are without parenthesis support)
         self.andexpr = Forward()
@@ -1238,9 +1244,12 @@ if __name__ == "__main__":
 ref_dataset_name = 100
 #params = [ref_dataset_name, 50]
 # { 'name': ref_dataset_name }
-params = [{ 'name': ref_dataset_name }, { 'name': [20 * 30] }] 
+#params = [{ 'name': ref_dataset_name }, { 'name': [20 * 30] }] 
 #params = { 'name': ref_dataset_name }
-print(params)
+
+    params = {"fastq_R1": {"values":[{"src":"hda", "id":"9ac6c47a8515c831"}]}, "fastq_R2":{"values":[{"src":"hda","id":"6dbc21d257b88b00"}]}}
+    
+print(params = 'xt')
 
             """
         tokens = p.parse(test_program_example)

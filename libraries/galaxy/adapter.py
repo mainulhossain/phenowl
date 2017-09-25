@@ -328,3 +328,64 @@ def run_fastq_groomer(*args):
     tool_args.extend([historyid, tool_id, input])
 
     return run_tool(*tool_args)
+
+
+#===============================================================================
+# run_bwa
+# {"tool_id":"toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/0.7.15.2","tool_version":"0.7.15.2",
+# "inputs":{
+#     "reference_source|reference_source_selector":"history",
+#     "reference_source|ref_file":{
+#         "values":[{
+#             "src":"hda",
+#             "name":"all.cDNA",
+#             "tags":[],
+#             "keep":false,
+#             "hid":2,
+#             "id":"0d72ca01c763d02d"}],
+#         "batch":false},
+#         "reference_source|index_a":"auto",
+#         "input_type|input_type_selector":"paired",
+#         "input_type|fastq_input1":{
+#             "values":[{
+#                 "src":"hda",
+#                 "name":"FASTQ Groomer on data 1",
+#                 "tags":[],
+#                 "keep":false,
+#                 "hid":10,
+#                 "id":"4eb81b04b33684fd"}],
+#             "batch":false
+#         },
+#     "input_type|fastq_input2":{
+#         "values":[{
+#             "src":"hda",
+#             "name":"FASTQ Groomer on data 1",
+#             "tags":[],
+#             "keep":false,
+#             "hid":11,
+#             "id":"5761546ab79a71f2"}],
+#         "batch":false
+#     },
+#     "input_type|adv_pe_options|adv_pe_options_selector":"do_not_set",
+#     "rg|rg_selector":"do_not_set",
+#     "analysis_type|analysis_type_selector":"illumina"
+#     }
+#===============================================================================
+def run_bwa(*args):
+    
+    historyid = args[4] if len(args) > 4 else get_most_recent_history(*args)
+
+    dataset_ids = dataset_name_to_ids(*args)
+    if len(dataset_ids) == 0:
+        raise "Dataset not found"
+
+    dataset_id = dataset_ids[0]
+    input = {"input_file":{"values":[{"src":"hda", "id":dataset_id}]}}
+
+    server_args = list(args[:3])
+    server_args.append('FASTQ Groomer')
+    tool_id = tool_name_to_id(*server_args)
+    tool_args = list(args[:3])
+    tool_args.extend([historyid, tool_id, input])
+
+    return run_tool(*tool_args)

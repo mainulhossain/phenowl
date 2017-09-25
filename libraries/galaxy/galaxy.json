@@ -252,6 +252,17 @@
            "returns": "string",
            "example":"FASTQGroomer(input_file, [history_id])",
            "runmode": "dist"
+       },
+       {
+           "org": "srlab",
+           "package": "galaxy",
+           "module": "libraries.galaxy.adapter",
+           "name":"BWAlign",
+           "internal":"run_bwa",
+           "desc": "Map with BWA.",
+           "returns": "string",
+           "example":"BWAlign(input_file, [history_id])",
+           "runmode": "dist"
        }
    ]
 }
